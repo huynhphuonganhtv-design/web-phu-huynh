@@ -20,30 +20,16 @@ if "local_chats" not in st.session_state:
 # --- 📲 HÀM TẠO MÃ QR TỰ ĐỘNG ---
 @st.cache_data(ttl=3600)
 def generate_network_qr():
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        ip_address = s.getsockname()[0]
-        s.close()
-        
-        network_url = f"http://{ip_address}:8501"
-        
-        qr = qrcode.QRCode(version=1, box_size=10, border=2)
-        qr.add_data(network_url)
-        qr.make(fit=True)
-        img = qr.make_image(fill_color="#0f172a", back_color="white")
-        buf = BytesIO()
-        img.save(buf, format="PNG")
-        return buf.getvalue(), network_url
-    except:
-        backup_url = "http://192.168.1.236:8501"
-        qr = qrcode.QRCode(version=1, box_size=10, border=2)
-        qr.add_data(backup_url)
-        qr.make(fit=True)
-        img = qr.make_image(fill_color="#0f172a", back_color="white")
-        buf = BytesIO()
-        img.save(buf, format="PNG")
-        return buf.getvalue(), backup_url
+    # 🎯 SỬA CHỖ NÀY: Dán chính xác cái link web Streamlit vừa tạo của bạn vào đây!
+    network_url = "https://web-phu-huynh-cegoqx6nbxnukt3qddwg8i.streamlit.app" 
+    
+    qr = qrcode.QRCode(version=1, box_size=10, border=2)
+    qr.add_data(network_url)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="#0f172a", back_color="white")
+    buf = BytesIO()
+    img.save(buf, format="PNG")
+    return buf.getvalue(), network_url
 
 # --- 💬 HÀM GỬI TIN NHẮN CHAT ---
 def send_parent_msg():
