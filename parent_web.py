@@ -11,7 +11,77 @@ import hashlib
 # ── 🔴 URL FIREBASE GỐC CHUẨN ĐANG DÙNG CHUNG ──
 FIREBASE_URL = "https://pomodoroapp-701a2-default-rtdb.firebaseio.com/"
 
-st.set_page_config(page_title="Trung Tâm Điều Khiển Phụ Huynh", page_icon="👑", layout="centered")
+st.set_page_config(
+    page_title="Trung Tâm Điều Khiển Phụ Huynh", 
+    page_icon="👑", 
+    layout="centered",
+    initial_sidebar_state="expanded"
+)
+
+# 🔥 TÙY BIẾN GIAO DIỆN TỐI (DARK MODE CSS) SIÊU ĐẸP
+st.markdown("""
+    <style>
+    /* Nền tổng thể và font chữ */
+    .stApp {
+        background-color: #0f172a;
+        color: #f1f5f9;
+    }
+    /* Làm đẹp các khung chứa container */
+    [data-testid="stHeader"] {
+        background-color: rgba(15, 23, 42, 0.8);
+    }
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        background-color: #1e293b !important;
+        border: 1px solid #334155 !important;
+        border-radius: 12px !important;
+        padding: 20px !important;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    }
+    /* Tùy chỉnh màu sắc tiêu đề và văn bản */
+    h1, h2, h3 {
+        color: #38bdf8 !important;
+        font-weight: 700 !important;
+    }
+    /* Định dạng lại Sidebar */
+    section[data-testid="stSidebar"] {
+        background-color: #0b0f19 !important;
+        border-right: 1px solid #1e293b;
+    }
+    /* Làm đẹp các ô nhập liệu đầu vào */
+    .stTextInput input, .stNumberInput input, .stSelectbox div {
+        background-color: #0f172a !important;
+        color: #f1f5f9 !important;
+        border: 1px solid #475569 !important;
+        border-radius: 8px !important;
+    }
+    /* Nút bấm đặc biệt (Primary) - Màu đỏ cảnh báo */
+    button[data-testid="baseButton-primary"] {
+        background-color: #ef4444 !important;
+        border-color: #ef4444 !important;
+        color: white !important;
+        font-weight: bold !important;
+        border-radius: 8px !important;
+        transition: all 0.3s ease;
+    }
+    button[data-testid="baseButton-primary"]:hover {
+        background-color: #dc2626 !important;
+        box-shadow: 0 0 12px #ef4444;
+    }
+    /* Nút bấm thông thường (Secondary) - Màu xanh Neon */
+    button[data-testid="baseButton-secondary"] {
+        background-color: #38bdf8 !important;
+        color: #0f172a !important;
+        font-weight: bold !important;
+        border-radius: 8px !important;
+        border: none !important;
+        transition: all 0.3s ease;
+    }
+    button[data-testid="baseButton-secondary"]:hover {
+        background-color: #7dd3fc !important;
+        box-shadow: 0 0 12px #38bdf8;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 # Xử lý chuẩn hóa URL Firebase
 base_url = FIREBASE_URL.strip()
