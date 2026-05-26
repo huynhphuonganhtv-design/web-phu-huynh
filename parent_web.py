@@ -7,7 +7,6 @@ import pandas as pd
 from io import BytesIO
 from datetime import datetime
 import hashlib
-
 # ── 🔴 URL FIREBASE GỐC CHUẨN ĐANG DÙNG CHUNG ──
 FIREBASE_URL = "https://pomodoroapp-701a2-default-rtdb.firebaseio.com/"
 
@@ -18,76 +17,91 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 🔥 TÙY BIẾN GIAO DIỆN TỐI (DARK MODE CSS) SIÊU ĐẸP
-st.markdown("""
-    <style>
-    /* Nền tổng thể và font chữ */
-    .stApp {
-        background-color: #0f172a;
-        color: #f1f5f9;
-    }
-    /* Làm đẹp các khung chứa container */
-    [data-testid="stHeader"] {
-        background-color: rgba(15, 23, 42, 0.8);
-    }
-    div[data-testid="stVerticalBlockBorderWrapper"] {
-        background-color: #1e293b !important;
-        border: 1px solid #334155 !important;
-        border-radius: 12px !important;
-        padding: 20px !important;
-        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-    }
-    /* Tùy chỉnh màu sắc tiêu đề và văn bản */
-    h1, h2, h3 {
-        color: #38bdf8 !important;
-        font-weight: 700 !important;
-    }
-    /* Định dạng lại Sidebar */
-    section[data-testid="stSidebar"] {
-        background-color: #0b0f19 !important;
-        border-right: 1px solid #1e293b;
-    }
-    /* Làm đẹp các ô nhập liệu đầu vào */
-    .stTextInput input, .stNumberInput input, .stSelectbox div {
-        background-color: #0f172a !important;
-        color: #f1f5f9 !important;
-        border: 1px solid #475569 !important;
-        border-radius: 8px !important;
-    }
-    /* Nút bấm đặc biệt (Primary) - Màu đỏ cảnh báo */
-    button[data-testid="baseButton-primary"] {
-        background-color: #ef4444 !important;
-        border-color: #ef4444 !important;
-        color: white !important;
-        font-weight: bold !important;
-        border-radius: 8px !important;
-        transition: all 0.3s ease;
-    }
-    button[data-testid="baseButton-primary"]:hover {
-        background-color: #dc2626 !important;
-        box-shadow: 0 0 12px #ef4444;
-    }
-    /* Nút bấm thông thường (Secondary) - Màu xanh Neon */
-    button[data-testid="baseButton-secondary"] {
-        background-color: #38bdf8 !important;
-        color: #0f172a !important;
-        font-weight: bold !important;
-        border-radius: 8px !important;
-        border: none !important;
-        transition: all 0.3s ease;
-    }
-    button[data-testid="baseButton-secondary"]:hover {
-        background-color: #7dd3fc !important;
-        box-shadow: 0 0 12px #38bdf8;
-    }
-    </style>
-""", unsafe_allow_html=True)
+# =====================================================================
+# 🎨 BỘ ĐIỀU KHIỂN GIAO DIỆN SÁNG / TỐI (THEME SWITCHER)
+# =====================================================================
+# Khởi tạo trạng thái giao diện mặc định là Tối (Dark)
+if "theme_mode" not in st.session_state:
+    st.session_state["theme_mode"] = "🌙 Giao diện Tối"
+
+# Thiết lập thanh bên trước để người dùng chọn Sáng/Tối
+with st.sidebar:
+    st.markdown("<h3 style='margin-top:0;'>🎨 Cài đặt Giao diện</h3>", unsafe_allow_html=True)
+    theme_choice = st.selectbox(
+        "Chọn chế độ hiển thị:",
+        ["🌙 Giao diện Tối", "☀️ Giao diện Sáng"],
+        key="theme_select_box"
+    )
+    # Cập nhật session_state khi người dùng đổi lựa chọn
+    st.session_state["theme_mode"] = theme_choice
+
+# Nhúng CSS động dựa vào lựa chọn Sáng hay Tối
+if st.session_state["theme_mode"] == "🌙 Giao diện Tối":
+    # --- CSS CHẾ ĐỘ TỐI (DARK MODE) ---
+    st.markdown("""
+        <style>
+        .stApp { background-color: #0f172a; color: #f1f5f9; }
+        [data-testid="stHeader"] { background-color: rgba(15, 23, 42, 0.8); }
+        div[data-testid="stVerticalBlockBorderWrapper"] {
+            background-color: #1e293b !important; border: 1px solid #334155 !important;
+            border-radius: 12px !important; padding: 20px !important;
+        }
+        h1, h2, h3 { color: #38bdf8 !important; }
+        section[data-testid="stSidebar"] { background-color: #0b0f19 !important; border-right: 1px solid #1e293b; }
+        .stTextInput input, .stNumberInput input, .stSelectbox div {
+            background-color: #0f172a !important; color: #f1f5f9 !important; border: 1px solid #475569 !important;
+        }
+        /* Nút màu đỏ nguy hiểm */
+        button[data-testid="baseButton-primary"] {
+            background-color: #ef4444 !important; border-color: #ef4444 !important; color: white !important; font-weight: bold !important;
+        }
+        button[data-testid="baseButton-primary"]:hover { background-color: #dc2626 !important; box-shadow: 0 0 12px #ef4444; }
+        /* Nút màu xanh neon */
+        button[data-testid="baseButton-secondary"] {
+            background-color: #38bdf8 !important; color: #0f172a !important; font-weight: bold !important; border: none !important;
+        }
+        button[data-testid="baseButton-secondary"]:hover { background-color: #7dd3fc !important; box-shadow: 0 0 12px #38bdf8; }
+        /* Khung chat tối */
+        .chat-box { background-color: #0f172a; padding: 10px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #38bdf8; }
+        </style>
+    """, unsafe_allow_html=True)
+else:
+    # --- CSS CHẾ ĐỘ SÁNG (LIGHT MODE) ---
+    st.markdown("""
+        <style>
+        .stApp { background-color: #f8fafc; color: #0f172a; }
+        [data-testid="stHeader"] { background-color: rgba(248, 250, 252, 0.8); }
+        div[data-testid="stVerticalBlockBorderWrapper"] {
+            background-color: #ffffff !important; border: 1px solid #e2e8f0 !important;
+            border-radius: 12px !important; padding: 20px !important;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+        h1, h2, h3 { color: #0284c7 !important; }
+        section[data-testid="stSidebar"] { background-color: #f1f5f9 !important; border-right: 1px solid #e2e8f0; }
+        .stTextInput input, .stNumberInput input, .stSelectbox div {
+            background-color: #ffffff !important; color: #0f172a !important; border: 1px solid #cbd5e1 !important;
+        }
+        /* Nút màu đỏ ở chế độ sáng */
+        button[data-testid="baseButton-primary"] {
+            background-color: #dc2626 !important; border-color: #dc2626 !important; color: white !important; font-weight: bold !important;
+        }
+        button[data-testid="baseButton-primary"]:hover { background-color: #b91c1c !important; }
+        /* Nút màu xanh da trời ở chế độ sáng */
+        button[data-testid="baseButton-secondary"] {
+            background-color: #0284c7 !important; color: white !important; font-weight: bold !important; border: none !important;
+        }
+        button[data-testid="baseButton-secondary"]:hover { background-color: #0369a1 !important; }
+        /* Khung chat sáng */
+        .chat-box { background-color: #f1f5f9; padding: 10px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #0284c7; }
+        </style>
+    """, unsafe_allow_html=True)
+
 
 # Xử lý chuẩn hóa URL Firebase
 base_url = FIREBASE_URL.strip()
 if not base_url.endswith("/"): base_url += "/"
 
-# Khởi tạo các biến trạng thái nếu chưa có
+# Khởi tạo các biến trạng thái tài khoản nếu chưa có
 if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
 if "auth_page" not in st.session_state:
