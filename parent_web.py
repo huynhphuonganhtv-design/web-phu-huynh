@@ -318,11 +318,82 @@ def render_online_status():
 render_online_status()
 
 # Vẽ biểu đồ cột ổn định
+user_names = []
+user_times = []
+try:
+    res_users = requests.get(f"{base_url}users.json", timeout=3)
+    if res_users.status_code == 200 and res_users.json():
+        for u_id, u_info in res_users.json().items():
+            if isinstance(u_info, dict):
+                user_names.append(u_id)
+                user_times.append(u_info.get("study_seconds", 0) // 60)
+except: pass
+
 if user_names:
     df = pd.DataFrame({"Học sinh": user_names, "Thời gian học (Phút)": user_times})
     st.bar_chart(data=df, x="Học sinh", y="Thời gian học (Phút)", color="#38bdf8")
 else:
     st.info("Biểu đồ trống: Đang chờ máy con kết nối...")
+
+# =====================================================================
+# 🛡️ CHÈN THÊM: KHU VỰC QUẢN LÝ SAFETY SEARCH GUARD VÀO ĐÂY
+# =====================================================================
+st.write("---")
+with st.container():
+    st.markdown("### 🛡️ Safety Search Guard (Giám sát bàn phím & Từ khóa cấm)")
+    
+    # 1. Tải và hiển thị danh sách từ cấm hiện tại
+    current_blacklist = []
+    try:
+        res_bl = requests.get(f"{base_url}blacklist_keywords.json", timeout=2)
+        if res_bl.json(): current_blacklist = res_bl.json()
+    except: pass
+    
+    st.write(f"Danh sách từ khóa đang cấm: `{', '.join(current_blacklist) if current_blacklist else 'Trống'}`")
+    
+    col_bl1, col_bl2 = st.columns([3, 1])
+    with col_bl1:
+        new_word = st.text_input("Thêm từ khóa cấm mới (gõ thường, không dấu):", placeholder="Ví dụ: game, lau, hack...", key="txt_new_badword")
+    with col_bl2:
+        st.write("<br>", unsafe_allow_html=True)
+        if st.button("➕ Thêm Từ Cấm", use_container_width=True):
+            if new_word.strip() and new_word.strip().lower() not in current_blacklist:
+                current_blacklist.append(new_word.strip().lower())
+                requests.put(f"{base_url}blacklist_keywords.json", json=current_blacklist, timeout=2)
+                st.toast("Đã cập nhật từ khóa cấm lên hệ thống!", icon="💾")
+                st.rerun()
+                
+    if st.button("🧼 Xóa sạch danh sách từ cấm", key="btn_clear_blacklist", type="primary"):
+        requests.delete(f"{base_url}blacklist_keywords.json", timeout=2)
+        st.rerun()
+
+    st.write("")
+    
+    # 2. Vùng hiển thị Log phím gõ và Cảnh báo vi phạm (Quét ngầm)
+    @st.fragment(run_every=4)
+    def render_safety_logs():
+        # A. Hiển thị thông báo vi phạm màu đỏ rực
+        try:
+            res_alerts = requests.get(f"{base_url}safety_alerts.json", timeout=2)
+            if res_alerts.json():
+                st.markdown("<span style='color:#ef4444; font-weight:bold;'>⚠️ PHÁT HIỆN VI PHẠM CẤM:</span>", unsafe_allow_html=True)
+                for aid, info in list(res_alerts.json().items())[-3:]:
+                    # Khung thông báo đỏ bắt mắt bằng CSS có sẵn trong Streamlit
+                    st.error(f"🚨 MÁY CON VI PHẠM: Vừa gõ từ khóa cấm \"{info.get('keyword')}\" lúc {info.get('time')}. Hệ thống đã cưỡng chế tắt trình duyệt!")
+        except: pass
+        
+        # B. Hiển thị nhật ký gõ phím thông thường
+        try:
+            res_logs = requests.get(f"{base_url}key_logs.json", timeout=2)
+            if res_logs.json():
+                st.write("📋 **Nhật ký gõ phím từ máy con (Live):**")
+                for lid, text_line in list(res_logs.json().items())[-5:]:
+                    st.caption(f"🕒 {text_line.get('time', '--:--')} → `{text_line.get('text', '')}`")
+        except: pass
+
+    render_safety_logs()
+
+# =====================================================================
 
 st.write("---")
 
