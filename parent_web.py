@@ -12,6 +12,46 @@ FIREBASE_URL = "https://pomodoroapp-701a2-default-rtdb.firebaseio.com/"
 
 st.set_page_config(page_title="Trung Tâm Điều Khiển Phụ Huynh", page_icon="👑", layout="centered")
 
+# =====================================================================
+# 🔒 HỆ THỐNG MÀN HÌNH ĐĂNG NHẬP BẢO MẬT CHO BA MẸ
+# =====================================================================
+# 🎯 Bạn có thể đổi chữ "BaMe123" thành mật khẩu bất kỳ theo ý muốn
+MAT_KHAU_BA_ME = "BaMe123"
+
+if "authenticated" not in st.session_state:
+    st.session_state["authenticated"] = False
+
+def check_password():
+    if st.session_state["password_input"] == MAT_KHAU_BA_ME:
+        st.session_state["authenticated"] = True
+        st.success("🎉 Đăng nhập thành công!")
+        st.rerun()
+    else:
+        st.error("❌ Mật khẩu không chính xác. Vui lòng kiểm tra lại!")
+
+# Nếu chưa đăng nhập thành công, khóa toàn bộ giao diện điều khiển lại
+if not st.session_state["authenticated"]:
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.title("🔒 Trung Tâm Điều Khiển Phụ Huynh")
+    st.subheader("Vui lòng xác thực quyền truy cập hệ thống")
+    
+    st.text_input(
+        "Nhập mật khẩu ba mẹ:", 
+        type="password", 
+        key="password_input",
+        on_change=check_password,
+        placeholder="Nhập mật khẩu bí mật tại đây..."
+    )
+    
+    if st.button("Đăng nhập ứng dụng", use_container_width=True, type="primary"):
+        check_password()
+        
+    st.stop() # 🛑 DỪNG CHẶN ĐỨNG TOÀN BỘ CODE PHÍA DƯỚI
+
+# =====================================================================
+# 🎛️ GIAO DIỆN CHÍNH (Chỉ hiển thị sau khi nhập ĐÚNG mật khẩu)
+# =====================================================================
+
 if "input_text" not in st.session_state:
     st.session_state.input_text = ""
 if "local_chats" not in st.session_state:
@@ -20,7 +60,6 @@ if "local_chats" not in st.session_state:
 # --- 📲 HÀM TẠO MÃ QR TỰ ĐỘNG ---
 @st.cache_data(ttl=3600)
 def generate_network_qr():
-    # 🎯 SỬA CHỖ NÀY: Dán chính xác cái link web Streamlit vừa tạo của bạn vào đây!
     network_url = "https://web-phu-huynh-cegoqx6nbxnukt3qddwg8i.streamlit.app" 
     
     qr = qrcode.QRCode(version=1, box_size=10, border=2)
@@ -84,8 +123,13 @@ def clear_all_chats():
             st.toast("🧹 Đã làm sạch phòng chat lỗi!", icon="🧼")
     except: pass
 
-# ── ✨ GIAO DIỆN CHÍNH ✨ ──
+# Giao diện quản lý chính
 st.title("👑 Trung Tâm Quản Lý Phụ Huynh Tối Thượng")
+
+# Nút Đăng xuất nhanh ở góc trên
+if st.sidebar.button("🔒 Đăng xuất (Khóa App)"):
+    st.session_state["authenticated"] = False
+    st.rerun()
 
 # --- THÔNG TIN TRẠNG THÁI SERVER ---
 status_db = "Kết nối tốt 🟢"
@@ -164,7 +208,6 @@ if user_names:
                     base_url = FIREBASE_URL.strip()
                     if not base_url.endswith("/"): base_url += "/"
                     
-                    # 🎯 ĐÃ SỬA: Đóng gói đúng cấu trúc khóa "text" và đẩy thẳng vào nhánh "sticky" máy con chờ đợi
                     payload = {"text": sticky_msg.strip()}
                     response = requests.put(f"{base_url}sticky/{target}.json", json=payload, timeout=2.0)
                     
