@@ -216,22 +216,28 @@ def generate_network_qr():
 import datetime
 
 def send_parent_msg():
+    # 1. Lấy tin nhắn từ ô nhập liệu
     msg_text = st.session_state.widget_msg.strip()
+    
     if msg_text:
-        # Lấy giờ UTC server hiện tại rồi cộng thêm 7 tiếng để ra giờ Việt Nam
+        # 2. Tính giờ Việt Nam chuẩn (+7)
         now_vn = datetime.datetime.utcnow() + datetime.timedelta(hours=7)
-        current_time = now_vn.strftime("%H:%M") # Giờ chuẩn VN
+        current_time = now_vn.strftime("%H:%M")
         
-        new_msg = {"sender": f"PHỤ HUYNH ({st.session_state.get('username')}) 👤", "text": msg_text, "time": current_time}
+        new_msg = {
+            "sender": f"PHỤ HUYNH ({st.session_state.get('username')}) 👤", 
+            "text": msg_text, 
+            "time": current_time
+        }
+        
         try:
             requests.post(f"{base_url}chats.json", json=new_msg, timeout=2)
             st.toast("Đã gửi lời nhắc lên hệ thống!", icon="🚀")
         except:
             st.toast("Chế độ Local: Đã lưu tạm tin nhắn!", icon="💻")
-            
-        # 💡 Đổi biến tạm về rỗng và ép Web tải lại để xóa sạch chữ ở ô nhập liệu
-        st.session_state.input_text = ""
-        st.rerun()
+        
+        # 💡 DÒNG THẦN THÁNH: Xóa sạch chữ trực tiếp trong ô nhập liệu widget_msg
+        st.session_state.widget_msg = ""
 
 # --- 💬 HÀM GỠ TIN NHẮN ---
 def revoke_msg(chat_id):
