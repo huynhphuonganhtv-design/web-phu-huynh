@@ -6,6 +6,7 @@ import qrcode
 import pandas as pd
 from io import BytesIO
 from datetime import datetime
+import hashlib
 
 # ── 🔴 URL FIREBASE GỐC CHUẨN ──
 FIREBASE_URL = "https://pomodoroapp-701a2-default-rtdb.firebaseio.com/"
@@ -13,43 +14,99 @@ FIREBASE_URL = "https://pomodoroapp-701a2-default-rtdb.firebaseio.com/"
 st.set_page_config(page_title="Trung Tâm Điều Khiển Phụ Huynh", page_icon="👑", layout="centered")
 
 # =====================================================================
-# 🔒 HỆ THỐNG MÀN HÌNH ĐĂNG NHẬP BẢO MẬT CHO BA MẸ
+# 🔒 HỆ THỐNG ĐĂNG NHẬP / ĐĂNG KÝ TÀI KHOẢN QUA FIREBASE
 # =====================================================================
-# 🎯 Bạn có thể đổi chữ "BaMe123" thành mật khẩu bất kỳ theo ý muốn
-MAT_KHAU_BA_ME = "BaMe123"
-
 if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
+if "auth_page" not in st.session_state:
+    st.session_state["auth_page"] = "login"  # Mặc định ở màn hình đăng nhập
 
-def check_password():
-    if st.session_state["password_input"] == MAT_KHAU_BA_ME:
-        st.session_state["authenticated"] = True
-        st.success("🎉 Đăng nhập thành công!")
-        st.rerun()
-    else:
-        st.error("❌ Mật khẩu không chính xác. Vui lòng kiểm tra lại!")
+# Hàm băm mật khẩu để bảo mật (không lưu mật khẩu thô lên database)
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
 
-# Nếu chưa đăng nhập thành công, khóa toàn bộ giao diện điều khiển lại
-if not st.session_state["authenticated"]:
+base_url = FIREBASE_URL.strip()
+if not base_url.endswith("/"): base_url += "/"
+
+# --- MÀN HÌNH ĐĂNG NHẬP ---
+if not st.session_state["authenticated"] and st.session_state["auth_page"] == "login":
     st.markdown("<br><br>", unsafe_allow_html=True)
-    st.title("🔒 Trung Tâm Điều Khiển Phụ Huynh")
-    st.subheader("Vui lòng xác thực quyền truy cập hệ thống")
-    
-    st.text_input(
-        "Nhập mật khẩu ba mẹ:", 
-        type="password", 
-        key="password_input",
-        on_change=check_password,
-        placeholder="Nhập mật khẩu bí mật tại đây..."
-    )
-    
-    if st.button("Đăng nhập ứng dụng", use_container_width=True, type="primary"):
-        check_password()
+    with st.container(border=True):
+        st.markdown("<h2 style='text-align: center;'>🔑 ĐĂNG NHẬP PHỤ HUYNH</h2>", unsafe_allow_html=True)
         
-    st.stop() # 🛑 DỪNG CHẶN ĐỨNG TOÀN BỘ CODE PHÍA DƯỚI
+        username = st.text_input("Tên đăng nhập:", placeholder="Nhập tài khoản...")
+        password = st.text_input("Mật khẩu:", type="password", placeholder="Nhập mật khẩu...")
+        
+        if st.button("Đăng nhập hệ thống 🚀", use_container_width=True, type="primary"):
+            if username.strip() and password.strip():
+                try:
+                    # Kiểm tra tài khoản trên Firebase
+                    res = requests.get(f"{base_url}accounts/{username.strip()}.json", timeout=2)
+                    user_data = res.json()
+                    
+                    if user_data and user_data.get("password") == hash_password(password):
+                        st.session_state["authenticated"] = True
+                        st.session_state["username"] = username.strip()
+                        st.success("🎉 Đăng nhập thành công!")
+                        time.sleep(0.5)
+                        st.rerun()
+                    else:
+                        st.error("❌ Sai tài khoản hoặc mật khẩu!")
+                except:
+                    st.error("Lỗi kết nối máy chủ Firebase!")
+            else:
+                st.warning("Vui lòng điền đầy đủ thông tin!")
+                
+        st.write("---")
+        st.caption("Chưa có tài khoản phụ huynh?")
+        if st.button("Tạo tài khoản mới (Đăng ký) ✨", use_container_width=True):
+            st.session_state["auth_page"] = "register"
+            st.rerun()
+            
+    st.stop()
+
+# --- MÀN HÌNH ĐĂNG KÝ ---
+if not st.session_state["authenticated"] and st.session_state["auth_page"] == "register":
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    with st.container(border=True):
+        st.markdown("<h2 style='text-align: center;'>✨ ĐĂNG KÝ TÀI KHOẢN</h2>", unsafe_allow_html=True)
+        
+        new_username = st.text_input("Tạo tên đăng nhập mới:", placeholder="Ví dụ: bame_haidang")
+        new_password = st.text_input("Tạo mật khẩu:", type="password", placeholder="Nhập mật khẩu an toàn...")
+        confirm_password = st.text_input("Nhập lại mật khẩu:", type="password", placeholder="Xác nhận lại mật khẩu...")
+        
+        if st.button("Hoàn tất Đăng ký 🛠️", use_container_width=True, type="primary"):
+            if new_username.strip() and new_password.strip():
+                if new_password != confirm_password:
+                    st.error("❌ Mật khẩu nhập lại không khớp!")
+                else:
+                    try:
+                        # Kiểm tra xem tài khoản đã tồn tại chưa
+                        check_res = requests.get(f"{base_url}accounts/{new_username.strip()}.json", timeout=2)
+                        if check_res.json() is not None:
+                            st.error("❌ Tên đăng nhập này đã có người sử dụng!")
+                        else:
+                            # Lưu tài khoản mới lên Firebase
+                            account_data = {"password": hash_password(new_password)}
+                            requests.put(f"{base_url}accounts/{new_username.strip()}.json", json=account_data, timeout=2)
+                            st.success("🎉 Đăng ký thành công! Hãy đăng nhập.")
+                            st.session_state["auth_page"] = "login"
+                            time.sleep(1)
+                            st.rerun()
+                    except:
+                        st.error("Lỗi kết nối Firebase!")
+            else:
+                st.warning("Vui lòng điền đầy đủ thông tin!")
+                
+        st.write("---")
+        if st.button("Quay lại Đăng nhập ↩️", use_container_width=True):
+            st.session_state["auth_page"] = "login"
+            st.rerun()
+            
+    st.stop()
 
 # =====================================================================
-# 🎛️ GIAO DIỆN CHÍNH (Chỉ hiển thị sau khi nhập ĐÚNG mật khẩu)
+# 🎛️ GIAO DIỆN CHÍNH (Chỉ mở ra khi đã Đăng nhập thành công)
 # =====================================================================
 
 if "input_text" not in st.session_state:
@@ -75,13 +132,11 @@ def send_parent_msg():
     msg_text = st.session_state.widget_msg.strip()
     if msg_text:
         current_time = time.strftime("%H:%M")
-        new_msg = {"sender": "PHỤ HUYNH 👤", "text": msg_text, "time": current_time}
+        new_msg = {"sender": f"PHỤ HUYNH ({st.session_state.get('username')}) 👤", "text": msg_text, "time": current_time}
         msg_id = f"local_{int(time.time())}"
         st.session_state.local_chats[msg_id] = new_msg
         
         try:
-            base_url = FIREBASE_URL.strip()
-            if not base_url.endswith("/"): base_url += "/"
             requests.post(f"{base_url}chats.json", json=new_msg, timeout=2)
             st.toast("Đã gửi lời nhắc lên hệ thống!", icon="🚀")
         except:
@@ -97,8 +152,6 @@ def revoke_msg(chat_id):
             st.toast("Đã gỡ tin nhắn tạm!", icon="✂️")
     else:
         try:
-            base_url = FIREBASE_URL.strip()
-            if not base_url.endswith("/"): base_url += "/"
             requests.patch(f"{base_url}chats/{chat_id}.json", json={"text": "đã bị phụ huynh gỡ bỏ.", "type": "revoked"}, timeout=2)
             st.toast("Đã gỡ tin nhắn trên đám mây!", icon="✂️")
         except: st.toast("Lỗi kết nối mạng!", icon="❌")
@@ -106,8 +159,6 @@ def revoke_msg(chat_id):
 # --- 🚨 HÀM PHÁT LỆNH ĐIỀU KHIỂN TỪ XA CHUẨN ĐỒNG BỘ ---
 def send_remote_command(payload, target_user):
     try:
-        base_url = FIREBASE_URL.strip()
-        if not base_url.endswith("/"): base_url += "/"
         requests.put(f"{base_url}commands/{target_user}.json", json=payload, timeout=2)
         st.toast(f"🚨 Đã chuyển lệnh thành công tới {target_user}!", icon="⚡")
     except: st.error("Lỗi kết nối mạng Firebase.")
@@ -115,8 +166,6 @@ def send_remote_command(payload, target_user):
 # --- 🧹 HÀM CLEAR CHAT CỨU HỘ ---
 def clear_all_chats():
     try:
-        base_url = FIREBASE_URL.strip()
-        if not base_url.endswith("/"): base_url += "/"
         res = requests.delete(f"{base_url}chats.json", timeout=2)
         if res.status_code == 200:
             st.session_state.local_chats = {}
@@ -126,16 +175,16 @@ def clear_all_chats():
 # Giao diện quản lý chính
 st.title("👑 Trung Tâm Quản Lý Phụ Huynh Tối Thượng")
 
-# Nút Đăng xuất nhanh ở góc trên
-if st.sidebar.button("🔒 Đăng xuất (Khóa App)"):
-    st.session_state["authenticated"] = False
-    st.rerun()
+# Thanh bên hiển thị thông tin User đăng nhập
+with st.sidebar:
+    st.write(f"### 👤 Xin chào, {st.session_state.get('username')}!")
+    if st.button("🔒 Đăng xuất ứng dụng", use_container_width=True):
+        st.session_state["authenticated"] = False
+        st.rerun()
 
 # --- THÔNG TIN TRẠNG THÁI SERVER ---
 status_db = "Kết nối tốt 🟢"
 try:
-    base_url = FIREBASE_URL.strip()
-    if not base_url.endswith("/"): base_url += "/"
     res_test = requests.get(f"{base_url}chats.json", timeout=1.5)
     if res_test.status_code != 200: status_db = "Lỗi kết nối 🔴"
 except: status_db = "Ngoại tuyến 🟡"
@@ -205,12 +254,8 @@ if user_names:
         if st.button("📌 Ghim Lời Nhắc Lên Màn Hình", use_container_width=True):
             if sticky_msg.strip():
                 try:
-                    base_url = FIREBASE_URL.strip()
-                    if not base_url.endswith("/"): base_url += "/"
-                    
                     payload = {"text": sticky_msg.strip()}
                     response = requests.put(f"{base_url}sticky/{target}.json", json=payload, timeout=2.0)
-                    
                     if response.status_code == 200:
                         st.toast("📌 Đã ghim lời nhắc lên màn hình máy con thành công!", icon="💛")
                     else:
