@@ -272,10 +272,28 @@ try:
     if res_test.status_code != 200: status_db = "Lỗi kết nối 🔴"
 except: status_db = "Ngoại tuyến 🟡"
 
+# ── 🕒 KHU VỰC ĐỒNG HỒ ĐẾM GIÂY REAL-TIME VIỆT NAM ──
+import datetime
+
 m1, m2, m3 = st.columns(3)
-with m1: st.metric(label="📡 Máy chủ Firebase", value=status_db)
-with m2: st.metric(label="⏱️ Đồng hồ hệ thống", value=datetime.now().strftime("%H:%M:%S"))
-with m3: st.metric(label="💬 Tin nhắc tạm", value=f"{len(st.session_state.local_chats)} tin")
+
+with m1: 
+    st.metric(label="📡 Máy chủ Firebase", value=status_db)
+
+with m2:
+    # Hàm fragment này ép ô đồng hồ tự chạy lại sau mỗi 1 giây ngầm
+    @st.fragment(run_every=1)
+    def live_clock():
+        # Lấy giờ quốc tế của Server đám mây rồi cộng thêm 7 tiếng (Múi giờ VN)
+        now_vn = datetime.datetime.utcnow() + datetime.timedelta(hours=7)
+        time_string = now_vn.strftime("%H:%M:%S")
+        st.metric(label="⏱️ Đồng hồ hệ thống", value=time_string)
+    
+    live_clock()
+
+with m3: 
+    st.metric(label="💬 Tin nhắc tạm", value=f"{len(st.session_state.local_chats)} tin")
+# ───────────────────────────────────────────────────
 
 st.write("---")
 
