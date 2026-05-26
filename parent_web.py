@@ -66,7 +66,7 @@ if not st.session_state["authenticated"] and st.session_state["auth_page"] == "l
             st.session_state["auth_page"] = "register"
             st.rerun()
             
-    st.stop() # Chặn không cho chạy code app khi chưa đăng nhập
+    st.stop()
 
 # 2. GIAO DIỆN ĐĂNG KÝ
 if not st.session_state["authenticated"] and st.session_state["auth_page"] == "register":
@@ -74,7 +74,7 @@ if not st.session_state["authenticated"] and st.session_state["auth_page"] == "r
     with st.container(border=True):
         st.markdown("<h2 style='text-align: center;'>✨ ĐĂNG KÝ TÀI KHOẢN</h2>", unsafe_allow_html=True)
         
-        reg_user = st.text_input("Tạo tên đăng nhập mới:", key="reg_u", placeholder="Ví dụ: bame_haidang")
+        reg_user = st.text_input("Tên đăng nhập mới:", key="reg_u", placeholder="Ví dụ: bame_haidang")
         reg_pass = st.text_input("Tạo mật khẩu:", type="password", key="reg_p", placeholder="Nhập mật khẩu...")
         reg_confirm = st.text_input("Nhập lại mật khẩu:", type="password", key="reg_c", placeholder="Xác nhận mật khẩu...")
         
@@ -86,12 +86,10 @@ if not st.session_state["authenticated"] and st.session_state["auth_page"] == "r
                     st.error("❌ Mật khẩu xác nhận không khớp!")
                 else:
                     try:
-                        # Kiểm tra trùng tên tài khoản trên Firebase chung
                         check_res = requests.get(f"{base_url}accounts/{u}.json", timeout=3)
                         if check_res.json() is not None:
                             st.error("❌ Tên đăng nhập này đã tồn tại!")
                         else:
-                            # Tiến hành ghi tài khoản mới lên nhánh accounts/
                             requests.put(f"{base_url}accounts/{u}.json", json={"password": hash_password(p)}, timeout=3)
                             st.success("🎉 Đăng ký thành công! Đang chuyển về trang Đăng nhập...")
                             st.session_state["auth_page"] = "login"
@@ -107,7 +105,7 @@ if not st.session_state["authenticated"] and st.session_state["auth_page"] == "r
             st.session_state["auth_page"] = "login"
             st.rerun()
             
-    st.stop() # Chặn code app dưới
+    st.stop()
 
 # =====================================================================
 # 🎛️ GIAO DIỆN CHÍNH (Chỉ kích hoạt khi ĐÃ ĐĂNG NHẬP)
@@ -197,73 +195,84 @@ with m3: st.metric(label="💬 Tin nhắc tạm", value=f"{len(st.session_state.
 
 st.write("---")
 
-# 📊 ── BIỂU ĐỒ GIÁM SÁT MÁY CON ──
-st.subheader("📊 Phân Tích & Giám Sát Học Tập")
-user_names = []
-user_times = []
+# =====================================================================
+# 🔄 VÙNG ĐỒNG BỘ NGẦM (MÀN HÌNH KHÔNG BỊ MỜ KHI TRANH THỦ UPDATE)
+# =====================================================================
+@st.fragment(run_every=5)
+def render_realtime_dashboard():
+    # 📊 ── BIỂU ĐỒ GIÁM SÁT MÁY CON ──
+    st.subheader("📊 Phân Tích & Giám Sát Học Tập (Tự động cập nhật ngầm ✨)")
+    user_names = []
+    user_times = []
 
-try:
-    res_users = requests.get(f"{base_url}users.json", timeout=2)
-    if res_users.status_code == 200 and res_users.json():
-        users_data = res_users.json()
-        for u_id, u_info in users_data.items():
-            if isinstance(u_info, dict):
-                u_status = u_info.get("status", "offline")
-                u_time = u_info.get("study_seconds", 0) // 60
-                user_names.append(u_id)
-                user_times.append(u_time)
-                status_emoji = "🟢 Trực tuyến" if u_status == "online" else "⚫ Ngoại tuyến"
-                st.caption(f"👤 **{u_id}**: {status_emoji} | Đã học: `{u_time} phút`")
-        if user_names:
-            df = pd.DataFrame({"Học sinh": user_names, "Thời gian học (Phút)": user_times})
-            st.bar_chart(data=df, x="Học sinh", y="Thời gian học (Phút)", color="#38bdf8")
-    else: st.info("Chưa có dữ liệu học sinh.")
-except: st.caption("⚠️ Không thể tải đồ thị giám sát.")
-
-st.write("---")
-
-# ⚡ ── TRUNG TÂM ĐIỀU KHIỂN TỪ XA ──
-st.subheader("⚡ Điều Khiển & Giao Mục Tiêu Từ Xa")
-if user_names:
-    target = st.selectbox("Chọn con để điều khiển:", user_names)
+    try:
+        res_users = requests.get(f"{base_url}users.json", timeout=2)
+        if res_users.status_code == 200 and res_users.json():
+            users_data = res_users.json()
+            for u_id, u_info in users_data.items():
+                if isinstance(u_info, dict):
+                    u_status = u_info.get("status", "offline")
+                    u_time = u_info.get("study_seconds", 0) // 60
+                    user_names.append(u_id)
+                    user_times.append(u_time)
+                    status_emoji = "🟢 Trực tuyến" if u_status == "online" else "⚫ Ngoại tuyến"
+                    st.caption(f"👤 **{u_id}**: {status_emoji} | Đã học: `{u_time} phút`")
+            if user_names:
+                df = pd.DataFrame({"Học sinh": user_names, "Thời gian học (Phút)": user_times})
+                st.bar_chart(data=df, x="Hogh sinh", y="Thời gian học (Phút)", color="#38bdf8")
+        else: 
+            st.info("Chưa có dữ liệu học sinh.")
+    except: 
+        st.caption("⚠️ Không thể tải đồ thị giám sát.")
     
-    c_cmd1, c_cmd2 = st.columns(2)
-    with c_cmd1:
-        if st.button("🔔 PHÁT CHUÔNG CHÚ Ý", use_container_width=True):
-            payload = {"command": "ALERT_BUZZ", "timestamp": int(time.time()), "status": "pending"}
-            send_remote_command(payload, target)
-    with c_cmd2:
-        if st.button("🛑 LỆNH NGHỈ NGƠI (KHÓA APP)", type="primary", use_container_width=True):
-            payload = {"command": "FORCE_BREAK", "timestamp": int(time.time()), "status": "pending"}
-            send_remote_command(payload, target)
-            
-    st.write("")
-    c_target1, c_target2 = st.columns(2)
-    with c_target1:
-        target_mins = st.number_input("Đặt mục tiêu học hôm nay (Phút):", min_value=5, max_value=180, value=30, step=5)
-        if st.button("🚀 Gửi Mục Tiêu Thời Gian", use_container_width=True):
-            payload = {
-                "command": "SET_GOAL", 
-                "minutes": target_mins, 
-                "timestamp": int(time.time()), 
-                "status": "pending"
-            }
-            send_remote_command(payload, target)
-            
-    with c_target2:
-        sticky_msg = st.text_input("Lời nhắn ghim màn hình app con:", placeholder="Ví dụ: Học xong nhớ làm bài tập...")
-        if st.button("📌 Ghim Lời Nhắc Lên Màn Hình", use_container_width=True):
-            if sticky_msg.strip():
-                try:
-                    payload = {"text": sticky_msg.strip()}
-                    response = requests.put(f"{base_url}sticky/{target}.json", json=payload, timeout=2.0)
-                    if response.status_code == 200:
-                        st.toast("📌 Đã ghim lời nhắc lên màn hình máy con thành công!", icon="💛")
-                    else:
-                        st.error("Lỗi đồng bộ dữ liệu lên Firebase.")
-                except Exception as e:
-                    st.error(f"Lỗi kết nối mạng: {e}")
-else: st.info("Không có học sinh trực tuyến để điều khiển.")
+    st.write("---")
+
+    # ⚡ ── TRUNG TÂM ĐIỀU KHIỂN TỪ XA ──
+    st.subheader("⚡ Điều Khiển & Giao Mục Tiêu Từ Xa")
+    if user_names:
+        target = st.selectbox("Chọn con để điều khiển:", user_names, key="target_select")
+        
+        c_cmd1, c_cmd2 = st.columns(2)
+        with c_cmd1:
+            if st.button("🔔 PHÁT CHUÔNG CHÚ Ý", use_container_width=True, key="btn_buzz"):
+                payload = {"command": "ALERT_BUZZ", "timestamp": int(time.time()), "status": "pending"}
+                send_remote_command(payload, target)
+        with c_cmd2:
+            if st.button("🛑 LỆNH NGHỈ NGƠI (KHÓA APP)", type="primary", use_container_width=True, key="btn_break"):
+                payload = {"command": "FORCE_BREAK", "timestamp": int(time.time()), "status": "pending"}
+                send_remote_command(payload, target)
+                
+        st.write("")
+        c_target1, c_target2 = st.columns(2)
+        with c_target1:
+            target_mins = st.number_input("Đặt mục tiêu học hôm nay (Phút):", min_value=5, max_value=180, value=30, step=5, key="num_goal")
+            if st.button("🚀 Gửi Mục Tiêu Thời Gian", use_container_width=True, key="btn_set_goal"):
+                payload = {
+                    "command": "SET_GOAL", 
+                    "minutes": target_mins, 
+                    "timestamp": int(time.time()), 
+                    "status": "pending"
+                }
+                send_remote_command(payload, target)
+                
+        with c_target2:
+            sticky_msg = st.text_input("Lời nhắn ghim màn hình app con:", placeholder="Ví dụ: Học xong nhớ làm bài tập...", key="txt_sticky")
+            if st.button("📌 Ghim Lời Nhắc Lên Màn Hình", use_container_width=True, key="btn_sticky"):
+                if sticky_msg.strip():
+                    try:
+                        payload = {"text": sticky_msg.strip()}
+                        response = requests.put(f"{base_url}sticky/{target}.json", json=payload, timeout=2.0)
+                        if response.status_code == 200:
+                            st.toast("📌 Đã ghim lời nhắc lên màn hình máy con thành công!", icon="💛")
+                        else:
+                            st.error("Lỗi đồng bộ dữ liệu lên Firebase.")
+                    except Exception as e:
+                        st.error(f"Lỗi kết nối mạng: {e}")
+    else: 
+        st.info("Không có học sinh trực tuyến để điều khiển.")
+
+# Chạy vùng đồng bộ ngầm
+render_realtime_dashboard()
 
 st.write("---")
 
@@ -275,7 +284,7 @@ if qr_bytes and net_url:
         with col_qr: st.image(qr_bytes, width=150)
         with col_btn:
             st.caption(f"🔗 URL: `{net_url}`")
-            st.download_button(label="📥 Tải mã QR", data=qr_bytes, file_name="Ma_QR.png", mime="image/png")
+            st.download_button(label="📥 Tải mã QR", data=qr_bytes, file_name="Ma_QR.png", mime="image/png", key="download_qr_btn")
 
 st.write("---")
 
@@ -290,7 +299,7 @@ all_chats = {**chats, **st.session_state.local_chats}
 col_title, col_clear = st.columns([3, 1])
 with col_title: st.subheader(f"💬 Nhật ký tin nhắn ({len(all_chats)})")
 with col_clear:
-    if st.button("🧼 Dọn sạch chat", type="secondary"):
+    if st.button("🧼 Dọn sạch chat", type="secondary", key="btn_clear_chat"):
         clear_all_chats()
         st.rerun()
 
@@ -316,10 +325,3 @@ else:
 st.write("---")
 st.text_input("Nội dung lời nhắn công cộng:", value=st.session_state.input_text, key="widget_msg", placeholder="Nhập tin nhắn...", on_change=send_parent_msg)
 st.button("Gửi tin nhắn ➤", key="btn_send_msg", on_click=send_parent_msg)
-
-# Vòng lặp đếm ngược đồng bộ dữ liệu (Chỉ chạy khi đã đăng nhập)
-progress_bar = st.progress(0, text="🔄 Chuẩn bị đồng bộ dữ liệu...")
-for percent_complete in range(100):
-    time.sleep(0.05)
-    progress_bar.progress(percent_complete + 1, text=f"🔄 Đang đồng bộ tự động... {5 - (percent_complete*5//100)}s")
-st.rerun()
