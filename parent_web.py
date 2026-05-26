@@ -195,84 +195,96 @@ with m3: st.metric(label="💬 Tin nhắc tạm", value=f"{len(st.session_state.
 
 st.write("---")
 
-# =====================================================================
-# 🔄 VÙNG ĐỒNG BỘ NGẦM (MÀN HÌNH KHÔNG BỊ MỜ KHI TRANH THỦ UPDATE)
-# =====================================================================
+# 📊 ── BIỂU ĐỒ GIÁM SÁT MÁY CON ──
+st.subheader("📊 Phân Tích & Giám Sát Học Tập")
+
+user_names = []
+user_times = []
+
+# Tải dữ liệu từ Firebase trước khi vẽ đồ thị
+try:
+    res_users = requests.get(f"{base_url}users.json", timeout=3)
+    if res_users.status_code == 200 and res_users.json():
+        users_data = res_users.json()
+        for u_id, u_info in users_data.items():
+            if isinstance(u_info, dict):
+                user_names.append(u_id)
+                user_times.append(u_info.get("study_seconds", 0) // 60)
+except:
+    pass
+
+# Hàm cập nhật trạng thái text Online/Offline ngầm (Đảm bảo không mờ màn hình)
 @st.fragment(run_every=5)
-def render_realtime_dashboard():
-    # 📊 ── BIỂU ĐỒ GIÁM SÁT MÁY CON ──
-    st.subheader("📊 Phân Tích & Giám Sát Học Tập (Tự động cập nhật ngầm ✨)")
-    user_names = []
-    user_times = []
-
+def render_online_status():
     try:
-        res_users = requests.get(f"{base_url}users.json", timeout=2)
-        if res_users.status_code == 200 and res_users.json():
-            users_data = res_users.json()
-            for u_id, u_info in users_data.items():
+        res_live = requests.get(f"{base_url}users.json", timeout=2)
+        if res_live.status_code == 200 and res_live.json():
+            live_data = res_live.json()
+            st.caption("🟢 **Trạng thái trực tuyến hiện tại (Tự động quét...):**")
+            for u_id, u_info in live_data.items():
                 if isinstance(u_info, dict):
-                    u_status = u_info.get("status", "offline")
-                    u_time = u_info.get("study_seconds", 0) // 60
-                    user_names.append(u_id)
-                    user_times.append(u_time)
-                    status_emoji = "🟢 Trực tuyến" if u_status == "online" else "⚫ Ngoại tuyến"
-                    st.caption(f"👤 **{u_id}**: {status_emoji} | Đã học: `{u_time} phút`")
-            if user_names:
-                df = pd.DataFrame({"Học sinh": user_names, "Thời gian học (Phút)": user_times})
-                st.bar_chart(data=df, x="Hogh sinh", y="Thời gian học (Phút)", color="#38bdf8")
-        else: 
+                    status_emoji = "🟢 Trực tuyến" if u_info.get("status") == "online" else "⚫ Ngoại tuyến"
+                    st.markdown(f"- 👤 **{u_id}**: {status_emoji} | Đã học hôm nay: `{u_info.get('study_seconds', 0) // 60} phút`")
+        else:
             st.info("Chưa có dữ liệu học sinh.")
-    except: 
-        st.caption("⚠️ Không thể tải đồ thị giám sát.")
+    except:
+        st.caption("⚠️ Đang kết nối lại luồng dữ liệu...")
+
+# Chạy vùng quét trạng thái ngầm
+render_online_status()
+
+# Vẽ biểu đồ cột ổn định
+if user_names:
+    df = pd.DataFrame({"Học sinh": user_names, "Thời gian học (Phút)": user_times})
+    st.bar_chart(data=df, x="Học sinh", y="Thời gian học (Phút)", color="#38bdf8")
+else:
+    st.info("Biểu đồ trống: Đang chờ máy con kết nối...")
+
+st.write("---")
+
+# ⚡ ── TRUNG TÂM ĐIỀU KHIỂN TỪ XA ──
+st.subheader("⚡ Điều Khiển & Giao Mục Tiêu Từ Xa")
+if user_names:
+    target = st.selectbox("Chọn con để điều khiển:", user_names, key="target_select")
     
-    st.write("---")
-
-    # ⚡ ── TRUNG TÂM ĐIỀU KHIỂN TỪ XA ──
-    st.subheader("⚡ Điều Khiển & Giao Mục Tiêu Từ Xa")
-    if user_names:
-        target = st.selectbox("Chọn con để điều khiển:", user_names, key="target_select")
-        
-        c_cmd1, c_cmd2 = st.columns(2)
-        with c_cmd1:
-            if st.button("🔔 PHÁT CHUÔNG CHÚ Ý", use_container_width=True, key="btn_buzz"):
-                payload = {"command": "ALERT_BUZZ", "timestamp": int(time.time()), "status": "pending"}
-                send_remote_command(payload, target)
-        with c_cmd2:
-            if st.button("🛑 LỆNH NGHỈ NGƠI (KHÓA APP)", type="primary", use_container_width=True, key="btn_break"):
-                payload = {"command": "FORCE_BREAK", "timestamp": int(time.time()), "status": "pending"}
-                send_remote_command(payload, target)
-                
-        st.write("")
-        c_target1, c_target2 = st.columns(2)
-        with c_target1:
-            target_mins = st.number_input("Đặt mục tiêu học hôm nay (Phút):", min_value=5, max_value=180, value=30, step=5, key="num_goal")
-            if st.button("🚀 Gửi Mục Tiêu Thời Gian", use_container_width=True, key="btn_set_goal"):
-                payload = {
-                    "command": "SET_GOAL", 
-                    "minutes": target_mins, 
-                    "timestamp": int(time.time()), 
-                    "status": "pending"
-                }
-                send_remote_command(payload, target)
-                
-        with c_target2:
-            sticky_msg = st.text_input("Lời nhắn ghim màn hình app con:", placeholder="Ví dụ: Học xong nhớ làm bài tập...", key="txt_sticky")
-            if st.button("📌 Ghim Lời Nhắc Lên Màn Hình", use_container_width=True, key="btn_sticky"):
-                if sticky_msg.strip():
-                    try:
-                        payload = {"text": sticky_msg.strip()}
-                        response = requests.put(f"{base_url}sticky/{target}.json", json=payload, timeout=2.0)
-                        if response.status_code == 200:
-                            st.toast("📌 Đã ghim lời nhắc lên màn hình máy con thành công!", icon="💛")
-                        else:
-                            st.error("Lỗi đồng bộ dữ liệu lên Firebase.")
-                    except Exception as e:
-                        st.error(f"Lỗi kết nối mạng: {e}")
-    else: 
-        st.info("Không có học sinh trực tuyến để điều khiển.")
-
-# Chạy vùng đồng bộ ngầm
-render_realtime_dashboard()
+    c_cmd1, c_cmd2 = st.columns(2)
+    with c_cmd1:
+        if st.button("🔔 PHÁT CHUÔNG CHÚ Ý", use_container_width=True, key="btn_buzz"):
+            payload = {"command": "ALERT_BUZZ", "timestamp": int(time.time()), "status": "pending"}
+            send_remote_command(payload, target)
+    with c_cmd2:
+        if st.button("🛑 LỆNH NGHỈ NGƠI (KHÓA APP)", type="primary", use_container_width=True, key="btn_break"):
+            payload = {"command": "FORCE_BREAK", "timestamp": int(time.time()), "status": "pending"}
+            send_remote_command(payload, target)
+            
+    st.write("")
+    c_target1, c_target2 = st.columns(2)
+    with c_target1:
+        target_mins = st.number_input("Đặt mục tiêu học hôm nay (Phút):", min_value=5, max_value=180, value=30, step=5, key="num_goal")
+        if st.button("🚀 Gửi Mục Tiêu Thời Gian", use_container_width=True, key="btn_set_goal"):
+            payload = {
+                "command": "SET_GOAL", 
+                "minutes": target_mins, 
+                "timestamp": int(time.time()), 
+                "status": "pending"
+            }
+            send_remote_command(payload, target)
+            
+    with c_target2:
+        sticky_msg = st.text_input("Lời nhắn ghim màn hình app con:", placeholder="Ví dụ: Học xong nhớ làm bài tập...", key="txt_sticky")
+        if st.button("📌 Ghim Lời Nhắc Lên Màn Hình", use_container_width=True, key="btn_sticky"):
+            if sticky_msg.strip():
+                try:
+                    payload = {"text": sticky_msg.strip()}
+                    response = requests.put(f"{base_url}sticky/{target}.json", json=payload, timeout=2.0)
+                    if response.status_code == 200:
+                        st.toast("📌 Đã ghim lời nhắc lên màn hình máy con thành công!", icon="💛")
+                    else:
+                        st.error("Lỗi đồng bộ dữ liệu lên Firebase.")
+                except Exception as e:
+                    st.error(f"Lỗi kết nối mạng: {e}")
+else: 
+    st.info("Không có học sinh trực tuyến để điều khiển.")
 
 st.write("---")
 
