@@ -14,7 +14,7 @@ FIREBASE_URL = "https://pomodoroapp-701a2-default-rtdb.firebaseio.com/"
 st.set_page_config(
     page_title="Trung Tâm Điều Khiển Phụ Huynh", 
     page_icon="👑", 
-    layout="wide", # Nâng cấp sang chế độ màn hình rộng để chia cột chuyên nghiệp
+    layout="centered", # Quay lại giao diện cũ (dạng dọc tập trung)
     initial_sidebar_state="expanded"
 )
 
@@ -112,9 +112,7 @@ if st.session_state["theme_mode"] == "🌙 Giao diện Tối":
             box-shadow: 0 0 15px rgba(56, 189, 248, 0.6) !important; 
         }
         
-        /* Khung chat tinh gọn */
         .chat-box { background-color: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #38bdf8; }
-        .badge-custom { background-color: #ef4444; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
         </style>
     """, unsafe_allow_html=True)
 else:
@@ -178,7 +176,6 @@ else:
         button[data-testid="baseButton-secondary"]:hover { background-color: #0369a1 !important; transform: translateY(-1px); }
         
         .chat-box { background-color: #f1f5f9; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #0284c7; }
-        .badge-custom { background-color: #dc2626; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
         </style>
     """, unsafe_allow_html=True)
 
@@ -267,7 +264,7 @@ if not st.session_state["authenticated"] and st.session_state["auth_page"] == "r
     st.stop()
 
 # =====================================================================
-# 🎛️ LOGIC CHỨC NĂNG HỆ THỐNG GIAO DIỆN CHÍNH
+# 🎛️ GIAO DIỆN CHÍNH DẠNG 1 CỘT (GIỐNG BẢN CŨ CỦA BẠN)
 # =====================================================================
 if "input_text" not in st.session_state:
     st.session_state.input_text = ""
@@ -331,17 +328,14 @@ def clear_all_chats():
     except Exception: 
         pass
 
-# --- TIÊU ĐỀ HỆ THỐNG ---
-st.markdown("<h1 style='margin-bottom:0px;'>👑 Trung Tâm Quản Lý Phụ Huynh Tối Thượng</h1>", unsafe_allow_html=True)
-st.markdown("<p style='color:#64748b; font-size:14px; margin-top:-5px;'>Hệ thống giám sát tối cao, điều khiển từ xa và lá chắn an toàn cho máy con</p>", unsafe_allow_html=True)
+st.title("👑 Trung Tâm Quản Lý Phụ Huynh Tối Thượng")
 
 with st.sidebar:
     st.write(f"### 👤 Tài khoản: `{st.session_state.get('username')}`")
-    if st.button("🔒 Đăng xuất ứng dụng", use_container_width=True, type="primary"):
+    if st.button("🔒 Đăng xuất ứng dụng", use_container_width=True):
         st.session_state["authenticated"] = False
         st.rerun()
 
-# --- HÀNG THÔNG SỐ METRICS VIP ---
 status_db = "Kết nối tốt 🟢"
 try:
     res_test = requests.get(f"{base_url}chats.json", timeout=1.5)
@@ -350,20 +344,28 @@ except Exception:
     status_db = "Ngoại tuyến 🟡"
 
 m1, m2, m3 = st.columns(3)
-with m1: st.metric(label="📡 Máy chủ Firebase", value=status_db)
+with m1: 
+    st.metric(label="📡 Máy chủ Firebase", value=status_db)
+
 with m2:
     @st.fragment(run_every=1)
     def live_clock():
         now_vn = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=7)
-        st.metric(label="⏱️ Đồng hồ hệ thống", value=now_vn.strftime("%H:%M:%S"))
+        time_string = now_vn.strftime("%H:%M:%S")
+        st.metric(label="⏱️ Đồng hồ hệ thống", value=time_string)
     live_clock()
-with m3: st.metric(label="💬 Tin nhắc tạm", value=f"{len(st.session_state.local_chats)} tin")
+
+with m3: 
+    st.metric(label="💬 Tin nhắc tạm", value=f"{len(st.session_state.local_chats)} tin")
 
 st.write("---")
 
-# Quét tìm danh sách máy con trước để phục vụ hiển thị
+# 📊 ── BIỂU ĐỒ GIÁM SÁT MÁY CON ──
+st.subheader("📊 Phân Tích & Giám Sát Học Tập")
+
 user_names = []
 user_times = []
+
 try:
     res_users = requests.get(f"{base_url}users.json", timeout=3)
     if res_users.status_code == 200 and res_users.json():
@@ -375,163 +377,189 @@ try:
 except Exception:
     pass
 
-# =====================================================================
-# 🗂️ CHIA LAYOUT 2 CỘT CHUYÊN NGHIỆP (DASHBOARD GRID)
-# =====================================================================
-col_left, col_right = st.columns([1.1, 0.9], gap="large")
-
-# 🏛️ CỘT TRÁI: GIÁM SÁT HỌC TẬP & TRUNG TÂM ĐIỀU KHIỂN TỪ XA
-with col_left:
-    with st.container(border=True):
-        st.markdown("### 📊 Phân Tích & Giám Sát Học Tập")
-        
-        @st.fragment(run_every=5)
-        def render_online_status():
-            try:
-                res_live = requests.get(f"{base_url}users.json", timeout=2)
-                if res_live.status_code == 200 and res_live.json():
-                    live_data = res_live.json()
-                    for u_id, u_info in live_data.items():
-                        if isinstance(u_info, dict):
-                            badge = "<span style='color:#10b981;font-weight:bold;'>● Trực tuyến</span>" if u_info.get("status") == "online" else "<span style='color:#64748b;'>⚫ Ngoại tuyến</span>"
-                            st.markdown(f"💻 Máy: **{u_id}** &nbsp;|&nbsp; {badge} &nbsp;|&nbsp; ⏱️ Đã học: `{u_info.get('study_seconds', 0) // 60} phút`", unsafe_allow_html=True)
-                else: st.info("Chưa có dữ liệu học sinh.")
-            except Exception: st.caption("⚠️ Đang kết nối lại luồng dữ liệu...")
-        render_online_status()
-
-        if user_names:
-            df = pd.DataFrame({"Học sinh": user_names, "Thời gian học (Phút)": user_times})
-            st.bar_chart(data=df, x="Học sinh", y="Thời gian học (Phút)", color="#38bdf8")
+@st.fragment(run_every=5)
+def render_online_status():
+    try:
+        res_live = requests.get(f"{base_url}users.json", timeout=2)
+        if res_live.status_code == 200 and res_live.json():
+            live_data = res_live.json()
+            st.caption("🟢 **Trạng thái trực tuyến hiện tại (Tự động quét...):**")
+            for u_id, u_info in live_data.items():
+                if isinstance(u_info, dict):
+                    status_emoji = "🟢 Trực tuyến" if u_info.get("status") == "online" else "⚫ Ngoại tuyến"
+                    st.markdown(f"- 👤 **{u_id}**: {status_emoji} | Đã học hôm nay: `{u_info.get('study_seconds', 0) // 60} phút`")
         else:
-            st.info("Biểu đồ trống: Đang chờ máy con kết nối...")
+            st.info("Chưa có dữ liệu học sinh.")
+    except Exception:
+        st.caption("⚠️ Đang kết nối lại luồng dữ liệu...")
 
-    st.write("<br>", unsafe_allow_html=True)
+render_online_status()
 
-    with st.container(border=True):
-        st.markdown("### ⚡ Điều Khiển & Giao Mục Tiêu Từ Xa")
-        if user_names:
-            target = st.selectbox("🎯 Chọn con để điều khiển:", user_names, key="target_select")
-            
-            c_cmd1, c_cmd2 = st.columns(2)
-            with c_cmd1:
-                if st.button("🔔 PHÁT CHUÔNG CHÚ Ý", use_container_width=True, key="btn_buzz"):
-                    send_remote_command({"command": "ALERT_BUZZ", "timestamp": int(time.time()), "status": "pending"}, target)
-                target_mins = st.number_input("Đặt mục tiêu học hôm nay (Phút):", min_value=5, max_value=180, value=30, step=5, key="num_goal")
-                if st.button("🚀 Gửi Mục Tiêu Thời Gian", use_container_width=True, key="btn_set_goal", type="secondary"):
-                    send_remote_command({"command": "SET_GOAL", "minutes": target_mins, "timestamp": int(time.time()), "status": "pending"}, target)
-            with c_cmd2:
-                if st.button("🛑 LỆNH NGHỈ NGƠI (KHÓA APP)", type="primary", use_container_width=True, key="btn_break"):
-                    send_remote_command({"command": "FORCE_BREAK", "timestamp": int(time.time()), "status": "pending"}, target)
-                sticky_msg = st.text_input("Lời nhắn ghim màn hình app con:", placeholder="Ví dụ: Tập trung con nhé...", key="txt_sticky")
-                if st.button("📌 Ghim Lời Nhắc Lên Màn Hình", use_container_width=True, key="btn_sticky"):
-                    if sticky_msg.strip():
-                        send_remote_command({"command": "SET_STICKY", "text": sticky_msg.strip()}, target)
-                        try:
-                            requests.put(f"{base_url}sticky/{target}.json", json={"text": sticky_msg.strip()}, timeout=2)
-                            st.toast("📌 Đã ghim lời nhắc thành công!", icon="💛")
-                        except: pass
-        else: 
-            st.info("Không có học sinh trực tuyến để điều khiển.")
+if user_names:
+    df = pd.DataFrame({"Học sinh": user_names, "Thời gian học (Phút)": user_times})
+    st.bar_chart(data=df, x="Học sinh", y="Thời gian học (Phút)", color="#38bdf8")
+else:
+    st.info("Biểu đồ trống: Đang chờ máy con kết nối...")
 
-# 🛡️ CỘT PHẢI: LÁ CHẮN AN TOÀN (ANTI-PROC), KHUNG CHAT ĐỒNG BỘ & QR CODE
-with col_right:
-    with st.container(border=True):
-        st.markdown("### 🛡️ Safety Search Guard (Giám sát & Chặn Từ Cấm)")
-        current_blacklist = []
-        try:
-            res_bl = requests.get(f"{base_url}blacklist_keywords.json", timeout=2)
-            if res_bl.json(): current_blacklist = res_bl.json()
-        except: pass
-        
-        st.write(f"🚫 Từ khóa cấm: `{', '.join(current_blacklist) if current_blacklist else 'Trống'}`")
-        
-        col_bl1, col_bl2 = st.columns([2.2, 1])
-        with col_bl1:
-            new_word = st.text_input("Thêm từ khóa cấm mới:", placeholder="Ví dụ: game, phim...", key="txt_new_badword", label_visibility="collapsed")
-        with col_bl2:
-            if st.button("➕ Thêm Từ", use_container_width=True):
-                if new_word.strip() and new_word.strip().lower() not in current_blacklist:
-                    current_blacklist.append(new_word.strip().lower())
-                    requests.put(f"{base_url}blacklist_keywords.json", json=current_blacklist, timeout=2)
-                    st.toast("Đã cập nhật từ khóa cấm!", icon="💾")
-                    st.rerun()
-                    
-        if st.button("🧼 Xóa sạch danh sách từ cấm", key="btn_clear_blacklist", type="primary", use_container_width=True):
-            requests.delete(f"{base_url}blacklist_keywords.json", timeout=2)
-            st.rerun()
-
-        st.write("---")
-        
-        @st.fragment(run_every=4)
-        def render_safety_logs():
-            try:
-                res_alerts = requests.get(f"{base_url}safety_alerts.json", timeout=2)
-                if res_alerts.json():
-                    for aid, info in list(res_alerts.json().items())[-2:]:
-                        st.markdown(f"<div style='background-color:rgba(239,68,68,0.12); padding:10px; border-radius:6px; border-left:4px solid #ef4444; margin-bottom:8px; color:#f87171; font-size:13px;'>🚨 <b>VI PHẠM:</b> Máy con vừa gõ từ khóa cấm <b>{info.get('keyword')}</b> lúc {info.get('time')}!</div>", unsafe_allow_html=True)
-            except: pass
-            
-            try:
-                res_logs = requests.get(f"{base_url}key_logs.json", timeout=2)
-                if res_logs.json():
-                    st.markdown("<small style='color:#64748b;'>📋 Nhật ký gõ phím live:</small>", unsafe_allow_html=True)
-                    for lid, text_line in list(res_logs.json().items())[-3:]:
-                        st.caption(f"🕒 {text_line.get('time', '--:--')} → `{text_line.get('text', '')}`")
-            except: pass
-        render_safety_logs()
-
-    st.write("<br>", unsafe_allow_html=True)
-
-    with st.container(border=True):
-        # Đồng bộ danh sách Chat công cộng
-        chats = {}
-        try:
-            res = requests.get(f"{base_url}chats.json", timeout=2)
-            if res.status_code == 200 and res.json() and isinstance(res.json(), dict): chats = res.json()
-        except: pass
-        all_chats = {**chats, **st.session_state.local_chats}
-        
-        c_title, c_clr = st.columns([2, 1])
-        with c_title: st.markdown(f"### 💬 Nhật Ký Tin Nhắn ({len(all_chats)})")
-        with c_clr:
-            if st.button("🧼 Dọn chat", type="secondary", key="btn_clear_chat", use_container_width=True):
-                clear_all_chats()
+# =====================================================================
+# 🛡️ SAFETY SEARCH GUARD (Giám sát bàn phím & Từ khóa cấm)
+# =====================================================================
+st.write("---")
+with st.container():
+    st.markdown("### 🛡️ Safety Search Guard (Giám sát bàn phím & Từ khóa cấm)")
+    
+    current_blacklist = []
+    try:
+        res_bl = requests.get(f"{base_url}blacklist_keywords.json", timeout=2)
+        if res_bl.json(): current_blacklist = res_bl.json()
+    except Exception: 
+        pass
+    
+    st.write(f"Danh sách từ khóa đang cấm: `{', '.join(current_blacklist) if current_blacklist else 'Trống'}`")
+    
+    col_bl1, col_bl2 = st.columns([3, 1])
+    with col_bl1:
+        new_word = st.text_input("Thêm từ khóa cấm mới (gõ thường, không dấu):", placeholder="Ví dụ: game, lau, hack...", key="txt_new_badword")
+    with col_bl2:
+        st.write("<br>", unsafe_allow_html=True)
+        if st.button("➕ Thêm Từ Cấm", use_container_width=True):
+            if new_word.strip() and new_word.strip().lower() not in current_blacklist:
+                current_blacklist.append(new_word.strip().lower())
+                requests.put(f"{base_url}blacklist_keywords.json", json=current_blacklist, timeout=2)
+                st.toast("Đã cập nhật từ khóa cấm lên hệ thống!", icon="💾")
                 st.rerun()
-
-        # Hiển thị Chat Box cuộn mượt bằng CSS card
-        if not all_chats: st.info("Chưa có tin nhắn nào trong phòng.")
-        else:
-            for cid, m in list(all_chats.items())[-6:]:
-                if not isinstance(m, dict): continue
-                sender = m.get("sender", "Ẩn danh")
-                text = m.get("text", "")
-                ts = m.get("time", "--:--")
                 
-                if m.get("type") == "revoked":
-                    st.markdown(f"<div style='color:#64748b; font-size:13px; font-style:italic; padding:4px;'>⚠️ {sender} {text}</div>", unsafe_allow_html=True)
-                else:
-                    st.markdown(f"""
-                    <div class="chat-box">
-                        <small style="color:#38bdf8; font-weight:bold;">{sender}</small>
-                        <small style="color:#64748b; float:right;">🕒 {ts}</small>
-                        <p style="margin:4px 0 0 0; font-size:14px;">{text}</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    if st.button("✂️ Gỡ tin", key=f"del_{cid}", use_container_width=True):
-                        revoke_msg(cid)
-                        st.rerun()
+    if st.button("🧼 Xóa sạch danh sách từ cấm", key="btn_clear_blacklist", type="primary"):
+        requests.delete(f"{base_url}blacklist_keywords.json", timeout=2)
+        st.rerun()
 
-        st.text_input("Gửi tin nhắn nhanh xuống máy con:", key="widget_msg", placeholder="Nhập lời nhắc...", on_change=send_parent_msg)
-        st.button("Gửi tin nhắn ➤", key="btn_send_msg", on_click=send_parent_msg, use_container_width=True, type="secondary")
+    st.write("")
+    
+    @st.fragment(run_every=4)
+    def render_safety_logs():
+        try:
+            res_alerts = requests.get(f"{base_url}safety_alerts.json", timeout=2)
+            if res_alerts.json():
+                st.markdown("<span style='color:#ef4444; font-weight:bold;'>⚠️ PHÁT HIỆN VI PHẠM CẤM:</span>", unsafe_allow_html=True)
+                for aid, info in list(res_alerts.json().items())[-3:]:
+                    st.error(f"🚨 MÁY CON VI PHẠM: Vừa gõ từ khóa cấm {info.get('keyword')} lúc {info.get('time')}. Hệ thống đã cưỡng chế tắt trình duyệt!")
+        except Exception: 
+            pass
+        
+        try:
+            res_logs = requests.get(f"{base_url}key_logs.json", timeout=2)
+            if res_logs.json():
+                st.write("📋 **Nhật ký gõ phím từ máy con (Live):**")
+                for lid, text_line in list(res_logs.json().items())[-5:]:
+                    st.caption(f"🕒 {text_line.get('time', '--:--')} → `{text_line.get('text', '')}`")
+        except Exception: 
+            pass
 
-# --- BOTTOM BAR: QR CODE KẾT NỐI NHANH ---
-st.write("<br>", unsafe_allow_html=True)
+    render_safety_logs()
+
+# =====================================================================
+# ⚡ TRUNG TÂM ĐIỀU KHIỂN TỪ XA
+# =====================================================================
+st.write("---")
+st.subheader("⚡ Điều Khiển & Giao Mục Tiêu Từ Xa")
+if user_names:
+    target = st.selectbox("Chọn con để điều khiển:", user_names, key="target_select")
+    
+    c_cmd1, c_cmd2 = st.columns(2)
+    with c_cmd1:
+        if st.button("🔔 PHÁT CHUÔNG CHÚ Ý", use_container_width=True, key="btn_buzz"):
+            payload = {"command": "ALERT_BUZZ", "timestamp": int(time.time()), "status": "pending"}
+            send_remote_command(payload, target)
+    with c_cmd2:
+        if st.button("🛑 LỆNH NGHỈ NGƠI (KHÓA APP)", type="primary", use_container_width=True, key="btn_break"):
+            payload = {"command": "FORCE_BREAK", "timestamp": int(time.time()), "status": "pending"}
+            send_remote_command(payload, target)
+            
+    st.write("")
+    c_target1, c_target2 = st.columns(2)
+    with c_target1:
+        target_mins = st.number_input("Đặt mục tiêu học hôm nay (Phút):", min_value=5, max_value=180, value=30, step=5, key="num_goal")
+        if st.button("🚀 Gửi Mục Tiêu Thời Gian", use_container_width=True, key="btn_set_goal"):
+            payload = {
+                "command": "SET_GOAL", 
+                "minutes": target_mins, 
+                "timestamp": int(time.time()), 
+                "status": "pending"
+            }
+            send_remote_command(payload, target)
+            
+    with c_target2:
+        sticky_msg = st.text_input("Lời nhắn ghim màn hình app con:", placeholder="Ví dụ: Học xong nhớ làm bài tập...", key="txt_sticky")
+        if st.button("📌 Ghim Lời Nhắc Lên Màn Hình", use_container_width=True, key="btn_sticky"):
+            if sticky_msg.strip():
+                try:
+                    payload = {"text": sticky_msg.strip()}
+                    response = requests.put(f"{base_url}sticky/{target}.json", json=payload, timeout=2.0)
+                    if response.status_code == 200:
+                        st.toast("📌 Đã ghim lời nhắc lên màn hình máy con thành công!", icon="💛")
+                    else:
+                        st.error("Lỗi đồng bộ dữ liệu lên Firebase.")
+                except Exception as e:
+                    st.error(f"Lỗi kết nối mạng: {e}")
+else: 
+    st.info("Không có học sinh trực tuyến để điều khiển.")
+
+st.write("---")
+
+# QR Code Expander
 qr_bytes, net_url = generate_network_qr()
 if qr_bytes and net_url:
-    with st.expander("📲 MÃ QR KẾT NỐI ĐIỆN THOẠI DI ĐỘNG", expanded=False):
-        col_qr, col_btn = st.columns([1, 4])
-        with col_qr: st.image(qr_bytes, width=130)
+    with st.expander("📲 MÃ QR KẾT NỐI ĐIỆN THOẠI", expanded=False):
+        col_qr, col_btn = st.columns([1, 2])
+        with col_qr: st.image(qr_bytes, width=150)
         with col_btn:
-            st.markdown(f"⚙️ **Quét mã để điều khiển bằng điện thoại:**")
-            st.caption(f"Đường dẫn máy chủ: `{net_url}`")
-            st.download_button(label="📥 Tải ảnh QR Code", data=qr_bytes, file_name="Ma_QR_Parent.png", mime="image/png", key="download_qr_btn")
+            st.caption(f"🔗 URL: `{net_url}`")
+            st.download_button(label="📥 Tải mã QR", data=qr_bytes, file_name="Ma_QR.png", mime="image/png", key="download_qr_btn")
+
+st.write("---")
+
+# Nhật ký phòng chat công cộng
+chats = {}
+try:
+    res = requests.get(f"{base_url}chats.json", timeout=2)
+    if res.status_code == 200 and res.json() and isinstance(res.json(), dict): chats = res.json()
+except Exception: 
+    pass
+
+all_chats = {**chats, **st.session_state.local_chats}
+col_title, col_clear = st.columns([3, 1])
+with col_title: st.subheader(f"💬 Nhật ký tin nhắn ({len(all_chats)})")
+with col_clear:
+    if st.button("🧼 Dọn sạch chat", type="secondary", key="btn_clear_chat"):
+        clear_all_chats()
+        st.rerun()
+
+if not all_chats: st.info("Chưa có tin nhắn nào.")
+else:
+    for cid, m in list(all_chats.items())[-15:]:
+        if not isinstance(m, dict): continue
+        sender = m.get("sender", "Ẩn danh")
+        text = m.get("text", "")
+        ts = m.get("time", "--:--")
+        
+        with st.container(border=True):
+            if m.get("type") == "revoked": 
+                st.markdown(f"⚠️ *{sender} {text}*")
+            else:
+                # Sửa đổi cấu trúc bong bóng chat sang hộp CSS mới cho đẹp, mượt hơn bản cũ
+                st.markdown(f"""
+                <div class="chat-box">
+                    <small style="color:#38bdf8; font-weight:bold;">{sender}</small>
+                    <small style="color:#64748b; float:right;">🕒 {ts}</small>
+                    <p style="margin:4px 0 6px 0; font-size:14px;">{text}</p>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Nút Gỡ để ngay bên dưới hộp tin nhắn gọn gàng
+                if st.button("✂️ Gỡ tin nhắn này", key=f"del_{cid}", type="primary", use_container_width=True):
+                    revoke_msg(cid)
+                    st.rerun()
+
+st.write("---")
+st.text_input("Nội dung lời nhắn công cộng:", key="widget_msg", placeholder="Nhập tin nhắn...", on_change=send_parent_msg)
+st.button("Gửi tin nhắn ➤", key="btn_send_msg", on_click=send_parent_msg, use_container_width=True, type="secondary")
