@@ -18,13 +18,13 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+
 # =====================================================================
-# 🎨 BỘ ĐIỀU KHIỂN GIAO DIỆN SÁNG / TỐI (BẢN VÀNG - ĐÃ SỬA LỖI HIỂN THỊ)
+# 🎨 SIÊU NÂNG CẤP GIAO DIỆN PREMIUM (SCROLLBAR, ANIMATION & CARD 3D)
 # =====================================================================
 if "theme_mode" not in st.session_state:
     st.session_state["theme_mode"] = "🌙 Giao diện Tối"
 
-# Hàm callback xử lý đổi giao diện chuẩn xác không lo giật lag
 def change_theme():
     st.session_state["theme_mode"] = st.session_state["theme_select_box"]
 
@@ -34,23 +34,35 @@ with st.sidebar:
         "Chọn chế độ hiển thị:",
         ["🌙 Giao diện Tối", "☀️ Giao diện Sáng"],
         key="theme_select_box",
-        on_change=change_theme  # Kích hoạt đổi giao diện ngay lập tức khi click
+        on_change=change_theme
     )
 
 if st.session_state["theme_mode"] == "🌙 Giao diện Tối":
     st.markdown("""
         <style>
-        /* Nền ứng dụng tối + Hiệu ứng chuyển màu nền mượt */
+        /* 1. THANH CUỘT TÙY CHỈNH (CYBERPUNK SCROLLBAR) */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
+
+        /* Nền ứng dụng tối */
         .stApp { background-color: #0f172a; color: #f1f5f9; transition: background-color 0.3s ease; }
         [data-testid="stHeader"] { background-color: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); }
         
-        /* Định dạng các khối Card */
+        /* 2. HIỆU ỨNG CARD 3D KHI RE CHUỘT */
         div[data-testid="stVerticalBlockBorderWrapper"] {
             background-color: #1e293b !important; 
             border: 1px solid #334155 !important;
-            border-radius: 12px !important; 
-            padding: 20px !important;
+            border-radius: 14px !important; 
+            padding: 22px !important;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease !important;
+        }
+        div[data-testid="stVerticalBlockBorderWrapper"]:hover {
+            transform: translateY(-3px); /* Nhấc card lên nhẹ */
+            border-color: #38bdf8 !important; /* Đổi màu viền sang xanh neon */
+            box-shadow: 0 15px 25px -5px rgba(56, 189, 248, 0.15) !important; /* Đổ bóng phát sáng */
         }
         
         /* Màu tiêu đề Cyberpunk Gradient */
@@ -61,70 +73,76 @@ if st.session_state["theme_mode"] == "🌙 Giao diện Tối":
             font-weight: 700 !important;
         }
         
-        /* Thanh Sidebar */
         section[data-testid="stSidebar"] { background-color: #0b0f19 !important; border-right: 1px solid #1e293b; }
         
-        /* SỬA LỖI: Ô nhập liệu và Ép chữ Selectbox phải có màu trắng */
+        /* Ô nhập liệu và Ép chữ Selectbox */
         .stTextInput input, .stNumberInput input, div[data-baseweb="select"] {
             background-color: #0f172a !important; 
             color: #f1f5f9 !important; 
             border: 1px solid #475569 !important;
             border-radius: 8px !important;
         }
-        /* Sửa lỗi mất chữ trong ô Selectbox ở giao diện tối */
-        div[data-baseweb="select"] * {
-            color: #f1f5f9 !important;
-        }
+        div[data-baseweb="select"] * { color: #f1f5f9 !important; }
         
-        /* Nút Bấm Primary (Nút Nguy Hiểm/Khóa) */
+        /* 3. HIỆU ỨNG PHÁT SÁNG CHẬM (PULSE ANIMATION) CHO NÚT CHÍNH */
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
         button[data-testid="baseButton-primary"] {
             background: linear-gradient(135deg, #ef4444, #b91c1c) !important; 
-            border: none !important; 
-            color: white !important; 
-            font-weight: bold !important;
-            border-radius: 8px !important;
-            transition: all 0.25s ease-in-out !important;
+            border: none !important; color: white !important; font-weight: bold !important;
+            border-radius: 8px !important; transition: all 0.25s ease-in-out !important;
+            animation: pulse-red 2s infinite; /* Thêm hiệu ứng đập nhịp tim */
         }
         button[data-testid="baseButton-primary"]:hover { 
-            transform: translateY(-1px);
-            box-shadow: 0 0 15px rgba(239, 68, 68, 0.6) !important; 
+            transform: scale(1.02); /* Phóng to nhẹ khi rê chuột */
+            animation: none; /* Tắt nhịp tim khi hover để giữ bóng cố định */
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.7) !important; 
         }
         
-        /* Nút Bấm Secondary (Nút Tính Năng/Gửi) */
+        /* Nút Bấm Secondary */
         button[data-testid="baseButton-secondary"] {
             background: linear-gradient(135deg, #38bdf8, #2563eb) !important; 
-            color: white !important; 
-            font-weight: bold !important; 
-            border: none !important;
-            border-radius: 8px !important;
-            transition: all 0.25s ease-in-out !important;
+            color: white !important; font-weight: bold !important; border: none !important;
+            border-radius: 8px !important; transition: all 0.25s ease-in-out !important;
         }
         button[data-testid="baseButton-secondary"]:hover { 
             transform: translateY(-1px);
             box-shadow: 0 0 15px rgba(56, 189, 248, 0.6) !important; 
         }
         
-        /* Khung hiển thị chat */
-        .chat-box { background-color: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #38bdf8; }
+        .chat-box { background-color: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #38bdf8; }
         </style>
     """, unsafe_allow_html=True)
 else:
     st.markdown("""
         <style>
-        /* Nền ứng dụng sáng + Hiệu ứng chuyển màu nền mượt */
+        /* 1. THANH CUỘT BẢN SÁNG (MINIMALIST SCROLLBAR) */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f8fafc; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Nền ứng dụng sáng */
         .stApp { background-color: #f8fafc; color: #0f172a; transition: background-color 0.3s ease; }
         [data-testid="stHeader"] { background-color: rgba(248, 250, 252, 0.8); backdrop-filter: blur(8px); }
         
-        /* Định dạng các khối Card */
+        /* 2. HIỆU ỨNG CARD CHO BẢN SÁNG */
         div[data-testid="stVerticalBlockBorderWrapper"] {
             background-color: #ffffff !important; 
             border: 1px solid #e2e8f0 !important;
-            border-radius: 12px !important; 
-            padding: 20px !important;
+            border-radius: 14px !important; 
+            padding: 22px !important;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+            transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+        }
+        div[data-testid="stVerticalBlockBorderWrapper"]:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.08) !important;
         }
         
-        /* SỬA LỖI: Reset lại text-fill-color để hiển thị rõ màu xanh ở bản sáng */
         h1, h2, h3 { 
             color: #0284c7 !important; 
             background: none !important;
@@ -132,44 +150,32 @@ else:
             font-weight: 700 !important; 
         }
         
-        /* Thanh Sidebar */
         section[data-testid="stSidebar"] { background-color: #f1f5f9 !important; border-right: 1px solid #e2e8f0; }
         
-        /* SỬA LỖI: Ô nhập liệu và Selectbox bản sáng */
         .stTextInput input, .stNumberInput input, div[data-baseweb="select"] {
             background-color: #ffffff !important; 
             color: #0f172a !important; 
             border: 1px solid #cbd5e1 !important;
             border-radius: 8px !important;
         }
-        /* Đảm bảo chữ trong ô Selectbox bản sáng có màu tối rõ ràng */
-        div[data-baseweb="select"] * {
-            color: #0f172a !important;
-        }
+        div[data-baseweb="select"] * { color: #0f172a !important; }
         
-        /* Nút Bấm Primary */
+        /* Nút Bấm Primary bản sáng */
         button[data-testid="baseButton-primary"] {
             background-color: #dc2626 !important; 
-            border: none !important; 
-            color: white !important; 
-            font-weight: bold !important;
-            border-radius: 8px !important;
-            transition: all 0.25s ease-in-out !important;
+            border: none !important; color: white !important; font-weight: bold !important;
+            border-radius: 8px !important; transition: all 0.25s ease-in-out !important;
         }
         button[data-testid="baseButton-primary"]:hover { background-color: #b91c1c !important; transform: translateY(-1px); }
         
-        /* Nút Bấm Secondary */
+        /* Nút Bấm Secondary bản sáng */
         button[data-testid="baseButton-secondary"] {
             background-color: #0284c7 !important; 
-            color: white !important; 
-            font-weight: bold !important; 
-            border: none !important;
-            border-radius: 8px !important;
-            transition: all 0.25s ease-in-out !important;
+            color: white !important; font-weight: bold !important; border: none !important;
+            border-radius: 8px !important; transition: all 0.25s ease-in-out !important;
         }
         button[data-testid="baseButton-secondary"]:hover { background-color: #0369a1 !important; transform: translateY(-1px); }
         
-        /* Khung hiển thị chat */
         .chat-box { background-color: #f1f5f9; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #0284c7; }
         </style>
     """, unsafe_allow_html=True)
