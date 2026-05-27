@@ -19,7 +19,7 @@ st.set_page_config(
 )
 
 # =====================================================================
-# 🎨 BỘ ĐIỀU KHIỂN GIAO DIỆN SÁNG / TỐI (ĐÃ SỬA LỖI & TỐI ƯU UI)
+# 🎨 BỘ ĐIỀU KHIỂN GIAO DIỆN SÁNG / TỐI (BẢN VÀNG - ĐÃ SỬA LỖI HIỂN THỊ)
 # =====================================================================
 if "theme_mode" not in st.session_state:
     st.session_state["theme_mode"] = "🌙 Giao diện Tối"
@@ -40,8 +40,8 @@ with st.sidebar:
 if st.session_state["theme_mode"] == "🌙 Giao diện Tối":
     st.markdown("""
         <style>
-        /* Nền ứng dụng tối */
-        .stApp { background-color: #0f172a; color: #f1f5f9; }
+        /* Nền ứng dụng tối + Hiệu ứng chuyển màu nền mượt */
+        .stApp { background-color: #0f172a; color: #f1f5f9; transition: background-color 0.3s ease; }
         [data-testid="stHeader"] { background-color: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); }
         
         /* Định dạng các khối Card */
@@ -55,21 +55,25 @@ if st.session_state["theme_mode"] == "🌙 Giao diện Tối":
         
         /* Màu tiêu đề Cyberpunk Gradient */
         h1, h2, h3 { 
-            background: linear-gradient(to right, #38bdf8, #818cf8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            background: linear-gradient(to right, #38bdf8, #818cf8) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
             font-weight: 700 !important;
         }
         
         /* Thanh Sidebar */
         section[data-testid="stSidebar"] { background-color: #0b0f19 !important; border-right: 1px solid #1e293b; }
         
-        /* SỬA LỖI: Ô nhập liệu và Selectbox chuẩn CSS của Streamlit */
+        /* SỬA LỖI: Ô nhập liệu và Ép chữ Selectbox phải có màu trắng */
         .stTextInput input, .stNumberInput input, div[data-baseweb="select"] {
             background-color: #0f172a !important; 
             color: #f1f5f9 !important; 
             border: 1px solid #475569 !important;
             border-radius: 8px !important;
+        }
+        /* Sửa lỗi mất chữ trong ô Selectbox ở giao diện tối */
+        div[data-baseweb="select"] * {
+            color: #f1f5f9 !important;
         }
         
         /* Nút Bấm Primary (Nút Nguy Hiểm/Khóa) */
@@ -107,8 +111,8 @@ if st.session_state["theme_mode"] == "🌙 Giao diện Tối":
 else:
     st.markdown("""
         <style>
-        /* Nền ứng dụng sáng */
-        .stApp { background-color: #f8fafc; color: #0f172a; }
+        /* Nền ứng dụng sáng + Hiệu ứng chuyển màu nền mượt */
+        .stApp { background-color: #f8fafc; color: #0f172a; transition: background-color 0.3s ease; }
         [data-testid="stHeader"] { background-color: rgba(248, 250, 252, 0.8); backdrop-filter: blur(8px); }
         
         /* Định dạng các khối Card */
@@ -120,7 +124,13 @@ else:
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
         }
         
-        h1, h2, h3 { color: #0284c7 !important; font-weight: 700 !important; }
+        /* SỬA LỖI: Reset lại text-fill-color để hiển thị rõ màu xanh ở bản sáng */
+        h1, h2, h3 { 
+            color: #0284c7 !important; 
+            background: none !important;
+            -webkit-text-fill-color: initial !important; 
+            font-weight: 700 !important; 
+        }
         
         /* Thanh Sidebar */
         section[data-testid="stSidebar"] { background-color: #f1f5f9 !important; border-right: 1px solid #e2e8f0; }
@@ -131,6 +141,10 @@ else:
             color: #0f172a !important; 
             border: 1px solid #cbd5e1 !important;
             border-radius: 8px !important;
+        }
+        /* Đảm bảo chữ trong ô Selectbox bản sáng có màu tối rõ ràng */
+        div[data-baseweb="select"] * {
+            color: #0f172a !important;
         }
         
         /* Nút Bấm Primary */
