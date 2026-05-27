@@ -19,72 +19,146 @@ st.set_page_config(
 )
 
 # =====================================================================
-# 🎨 BỘ ĐIỀU KHIỂN GIAO DIỆN SÁNG / TỐI (THEME SWITCHER)
+# 🎨 BỘ ĐIỀU KHIỂN GIAO DIỆN SÁNG / TỐI (ĐÃ SỬA LỖI & TỐI ƯU UI)
 # =====================================================================
 if "theme_mode" not in st.session_state:
     st.session_state["theme_mode"] = "🌙 Giao diện Tối"
+
+# Hàm callback xử lý đổi giao diện chuẩn xác không lo giật lag
+def change_theme():
+    st.session_state["theme_mode"] = st.session_state["theme_select_box"]
 
 with st.sidebar:
     st.markdown("<h3 style='margin-top:0;'>🎨 Cài đặt Giao diện</h3>", unsafe_allow_html=True)
     theme_choice = st.selectbox(
         "Chọn chế độ hiển thị:",
         ["🌙 Giao diện Tối", "☀️ Giao diện Sáng"],
-        key="theme_select_box"
+        key="theme_select_box",
+        on_change=change_theme  # Kích hoạt đổi giao diện ngay lập tức khi click
     )
-    st.session_state["theme_mode"] = theme_choice
 
 if st.session_state["theme_mode"] == "🌙 Giao diện Tối":
     st.markdown("""
         <style>
+        /* Nền ứng dụng tối */
         .stApp { background-color: #0f172a; color: #f1f5f9; }
-        [data-testid="stHeader"] { background-color: rgba(15, 23, 42, 0.8); }
+        [data-testid="stHeader"] { background-color: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); }
+        
+        /* Định dạng các khối Card */
         div[data-testid="stVerticalBlockBorderWrapper"] {
-            background-color: #1e293b !important; border: 1px solid #334155 !important;
-            border-radius: 12px !important; padding: 20px !important;
+            background-color: #1e293b !important; 
+            border: 1px solid #334155 !important;
+            border-radius: 12px !important; 
+            padding: 20px !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
         }
-        h1, h2, h3 { color: #38bdf8 !important; }
+        
+        /* Màu tiêu đề Cyberpunk Gradient */
+        h1, h2, h3 { 
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700 !important;
+        }
+        
+        /* Thanh Sidebar */
         section[data-testid="stSidebar"] { background-color: #0b0f19 !important; border-right: 1px solid #1e293b; }
-        .stTextInput input, .stNumberInput input, .stSelectbox div {
-            background-color: #0f172a !important; color: #f1f5f9 !important; border: 1px solid #475569 !important;
+        
+        /* SỬA LỖI: Ô nhập liệu và Selectbox chuẩn CSS của Streamlit */
+        .stTextInput input, .stNumberInput input, div[data-baseweb="select"] {
+            background-color: #0f172a !important; 
+            color: #f1f5f9 !important; 
+            border: 1px solid #475569 !important;
+            border-radius: 8px !important;
         }
+        
+        /* Nút Bấm Primary (Nút Nguy Hiểm/Khóa) */
         button[data-testid="baseButton-primary"] {
-            background-color: #ef4444 !important; border-color: #ef4444 !important; color: white !important; font-weight: bold !important;
+            background: linear-gradient(135deg, #ef4444, #b91c1c) !important; 
+            border: none !important; 
+            color: white !important; 
+            font-weight: bold !important;
+            border-radius: 8px !important;
+            transition: all 0.25s ease-in-out !important;
         }
-        button[data-testid="baseButton-primary"]:hover { background-color: #dc2626 !important; box-shadow: 0 0 12px #ef4444; }
+        button[data-testid="baseButton-primary"]:hover { 
+            transform: translateY(-1px);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.6) !important; 
+        }
+        
+        /* Nút Bấm Secondary (Nút Tính Năng/Gửi) */
         button[data-testid="baseButton-secondary"] {
-            background-color: #38bdf8 !important; color: #0f172a !important; font-weight: bold !important; border: none !important;
+            background: linear-gradient(135deg, #38bdf8, #2563eb) !important; 
+            color: white !important; 
+            font-weight: bold !important; 
+            border: none !important;
+            border-radius: 8px !important;
+            transition: all 0.25s ease-in-out !important;
         }
-        button[data-testid="baseButton-secondary"]:hover { background-color: #7dd3fc !important; box-shadow: 0 0 12px #38bdf8; }
-        .chat-box { background-color: #0f172a; padding: 10px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #38bdf8; }
+        button[data-testid="baseButton-secondary"]:hover { 
+            transform: translateY(-1px);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.6) !important; 
+        }
+        
+        /* Khung hiển thị chat */
+        .chat-box { background-color: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #38bdf8; }
         </style>
     """, unsafe_allow_html=True)
 else:
     st.markdown("""
         <style>
+        /* Nền ứng dụng sáng */
         .stApp { background-color: #f8fafc; color: #0f172a; }
-        [data-testid="stHeader"] { background-color: rgba(248, 250, 252, 0.8); }
+        [data-testid="stHeader"] { background-color: rgba(248, 250, 252, 0.8); backdrop-filter: blur(8px); }
+        
+        /* Định dạng các khối Card */
         div[data-testid="stVerticalBlockBorderWrapper"] {
-            background-color: #ffffff !important; border: 1px solid #e2e8f0 !important;
-            border-radius: 12px !important; padding: 20px !important;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            background-color: #ffffff !important; 
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 12px !important; 
+            padding: 20px !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
         }
-        h1, h2, h3 { color: #0284c7 !important; }
+        
+        h1, h2, h3 { color: #0284c7 !important; font-weight: 700 !important; }
+        
+        /* Thanh Sidebar */
         section[data-testid="stSidebar"] { background-color: #f1f5f9 !important; border-right: 1px solid #e2e8f0; }
-        .stTextInput input, .stNumberInput input, .stSelectbox div {
-            background-color: #ffffff !important; color: #0f172a !important; border: 1px solid #cbd5e1 !important;
+        
+        /* SỬA LỖI: Ô nhập liệu và Selectbox bản sáng */
+        .stTextInput input, .stNumberInput input, div[data-baseweb="select"] {
+            background-color: #ffffff !important; 
+            color: #0f172a !important; 
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 8px !important;
         }
+        
+        /* Nút Bấm Primary */
         button[data-testid="baseButton-primary"] {
-            background-color: #dc2626 !important; border-color: #dc2626 !important; color: white !important; font-weight: bold !important;
+            background-color: #dc2626 !important; 
+            border: none !important; 
+            color: white !important; 
+            font-weight: bold !important;
+            border-radius: 8px !important;
+            transition: all 0.25s ease-in-out !important;
         }
-        button[data-testid="baseButton-primary"]:hover { background-color: #b91c1c !important; }
+        button[data-testid="baseButton-primary"]:hover { background-color: #b91c1c !important; transform: translateY(-1px); }
+        
+        /* Nút Bấm Secondary */
         button[data-testid="baseButton-secondary"] {
-            background-color: #0284c7 !important; color: white !important; font-weight: bold !important; border: none !important;
+            background-color: #0284c7 !important; 
+            color: white !important; 
+            font-weight: bold !important; 
+            border: none !important;
+            border-radius: 8px !important;
+            transition: all 0.25s ease-in-out !important;
         }
-        button[data-testid="baseButton-secondary"]:hover { background-color: #0369a1 !important; }
-        .chat-box { background-color: #f1f5f9; padding: 10px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #0284c7; }
+        button[data-testid="baseButton-secondary"]:hover { background-color: #0369a1 !important; transform: translateY(-1px); }
+        
+        /* Khung hiển thị chat */
+        .chat-box { background-color: #f1f5f9; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #0284c7; }
         </style>
     """, unsafe_allow_html=True)
-
 base_url = FIREBASE_URL.strip()
 if not base_url.endswith("/"): base_url += "/"
 
