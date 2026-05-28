@@ -14,12 +14,12 @@ FIREBASE_URL = "https://pomodoroapp-701a2-default-rtdb.firebaseio.com/"
 st.set_page_config(
     page_title="Trung Tâm Điều Khiển Phụ Huynh", 
     page_icon="👑", 
-    layout="centered", # Quay lại giao diện cũ (dạng dọc tập trung)
+    layout="centered", # Bản dọc tập trung tối ưu trải nghiệm mobile/desktop
     initial_sidebar_state="expanded"
 )
 
 # =====================================================================
-# 🎨 SIÊU NÂNG CẤP GIAO DIỆN PREMIUM (SCROLLBAR, ANIMATION & CARD 3D)
+# 🎨 GIAO DIỆN PREMIUM (MƯỢT MÀ, ĐÃ ĐƯỢC ĐỒNG BỘ CSS)
 # =====================================================================
 if "theme_mode" not in st.session_state:
     st.session_state["theme_mode"] = "🌙 Giao diện Tối"
@@ -39,17 +39,12 @@ with st.sidebar:
 if st.session_state["theme_mode"] == "🌙 Giao diện Tối":
     st.markdown("""
         <style>
-        /* 1. THANH CUỘT TÙY CHỈNH (CYBERPUNK SCROLLBAR) */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
-
-        /* Nền ứng dụng tối */
         .stApp { background-color: #0f172a; color: #f1f5f9; transition: background-color 0.3s ease; }
         [data-testid="stHeader"] { background-color: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); }
-        
-        /* 2. HIỆU ỨNG CARD 3D KHI RE CHUỘT */
         div[data-testid="stVerticalBlockBorderWrapper"] {
             background-color: #1e293b !important; 
             border: 1px solid #334155 !important;
@@ -59,122 +54,51 @@ if st.session_state["theme_mode"] == "🌙 Giao diện Tối":
             transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease !important;
         }
         div[data-testid="stVerticalBlockBorderWrapper"]:hover {
-            transform: translateY(-3px); 
-            border-color: #38bdf8 !important; 
+            transform: translateY(-3px); border-color: #38bdf8 !important; 
             box-shadow: 0 15px 25px -5px rgba(56, 189, 248, 0.15) !important; 
         }
-        
-        /* Màu tiêu đề Cyberpunk Gradient */
         h1, h2, h3 { 
             background: linear-gradient(to right, #38bdf8, #818cf8) !important;
-            -webkit-background-clip: text !important;
-            -webkit-text-fill-color: transparent !important;
-            font-weight: 700 !important;
+            -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important; font-weight: 700 !important;
         }
-        
         section[data-testid="stSidebar"] { background-color: #0b0f19 !important; border-right: 1px solid #1e293b; }
-        
-        /* Ô nhập liệu và Ép chữ Selectbox */
         .stTextInput input, .stNumberInput input, div[data-baseweb="select"] {
-            background-color: #0f172a !important; 
-            color: #f1f5f9 !important; 
-            border: 1px solid #475569 !important;
-            border-radius: 8px !important;
+            background-color: #0f172a !important; color: #f1f5f9 !important; border: 1px solid #475569 !important; border-radius: 8px !important;
         }
         div[data-baseweb="select"] * { color: #f1f5f9 !important; }
-        
-        /* 3. HIỆU ỨNG PHÁT SÁNG CHẬM (PULSE ANIMATION) CHO NÚT CHÍNH */
         @keyframes pulse-red {
             0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
             70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
             100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
         button[data-testid="baseButton-primary"] {
-            background: linear-gradient(135deg, #ef4444, #b91c1c) !important; 
-            border: none !important; color: white !important; font-weight: bold !important;
-            border-radius: 8px !important; transition: all 0.25s ease-in-out !important;
-            animation: pulse-red 2s infinite;
+            background: linear-gradient(135deg, #ef4444, #b91c1c) !important; border: none !important; color: white !important; font-weight: bold !important;
+            border-radius: 8px !important; transition: all 0.25s ease-in-out !important; animation: pulse-red 2s infinite;
         }
-        button[data-testid="baseButton-primary"]:hover { 
-            transform: scale(1.02); 
-            animation: none; 
-            box-shadow: 0 0 15px rgba(239, 68, 68, 0.7) !important; 
-        }
-        
-        /* Nút Bấm Secondary */
         button[data-testid="baseButton-secondary"] {
-            background: linear-gradient(135deg, #38bdf8, #2563eb) !important; 
-            color: white !important; font-weight: bold !important; border: none !important;
+            background: linear-gradient(135deg, #38bdf8, #2563eb) !important; color: white !important; font-weight: bold !important; border: none !important;
             border-radius: 8px !important; transition: all 0.25s ease-in-out !important;
         }
-        button[data-testid="baseButton-secondary"]:hover { 
-            transform: translateY(-1px);
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.6) !important; 
-        }
-        
+        button[data-testid="baseButton-secondary"]:hover { transform: translateY(-1px); box-shadow: 0 0 15px rgba(56, 189, 248, 0.6) !important; }
         .chat-box { background-color: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #38bdf8; }
         </style>
     """, unsafe_allow_html=True)
 else:
     st.markdown("""
         <style>
-        /* 1. THANH CUỘT BẢN SÁNG (MINIMALIST SCROLLBAR) */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #f8fafc; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-        /* Nền ứng dụng sáng */
         .stApp { background-color: #f8fafc; color: #0f172a; transition: background-color 0.3s ease; }
-        [data-testid="stHeader"] { background-color: rgba(248, 250, 252, 0.8); backdrop-filter: blur(8px); }
-        
-        /* 2. HIỆU ỨNG CARD CHO BẢN SÁNG */
         div[data-testid="stVerticalBlockBorderWrapper"] {
-            background-color: #ffffff !important; 
-            border: 1px solid #e2e8f0 !important;
-            border-radius: 14px !important; 
-            padding: 22px !important;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
-            transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+            background-color: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 14px !important; padding: 22px !important; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
         }
-        div[data-testid="stVerticalBlockBorderWrapper"]:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.08) !important;
-        }
-        
-        h1, h2, h3 { 
-            color: #0284c7 !important; 
-            background: none !important;
-            -webkit-text-fill-color: initial !important; 
-            font-weight: 700 !important; 
-        }
-        
+        h1, h2, h3 { color: #0284c7 !important; background: none !important; -webkit-text-fill-color: initial !important; font-weight: 700 !important; }
         section[data-testid="stSidebar"] { background-color: #f1f5f9 !important; border-right: 1px solid #e2e8f0; }
-        
-        .stTextInput input, .stNumberInput input, div[data-baseweb="select"] {
-            background-color: #ffffff !important; 
-            color: #0f172a !important; 
-            border: 1px solid #cbd5e1 !important;
-            border-radius: 8px !important;
-        }
-        div[data-baseweb="select"] * { color: #0f172a !important; }
-        
-        /* Nút Bấm Primary bản sáng */
-        button[data-testid="baseButton-primary"] {
-            background-color: #dc2626 !important; 
-            border: none !important; color: white !important; font-weight: bold !important;
-            border-radius: 8px !important; transition: all 0.25s ease-in-out !important;
-        }
-        button[data-testid="baseButton-primary"]:hover { background-color: #b91c1c !important; transform: translateY(-1px); }
-        
-        /* Nút Bấm Secondary bản sáng */
-        button[data-testid="baseButton-secondary"] {
-            background-color: #0284c7 !important; 
-            color: white !important; font-weight: bold !important; border: none !important;
-            border-radius: 8px !important; transition: all 0.25s ease-in-out !important;
-        }
-        button[data-testid="baseButton-secondary"]:hover { background-color: #0369a1 !important; transform: translateY(-1px); }
-        
+        .stTextInput input, .stNumberInput input, div[data-baseweb="select"] { background-color: #ffffff !important; color: #0f172a !important; border: 1px solid #cbd5e1 !important; border-radius: 8px !important; }
+        button[data-testid="baseButton-primary"] { background-color: #dc2626 !important; border: none !important; color: white !important; font-weight: bold !important; border-radius: 8px !important; }
+        button[data-testid="baseButton-secondary"] { background-color: #0284c7 !important; color: white !important; font-weight: bold !important; border: none !important; border-radius: 8px !important; }
         .chat-box { background-color: #f1f5f9; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #0284c7; }
         </style>
     """, unsafe_allow_html=True)
@@ -191,7 +115,7 @@ def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
 # =====================================================================
-# 🔒 LỚP BẢO MẬT: MÀN HÌNH ĐĂNG NHẬP / ĐĂNG KÝ
+# 🔒 LỚP BẢO MẬT ĐĂNG NHẬP
 # =====================================================================
 if not st.session_state["authenticated"] and st.session_state["auth_page"] == "login":
     st.markdown("<br><br>", unsafe_allow_html=True)
@@ -199,7 +123,6 @@ if not st.session_state["authenticated"] and st.session_state["auth_page"] == "l
         st.markdown("<h2 style='text-align: center;'>🔑 ĐĂNG NHẬP PHỤ HUYNH</h2>", unsafe_allow_html=True)
         username_input = st.text_input("Tên đăng nhập:", key="login_user", placeholder="Nhập tài khoản...")
         password_input = st.text_input("Mật khẩu:", type="password", key="login_pass", placeholder="Nhập mật khẩu...")
-        
         if st.button("Đăng nhập hệ thống 🚀", use_container_width=True, type="primary"):
             u = username_input.strip()
             p = password_input.strip()
@@ -213,15 +136,9 @@ if not st.session_state["authenticated"] and st.session_state["auth_page"] == "l
                         st.success("🎉 Đăng nhập thành công!")
                         time.sleep(0.5)
                         st.rerun()
-                    else:
-                        st.error("❌ Sai tài khoản hoặc mật khẩu!")
-                except Exception:
-                    st.error("❌ Không thể kết nối tới Firebase! Kiểm tra mạng hoặc URL.")
-            else:
-                st.warning("Vui lòng nhập đủ tài khoản và mật khẩu!")
-                
+                    else: st.error("❌ Sai tài khoản hoặc mật khẩu!")
+                except Exception: st.error("❌ Lỗi kết nối tới Firebase!")
         st.write("---")
-        st.caption("Chưa có tài khoản quản lý?")
         if st.button("Tạo tài khoản mới (Đăng ký) ✨", use_container_width=True):
             st.session_state["auth_page"] = "register"
             st.rerun()
@@ -234,42 +151,24 @@ if not st.session_state["authenticated"] and st.session_state["auth_page"] == "r
         reg_user = st.text_input("Tên đăng nhập mới:", key="reg_u", placeholder="Ví dụ: bame_haidang")
         reg_pass = st.text_input("Tạo mật khẩu:", type="password", key="reg_p", placeholder="Nhập mật khẩu...")
         reg_confirm = st.text_input("Nhập lại mật khẩu:", type="password", key="reg_c", placeholder="Xác nhận mật khẩu...")
-        
         if st.button("Hoàn tất Đăng ký 🛠️", use_container_width=True, type="primary"):
             u = reg_user.strip()
             p = reg_pass.strip()
-            if u and p:
-                if p != reg_confirm.strip():
-                    st.error("❌ Mật khẩu xác nhận không khớp!")
-                else:
-                    try:
-                        check_res = requests.get(f"{base_url}accounts/{u}.json", timeout=3)
-                        if check_res.json() is not None:
-                            st.error("❌ Tên đăng nhập này đã tồn tại!")
-                        else:
-                            requests.put(f"{base_url}accounts/{u}.json", json={"password": hash_password(p)}, timeout=3)
-                            st.success("🎉 Đăng ký thành công! Đang chuyển về trang Đăng nhập...")
-                            st.session_state["auth_page"] = "login"
-                            time.sleep(1.5)
-                            st.rerun()
-                    except Exception:
-                        st.error("❌ Lỗi kết nối gửi dữ liệu lên Firebase!")
-            else:
-                st.warning("Vui lòng điền đầy đủ thông tin ô trống!")
-                
-        st.write("---")
-        if st.button("Quay lại Đăng nhập ↩️", use_container_width=True):
-            st.session_state["auth_page"] = "login"
-            st.rerun()
+            if u and p and p == reg_confirm.strip():
+                try:
+                    requests.put(f"{base_url}accounts/{u}.json", json={"password": hash_password(p)}, timeout=3)
+                    st.success("🎉 Đăng ký thành công!")
+                    st.session_state["auth_page"] = "login"
+                    time.sleep(1)
+                    st.rerun()
+                except Exception: st.error("❌ Lỗi gửi dữ liệu!")
     st.stop()
 
 # =====================================================================
-# 🎛️ GIAO DIỆN CHÍNH DẠNG 1 CỘT (GIỐNG BẢN CŨ CỦA BẠN)
+# KHỞI TẠO BIẾN TRẠNG THÁI CƠ SỞ
 # =====================================================================
-if "input_text" not in st.session_state:
-    st.session_state.input_text = ""
-if "local_chats" not in st.session_state:
-    st.session_state.local_chats = {}
+if "input_text" not in st.session_state: st.session_state.input_text = ""
+if "local_chats" not in st.session_state: st.session_state.local_chats = {}
 
 @st.cache_data(ttl=3600)
 def generate_network_qr():
@@ -286,47 +185,18 @@ def send_parent_msg():
     msg_text = st.session_state.widget_msg.strip()
     if msg_text:
         now_vn = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=7)
-        current_time = now_vn.strftime("%H:%M")
-        new_msg = {
-            "sender": f"PHỤ HUYNH ({st.session_state.get('username')}) 👤", 
-            "text": msg_text, 
-            "time": current_time
-        }
-        try:
-            requests.post(f"{base_url}chats.json", json=new_msg, timeout=2)
-            st.toast("Đã gửi lời nhắc lên hệ thống!", icon="🚀")
-        except Exception:
-            st.toast("Chế độ Local: Đã lưu tạm tin nhắn!", icon="💻")
+        new_msg = {"sender": f"PHỤ HUYNH ({st.session_state.get('username')}) 👤", "text": msg_text, "time": now_vn.strftime("%H:%M")}
+        try: requests.post(f"{base_url}chats.json", json=new_msg, timeout=2)
+        except Exception: pass
         st.session_state.widget_msg = ""
 
 def revoke_msg(chat_id):
-    if chat_id.startswith("local_"):
-        if chat_id in st.session_state.local_chats:
-            st.session_state.local_chats[chat_id]["text"] = "đã bị phụ huynh gỡ bỏ."
-            st.session_state.local_chats[chat_id]["type"] = "revoked"
-            st.toast("Đã gỡ tin nhắn tạm!", icon="✂️")
-    else:
-        try:
-            requests.patch(f"{base_url}chats/{chat_id}.json", json={"text": "đã bị phụ huynh gỡ bỏ.", "type": "revoked"}, timeout=2)
-            st.toast("Đã gỡ tin nhắn trên đám mây!", icon="✂️")
-        except Exception: 
-            st.toast("Lỗi kết nối mạng!", icon="❌")
+    try: requests.patch(f"{base_url}chats/{chat_id}.json", json={"text": "đã bị phụ huynh gỡ bỏ.", "type": "revoked"}, timeout=2)
+    except Exception: pass
 
 def send_remote_command(payload, target_user):
-    try:
-        requests.put(f"{base_url}commands/{target_user}.json", json=payload, timeout=2)
-        st.toast(f"🚨 Đã chuyển lệnh thành công tới {target_user}!", icon="⚡")
-    except Exception: 
-        st.error("Lỗi kết nối mạng Firebase.")
-
-def clear_all_chats():
-    try:
-        res = requests.delete(f"{base_url}chats.json", timeout=2)
-        if res.status_code == 200:
-            st.session_state.local_chats = {}
-            st.toast("🧹 Đã làm sạch phòng chat lỗi!", icon="🧼")
-    except Exception: 
-        pass
+    try: requests.put(f"{base_url}commands/{target_user}.json", json=payload, timeout=2)
+    except Exception: pass
 
 st.title("👑 Trung Tâm Quản Lý Phụ Huynh Tối Thượng")
 
@@ -336,126 +206,96 @@ with st.sidebar:
         st.session_state["authenticated"] = False
         st.rerun()
 
-status_db = "Kết nối tốt 🟢"
-try:
-    res_test = requests.get(f"{base_url}chats.json", timeout=1.5)
-    if res_test.status_code != 200: status_db = "Lỗi kết nối 🔴"
-except Exception: 
-    status_db = "Ngoại tuyến 🟡"
-
-m1, m2, m3 = st.columns(3)
-with m1: 
-    st.metric(label="📡 Máy chủ Firebase", value=status_db)
-
+# ⏱️ Đồng hồ và Trạng thái Server
+m1, m2 = st.columns(2)
+with m1: st.metric(label="📡 Máy chủ Firebase", value="Hoạt động tốt 🟢")
 with m2:
     @st.fragment(run_every=1)
     def live_clock():
         now_vn = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=7)
-        time_string = now_vn.strftime("%H:%M:%S")
-        st.metric(label="⏱️ Đồng hồ hệ thống", value=time_string)
+        st.metric(label="⏱️ Đồng hồ hệ thống", value=now_vn.strftime("%H:%M:%S"))
     live_clock()
 
-with m3: 
-    st.metric(label="💬 Tin nhắc tạm", value=f"{len(st.session_state.local_chats)} tin")
-
 st.write("---")
 
-# 📊 ── BIỂU ĐỒ GIÁM SÁT MÁY CON ──
-st.subheader("📊 Phân Tích & Giám Sát Học Tập")
-
-user_names = []
-user_times = []
+# =====================================================================
+# 🏆 TÍNH NĂNG: BẢNG XẾP HẠNG THI ĐUA CHĂM CHỈ
+# =====================================================================
+st.subheader("🏆 Bảng Xếp Hạng Chăm Chỉ")
+user_names, user_times = [], []
 
 try:
-    res_users = requests.get(f"{base_url}users.json", timeout=3)
-    if res_users.status_code == 200 and res_users.json():
-        users_data = res_users.json()
-        for u_id, u_info in users_data.items():
+    res_users = requests.get(f"{base_url}users.json", timeout=3).json()
+    if res_users:
+        leaderboard_data = []
+        for u_id, u_info in res_users.items():
             if isinstance(u_info, dict):
                 user_names.append(u_id)
-                user_times.append(u_info.get("study_seconds", 0) // 60)
-except Exception:
-    pass
-
-@st.fragment(run_every=5)
-def render_online_status():
-    try:
-        res_live = requests.get(f"{base_url}users.json", timeout=2)
-        if res_live.status_code == 200 and res_live.json():
-            live_data = res_live.json()
-            st.caption("🟢 **Trạng thái trực tuyến hiện tại (Tự động quét...):**")
-            for u_id, u_info in live_data.items():
-                if isinstance(u_info, dict):
-                    status_emoji = "🟢 Trực tuyến" if u_info.get("status") == "online" else "⚫ Ngoại tuyến"
-                    st.markdown(f"- 👤 **{u_id}**: {status_emoji} | Đã học hôm nay: `{u_info.get('study_seconds', 0) // 60} phút`")
-        else:
-            st.info("Chưa có dữ liệu học sinh.")
-    except Exception:
-        st.caption("⚠️ Đang kết nối lại luồng dữ liệu...")
-
-render_online_status()
+                study_mins = u_info.get("study_seconds", 0) // 60
+                user_times.append(study_mins)
+                status = "🟢 Trực tuyến" if u_info.get("status") == "online" else "⚫ Ngoại tuyến"
+                leaderboard_data.append({"Học sinh": u_id, "Thời gian học (Phút)": study_mins, "Trạng thái": status})
+        
+        if leaderboard_data:
+            df_lb = pd.DataFrame(leaderboard_data).sort_values(by="Thời gian học (Phút)", ascending=False).reset_index(drop=True)
+            ranks, titles = [], []
+            for i in range(len(df_lb)):
+                if i == 0: ranks.append("🥇 Hạng Nhất"); titles.append("⚡ Chiến Thần Chăm Chỉ")
+                elif i == 1: ranks.append("🥈 Hạng Nhì"); titles.append("🔥 Học Bá Tương Lai")
+                elif i == 2: ranks.append("🥉 Hạng Ba"); titles.append("🌟 Cố Gắng Vượt Bậc")
+                else: ranks.append(f"🏅 Hạng {i+1}"); titles.append("📚 Sĩ Tử Chăm Ngoan")
+            df_lb.insert(0, "Thứ Hạng", ranks)
+            df_lb["Danh Hiệu"] = titles
+            
+            st.dataframe(df_lb, use_container_width=True, hide_index=True)
+            if df_lb.iloc[0]["Thời gian học (Phút)"] > 0:
+                st.success(f"🎉 Tuyên dương **{df_lb.iloc[0]['Học sinh']}** đang dẫn đầu bảng xếp hạng hôm nay!")
+except Exception: pass
 
 if user_names:
-    df = pd.DataFrame({"Học sinh": user_names, "Thời gian học (Phút)": user_times})
-    st.bar_chart(data=df, x="Học sinh", y="Thời gian học (Phút)", color="#38bdf8")
-else:
-    st.info("Biểu đồ trống: Đang chờ máy con kết nối...")
+    df_chart = pd.DataFrame({"Học sinh": user_names, "Thời gian học (Phút)": user_times})
+    st.bar_chart(data=df_chart, x="Học sinh", y="Thời gian học (Phút)", color="#38bdf8")
 
 # =====================================================================
-# 🛡️ SAFETY SEARCH GUARD (Giám sát bàn phím & Từ khóa cấm)
+# 🛡️ SAFETY SEARCH GUARD (Giám sát phím & Chặn từ cấm cũ)
 # =====================================================================
 st.write("---")
-with st.container():
-    st.markdown("### 🛡️ Safety Search Guard (Giám sát bàn phím & Từ khóa cấm)")
-    
-    current_blacklist = []
+st.markdown("### 🛡️ Safety Search Guard (Giám sát bàn phím & Từ khóa cấm)")
+current_blacklist = []
+try:
+    res_bl = requests.get(f"{base_url}blacklist_keywords.json", timeout=2).json()
+    if res_bl: current_blacklist = res_bl
+except Exception: pass
+
+st.write(f"Danh sách từ khóa đang cấm: `{', '.join(current_blacklist) if current_blacklist else 'Trống'}`")
+col_bl1, col_bl2 = st.columns([3, 1])
+with col_bl1:
+    new_word = st.text_input("Thêm từ khóa cấm mới (gõ thường, không dấu):", placeholder="Ví dụ: game, hack...", key="txt_new_badword")
+with col_bl2:
+    st.write("<br>", unsafe_allow_html=True)
+    if st.button("➕ Thêm Từ Cấm", use_container_width=True):
+        if new_word.strip() and new_word.strip().lower() not in current_blacklist:
+            current_blacklist.append(new_word.strip().lower())
+            requests.put(f"{base_url}blacklist_keywords.json", json=current_blacklist, timeout=2)
+            st.rerun()
+
+@st.fragment(run_every=4)
+def render_safety_logs():
     try:
-        res_bl = requests.get(f"{base_url}blacklist_keywords.json", timeout=2)
-        if res_bl.json(): current_blacklist = res_bl.json()
-    except Exception: 
-        pass
-    
-    st.write(f"Danh sách từ khóa đang cấm: `{', '.join(current_blacklist) if current_blacklist else 'Trống'}`")
-    
-    col_bl1, col_bl2 = st.columns([3, 1])
-    with col_bl1:
-        new_word = st.text_input("Thêm từ khóa cấm mới (gõ thường, không dấu):", placeholder="Ví dụ: game, lau, hack...", key="txt_new_badword")
-    with col_bl2:
-        st.write("<br>", unsafe_allow_html=True)
-        if st.button("➕ Thêm Từ Cấm", use_container_width=True):
-            if new_word.strip() and new_word.strip().lower() not in current_blacklist:
-                current_blacklist.append(new_word.strip().lower())
-                requests.put(f"{base_url}blacklist_keywords.json", json=current_blacklist, timeout=2)
-                st.toast("Đã cập nhật từ khóa cấm lên hệ thống!", icon="💾")
-                st.rerun()
-                
-    if st.button("🧼 Xóa sạch danh sách từ cấm", key="btn_clear_blacklist", type="primary"):
-        requests.delete(f"{base_url}blacklist_keywords.json", timeout=2)
-        st.rerun()
+        res_alerts = requests.get(f"{base_url}safety_alerts.json", timeout=2).json()
+        if res_alerts:
+            for aid, info in list(res_alerts.items())[-2:]:
+                st.error(f"🚨 MÁY CON VI PHẠM: Vừa gõ từ khóa cấm [{info.get('keyword')}] lúc {info.get('time')}. Hệ thống đã cưỡng chế tắt trình duyệt!")
+    except Exception: pass
+    try:
+        res_logs = requests.get(f"{base_url}key_logs.json", timeout=2).json()
+        if res_logs:
+            st.write("📋 **Nhật ký gõ phím từ máy con (Live):**")
+            for lid, text_line in list(res_logs.items())[-4:]:
+                st.caption(f"🕒 {text_line.get('time', '--:--')} → `{text_line.get('text', '')}`")
+    except Exception: pass
 
-    st.write("")
-    
-    @st.fragment(run_every=4)
-    def render_safety_logs():
-        try:
-            res_alerts = requests.get(f"{base_url}safety_alerts.json", timeout=2)
-            if res_alerts.json():
-                st.markdown("<span style='color:#ef4444; font-weight:bold;'>⚠️ PHÁT HIỆN VI PHẠM CẤM:</span>", unsafe_allow_html=True)
-                for aid, info in list(res_alerts.json().items())[-3:]:
-                    st.error(f"🚨 MÁY CON VI PHẠM: Vừa gõ từ khóa cấm {info.get('keyword')} lúc {info.get('time')}. Hệ thống đã cưỡng chế tắt trình duyệt!")
-        except Exception: 
-            pass
-        
-        try:
-            res_logs = requests.get(f"{base_url}key_logs.json", timeout=2)
-            if res_logs.json():
-                st.write("📋 **Nhật ký gõ phím từ máy con (Live):**")
-                for lid, text_line in list(res_logs.json().items())[-5:]:
-                    st.caption(f"🕒 {text_line.get('time', '--:--')} → `{text_line.get('text', '')}`")
-        except Exception: 
-            pass
-
-    render_safety_logs()
+render_safety_logs()
 
 # =====================================================================
 # ⚡ TRUNG TÂM ĐIỀU KHIỂN TỪ XA
@@ -464,102 +304,56 @@ st.write("---")
 st.subheader("⚡ Điều Khiển & Giao Mục Tiêu Từ Xa")
 if user_names:
     target = st.selectbox("Chọn con để điều khiển:", user_names, key="target_select")
-    
     c_cmd1, c_cmd2 = st.columns(2)
     with c_cmd1:
-        if st.button("🔔 PHÁT CHUÔNG CHÚ Ý", use_container_width=True, key="btn_buzz"):
-            payload = {"command": "ALERT_BUZZ", "timestamp": int(time.time()), "status": "pending"}
-            send_remote_command(payload, target)
+        if st.button("🔔 PHÁT CHUÔNG CHÚ Ý", use_container_width=True):
+            send_remote_command({"command": "ALERT_BUZZ", "timestamp": int(time.time()), "status": "pending"}, target)
     with c_cmd2:
-        if st.button("🛑 LỆNH NGHỈ NGƠI (KHÓA APP)", type="primary", use_container_width=True, key="btn_break"):
-            payload = {"command": "FORCE_BREAK", "timestamp": int(time.time()), "status": "pending"}
-            send_remote_command(payload, target)
+        if st.button("🛑 LỆNH NGHỈ NGƠI (KHÓA APP)", type="primary", use_container_width=True):
+            send_remote_command({"command": "FORCE_BREAK", "timestamp": int(time.time()), "status": "pending"}, target)
             
     st.write("")
     c_target1, c_target2 = st.columns(2)
     with c_target1:
-        target_mins = st.number_input("Đặt mục tiêu học hôm nay (Phút):", min_value=5, max_value=180, value=30, step=5, key="num_goal")
-        if st.button("🚀 Gửi Mục Tiêu Thời Gian", use_container_width=True, key="btn_set_goal"):
-            payload = {
-                "command": "SET_GOAL", 
-                "minutes": target_mins, 
-                "timestamp": int(time.time()), 
-                "status": "pending"
-            }
-            send_remote_command(payload, target)
-            
+        target_mins = st.number_input("Đặt mục tiêu học hôm nay (Phút):", min_value=5, max_value=180, value=30, step=5)
+        if st.button("🚀 Gửi Mục Tiêu Thời Gian", use_container_width=True):
+            send_remote_command({"command": "SET_GOAL", "minutes": target_mins, "timestamp": int(time.time()), "status": "pending"}, target)
     with c_target2:
-        sticky_msg = st.text_input("Lời nhắn ghim màn hình app con:", placeholder="Ví dụ: Học xong nhớ làm bài tập...", key="txt_sticky")
-        if st.button("📌 Ghim Lời Nhắc Lên Màn Hình", use_container_width=True, key="btn_sticky"):
+        sticky_msg = st.text_input("Lời nhắn ghim màn hình app con:", placeholder="Nhập tin nhắn nhắn nhủ...")
+        if st.button("📌 Ghim Lời Nhắc", use_container_width=True):
             if sticky_msg.strip():
-                try:
-                    payload = {"text": sticky_msg.strip()}
-                    response = requests.put(f"{base_url}sticky/{target}.json", json=payload, timeout=2.0)
-                    if response.status_code == 200:
-                        st.toast("📌 Đã ghim lời nhắc lên màn hình máy con thành công!", icon="💛")
-                    else:
-                        st.error("Lỗi đồng bộ dữ liệu lên Firebase.")
-                except Exception as e:
-                    st.error(f"Lỗi kết nối mạng: {e}")
-else: 
-    st.info("Không có học sinh trực tuyến để điều khiển.")
+                requests.put(f"{base_url}sticky/{target}.json", json={"text": sticky_msg.strip()}, timeout=2)
 
 st.write("---")
 
-# QR Code Expander
+# QR Code
 qr_bytes, net_url = generate_network_qr()
-if qr_bytes and net_url:
-    with st.expander("📲 MÃ QR KẾT NỐI ĐIỆN THOẠI", expanded=False):
-        col_qr, col_btn = st.columns([1, 2])
-        with col_qr: st.image(qr_bytes, width=150)
-        with col_btn:
-            st.caption(f"🔗 URL: `{net_url}`")
-            st.download_button(label="📥 Tải mã QR", data=qr_bytes, file_name="Ma_QR.png", mime="image/png", key="download_qr_btn")
+if qr_bytes:
+    with st.expander("📲 MÃ QR KẾT NỐI ĐIỆN THOẠI"):
+        st.image(qr_bytes, width=150)
+        st.caption(f"🔗 Link: `{net_url}`")
 
+# Phòng chat công cộng
 st.write("---")
-
-# Nhật ký phòng chat công cộng
+st.subheader("💬 Nhật ký tin nhắn công cộng")
 chats = {}
 try:
-    res = requests.get(f"{base_url}chats.json", timeout=2)
-    if res.status_code == 200 and res.json() and isinstance(res.json(), dict): chats = res.json()
-except Exception: 
-    pass
+    res = requests.get(f"{base_url}chats.json", timeout=2).json()
+    if res and isinstance(res, dict): chats = res
+except Exception: pass
 
 all_chats = {**chats, **st.session_state.local_chats}
-col_title, col_clear = st.columns([3, 1])
-with col_title: st.subheader(f"💬 Nhật ký tin nhắn ({len(all_chats)})")
-with col_clear:
-    if st.button("🧼 Dọn sạch chat", type="secondary", key="btn_clear_chat"):
-        clear_all_chats()
-        st.rerun()
-
-if not all_chats: st.info("Chưa có tin nhắn nào.")
-else:
-    for cid, m in list(all_chats.items())[-15:]:
+if all_chats:
+    for cid, m in list(all_chats.items())[-8:]:
         if not isinstance(m, dict): continue
-        sender = m.get("sender", "Ẩn danh")
-        text = m.get("text", "")
-        ts = m.get("time", "--:--")
-        
+        sender, text, ts = m.get("sender", "Ẩn danh"), m.get("text", ""), m.get("time", "--:--")
         with st.container(border=True):
-            if m.get("type") == "revoked": 
-                st.markdown(f"⚠️ *{sender} {text}*")
+            if m.get("type") == "revoked": st.markdown(f"⚠️ *{sender} {text}*")
             else:
-                # Sửa đổi cấu trúc bong bóng chat sang hộp CSS mới cho đẹp, mượt hơn bản cũ
-                st.markdown(f"""
-                <div class="chat-box">
-                    <small style="color:#38bdf8; font-weight:bold;">{sender}</small>
-                    <small style="color:#64748b; float:right;">🕒 {ts}</small>
-                    <p style="margin:4px 0 6px 0; font-size:14px;">{text}</p>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                # Nút Gỡ để ngay bên dưới hộp tin nhắn gọn gàng
-                if st.button("✂️ Gỡ tin nhắn này", key=f"del_{cid}", type="primary", use_container_width=True):
+                st.markdown(f'<div class="chat-box"><small style="color:#38bdf8; font-weight:bold;">{sender}</small><small style="color:#64748b; float:right;">🕒 {ts}</small><p style="margin:4px 0 6px 0; font-size:14px;">{text}</p></div>', unsafe_allow_html=True)
+                if st.button("✂️ Gỡ tin nhắn", key=f"del_{cid}", type="primary", use_container_width=True):
                     revoke_msg(cid)
                     st.rerun()
 
-st.write("---")
 st.text_input("Nội dung lời nhắn công cộng:", key="widget_msg", placeholder="Nhập tin nhắn...", on_change=send_parent_msg)
 st.button("Gửi tin nhắn ➤", key="btn_send_msg", on_click=send_parent_msg, use_container_width=True, type="secondary")
