@@ -252,6 +252,24 @@ try:
                 st.success(f"🎉 Tuyên dương **{df_lb.iloc[0]['Học sinh']}** đang dẫn đầu bảng xếp hạng hôm nay!")
 except Exception: pass
 
+# 🟢 HIỂN THỊ DÒNG TRẠNG THÁI ONLINE/OFFLINE TỰ ĐỘNG QUÉT (MỚI KHÔI PHỤC)
+@st.fragment(run_every=5)
+def render_online_status():
+    try:
+        res_live = requests.get(f"{base_url}users.json", timeout=2).json()
+        if res_live:
+            st.caption("⚡ **Theo dõi trạng thái kết nối máy con (Tự động quét...):**")
+            for u_id, u_info in res_live.items():
+                if isinstance(u_info, dict):
+                    status_emoji = "🟢 Trực tuyến" if u_info.get("status") == "online" else "⚫ Ngoại tuyến"
+                    st.markdown(f"- 👤 **{u_id}**: {status_emoji} | Đã học hôm nay: `{u_info.get('study_seconds', 0) // 60} phút`")
+        else:
+            st.info("Chưa có dữ liệu học sinh.")
+    except Exception:
+        st.caption("⚠️ Đang kết nối lại luồng dữ liệu...")
+
+render_online_status()
+
 if user_names:
     df_chart = pd.DataFrame({"Học sinh": user_names, "Thời gian học (Phút)": user_times})
     st.bar_chart(data=df_chart, x="Học sinh", y="Thời gian học (Phút)", color="#38bdf8")
