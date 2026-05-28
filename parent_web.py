@@ -325,13 +325,22 @@ if user_names:
                 requests.put(f"{base_url}sticky/{target}.json", json={"text": sticky_msg.strip()}, timeout=2)
 
 st.write("---")
-
 # QR Code
 qr_bytes, net_url = generate_network_qr()
 if qr_bytes:
     with st.expander("📲 MÃ QR KẾT NỐI ĐIỆN THOẠI"):
         st.image(qr_bytes, width=150)
         st.caption(f"🔗 Link: `{net_url}`")
+        
+        # 📥 NÚT TẢI ẢNH QR VỀ MÁY (THÊM MỚI)
+        st.download_button(
+            label="📥 Tải mã QR về máy",
+            data=qr_bytes,
+            file_name="qrcode_phuhuynh.png",
+            mime="image/png",
+            use_container_width=True,
+            type="secondary"
+        )
 
 # Phòng chat công cộng
 st.write("---")
