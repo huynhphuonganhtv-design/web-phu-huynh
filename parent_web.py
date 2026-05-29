@@ -271,7 +271,9 @@ try:
                     st.success(f"✨ **Khởi đầu ấn tượng!** **{top_student}** đang tạm dẫn đầu bảng xếp hạng. Các máy con khác hãy tăng tốc đuổi kịp nhé!")
             else:
                 st.info("💡 Hôm nay chưa có phiên học nào được ghi nhận. Sĩ tử nào sẽ giành vị trí 🥇 đầu tiên đây?")
-except Exception as e: 
+except Exception: 
+    pass
+      
     
 
 @st.fragment(run_every=5)
