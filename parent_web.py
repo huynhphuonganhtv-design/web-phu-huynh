@@ -344,6 +344,9 @@ try:
     if selected_student != "📊 Tất cả học sinh":
             st.markdown(f"🎯 **Tiến độ mục tiêu hôm nay của {selected_student}:**")
             
+            # KHỞI TẠO BIẾN MỤC TIÊU (Ví dụ mặc định là 45 phút, bạn có thể đổi thành số khác)
+            target_goal_mins = 45 
+            
             # Tính toán tỷ lệ phần trăm %
             progress_pct = min(1.0, today_mins / max(1, target_goal_mins))
             percent_val = int(progress_pct * 100)
