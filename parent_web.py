@@ -215,6 +215,9 @@ st.write("---")
 # =====================================================================
 # 🏆 BẢNG XẾP HẠNG
 # =====================================================================
+# =====================================================================
+# 🏆 BẢNG XẾP HẠNG CHĂM CHỈ & VINH DANH (CẬP NHẬT TRỰC QUAN CHUẨN)
+# =====================================================================
 st.subheader("🏆 Bảng Xếp Hạng Chăm Chỉ")
 user_names, user_times = [], []
 
@@ -229,8 +232,11 @@ try:
                 user_times.append(study_mins)
                 status = "🟢 Trực tuyến" if u_info.get("status") == "online" else "⚫ Ngoại tuyến"
                 leaderboard_data.append({"Học sinh": u_id, "Thời gian học (Phút)": study_mins, "Trạng thái": status})
+        
         if leaderboard_data:
+            # Xử lý dữ liệu DataFrame sắp xếp giảm dần
             df_lb = pd.DataFrame(leaderboard_data).sort_values(by="Thời gian học (Phút)", ascending=False).reset_index(drop=True)
+            
             ranks, titles = [], []
             for i in range(len(df_lb)):
                 if i == 0: ranks.append("🥇 Hạng Nhất"); titles.append("⚡ Chiến Thần Chăm Chỉ")
@@ -239,10 +245,34 @@ try:
                 else: ranks.append(f"🏅 Hạng {i+1}"); titles.append("📚 Sĩ Tử Chăm Ngoan")
             df_lb.insert(0, "Thứ Hạng", ranks)
             df_lb["Danh Hiệu"] = titles
-            st.dataframe(df_lb, use_container_width=True, hide_index=True)
+
+            # 1. BIỂU ĐỒ TRỰC QUAN (Hiển thị ngay trên bảng)
+            chart_color = "#38bdf8" if st.session_state["theme_mode"] == "🌙 Giao diện Tối" else "#0284c7"
+            st.bar_chart(df_lb.set_index("Học sinh")["Thời gian học (Phút)"], color=chart_color)
+
+            # 2. BẢNG HUY CHƯƠNG CHI TIẾT
+            st.dataframe(
+                df_lb[["Thứ Hạng", "Học sinh", "Thời gian học (Phút)", "Danh Hiệu", "Trạng thái"]], 
+                use_container_width=True, 
+                hide_index=True
+            )
+            
+            # 3. LỜI KHEN ĐỘNG TUYÊN DƯƠNG
             if df_lb.iloc[0]["Thời gian học (Phút)"] > 0:
-                st.success(f"🎉 Tuyên dương **{df_lb.iloc[0]['Học sinh']}** đang dẫn đầu bảng xếp hạng hôm nay!")
-except Exception: pass
+                top_student = df_lb.iloc[0]['Học sinh']
+                top_mins = df_lb.iloc[0]['Thời gian học (Phút)']
+                
+                # Tạo lời khen ngẫu nhiên hoặc nâng cấp dựa trên số phút
+                if top_mins >= 90:
+                    st.success(f"👑 **Chiến thần xuất chúng!** Tuyên dương **{top_student}** đang thống trị bảng xếp hạng với `{top_mins} phút` tập trung đỉnh cao!")
+                elif top_mins >= 45:
+                    st.success(f"🎉 **Phong độ tuyệt vời!** Chúc mừng **{top_student}** đã xuất sắc cán mốc `{top_mins} phút` và dẫn đầu ngày hôm nay!")
+                else:
+                    st.success(f"✨ **Khởi đầu ấn tượng!** **{top_student}** đang tạm dẫn đầu bảng xếp hạng. Các máy con khác hãy tăng tốc đuổi kịp nhé!")
+            else:
+                st.info("💡 Hôm nay chưa có phiên học nào được ghi nhận. Sĩ tử nào sẽ giành vị trí 🥇 đầu tiên đây?")
+except Exception as e: 
+    
 
 @st.fragment(run_every=5)
 def render_online_status():
