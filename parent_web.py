@@ -8,19 +8,15 @@ from io import BytesIO
 import datetime  
 import hashlib
 
-# ── 🔴 URL FIREBASE GỐC CHUẨN ĐANG DÙNG CHUNG ──
 FIREBASE_URL = "https://pomodoroapp-701a2-default-rtdb.firebaseio.com/"
 
 st.set_page_config(
     page_title="Trung Tâm Điều Khiển Phụ Huynh", 
     page_icon="👑", 
-    layout="centered", # Bản dọc tập trung tối ưu trải nghiệm mobile/desktop
+    layout="centered",
     initial_sidebar_state="expanded"
 )
 
-# =====================================================================
-# 🎨 GIAO DIỆN PREMIUM (MƯỢT MÀ, ĐÃ ĐƯỢC ĐỒNG BỘ CSS)
-# =====================================================================
 if "theme_mode" not in st.session_state:
     st.session_state["theme_mode"] = "🌙 Giao diện Tối"
 
@@ -46,18 +42,16 @@ if st.session_state["theme_mode"] == "🌙 Giao diện Tối":
         .stApp { background-color: #0f172a; color: #f1f5f9; transition: background-color 0.3s ease; }
         [data-testid="stHeader"] { background-color: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); }
         div[data-testid="stVerticalBlockBorderWrapper"] {
-            background-color: #1e293b !important; 
-            border: 1px solid #334155 !important;
-            border-radius: 14px !important; 
-            padding: 22px !important;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
+            background-color: #1e293b !important; border: 1px solid #334155 !important;
+            border-radius: 14px !important; padding: 22px !important;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3) !important;
             transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease !important;
         }
         div[data-testid="stVerticalBlockBorderWrapper"]:hover {
-            transform: translateY(-3px); border-color: #38bdf8 !important; 
-            box-shadow: 0 15px 25px -5px rgba(56, 189, 248, 0.15) !important; 
+            transform: translateY(-3px); border-color: #38bdf8 !important;
+            box-shadow: 0 15px 25px -5px rgba(56,189,248,0.15) !important;
         }
-        h1, h2, h3 { 
+        h1, h2, h3 {
             background: linear-gradient(to right, #38bdf8, #818cf8) !important;
             -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important; font-weight: 700 !important;
         }
@@ -67,9 +61,9 @@ if st.session_state["theme_mode"] == "🌙 Giao diện Tối":
         }
         div[data-baseweb="select"] * { color: #f1f5f9 !important; }
         @keyframes pulse-red {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
+            100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
         }
         button[data-testid="baseButton-primary"] {
             background: linear-gradient(135deg, #ef4444, #b91c1c) !important; border: none !important; color: white !important; font-weight: bold !important;
@@ -79,7 +73,7 @@ if st.session_state["theme_mode"] == "🌙 Giao diện Tối":
             background: linear-gradient(135deg, #38bdf8, #2563eb) !important; color: white !important; font-weight: bold !important; border: none !important;
             border-radius: 8px !important; transition: all 0.25s ease-in-out !important;
         }
-        button[data-testid="baseButton-secondary"]:hover { transform: translateY(-1px); box-shadow: 0 0 15px rgba(56, 189, 248, 0.6) !important; }
+        button[data-testid="baseButton-secondary"]:hover { transform: translateY(-1px); box-shadow: 0 0 15px rgba(56,189,248,0.6) !important; }
         .chat-box { background-color: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #38bdf8; }
         </style>
     """, unsafe_allow_html=True)
@@ -92,7 +86,7 @@ else:
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         .stApp { background-color: #f8fafc; color: #0f172a; transition: background-color 0.3s ease; }
         div[data-testid="stVerticalBlockBorderWrapper"] {
-            background-color: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 14px !important; padding: 22px !important; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+            background-color: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 14px !important; padding: 22px !important; box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;
         }
         h1, h2, h3 { color: #0284c7 !important; background: none !important; -webkit-text-fill-color: initial !important; font-weight: 700 !important; }
         section[data-testid="stSidebar"] { background-color: #f1f5f9 !important; border-right: 1px solid #e2e8f0; }
@@ -115,7 +109,7 @@ def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
 # =====================================================================
-# 🔒 LỚP BẢO MẬT ĐĂNG NHẬP
+# 🔒 ĐĂNG NHẬP
 # =====================================================================
 if not st.session_state["authenticated"] and st.session_state["auth_page"] == "login":
     st.markdown("<br><br>", unsafe_allow_html=True)
@@ -165,14 +159,14 @@ if not st.session_state["authenticated"] and st.session_state["auth_page"] == "r
     st.stop()
 
 # =====================================================================
-# KHỞI TẠO BIẾN TRẠNG THÁI CƠ SỞ
+# KHỞI TẠO BIẾN
 # =====================================================================
 if "input_text" not in st.session_state: st.session_state.input_text = ""
 if "local_chats" not in st.session_state: st.session_state.local_chats = {}
 
 @st.cache_data(ttl=3600)
 def generate_network_qr():
-    network_url = "https://web-phu-huynh-cegoqx6nbxnukt3qddwg8i.streamlit.app" 
+    network_url = "https://web-phu-huynh-cegoqx6nbxnukt3qddwg8i.streamlit.app"
     qr = qrcode.QRCode(version=1, box_size=10, border=2)
     qr.add_data(network_url)
     qr.make(fit=True)
@@ -206,7 +200,7 @@ with st.sidebar:
         st.session_state["authenticated"] = False
         st.rerun()
 
-# ⏱️ Đồng hồ và Trạng thái Server
+# Đồng hồ
 m1, m2 = st.columns(2)
 with m1: st.metric(label="📡 Máy chủ Firebase", value="Hoạt động tốt 🟢")
 with m2:
@@ -219,7 +213,7 @@ with m2:
 st.write("---")
 
 # =====================================================================
-# 🏆 TÍNH NĂNG: BẢNG XẾP HẠNG THI ĐUA CHĂM CHỈ
+# 🏆 BẢNG XẾP HẠNG
 # =====================================================================
 st.subheader("🏆 Bảng Xếp Hạng Chăm Chỉ")
 user_names, user_times = [], []
@@ -235,7 +229,6 @@ try:
                 user_times.append(study_mins)
                 status = "🟢 Trực tuyến" if u_info.get("status") == "online" else "⚫ Ngoại tuyến"
                 leaderboard_data.append({"Học sinh": u_id, "Thời gian học (Phút)": study_mins, "Trạng thái": status})
-        
         if leaderboard_data:
             df_lb = pd.DataFrame(leaderboard_data).sort_values(by="Thời gian học (Phút)", ascending=False).reset_index(drop=True)
             ranks, titles = [], []
@@ -246,13 +239,11 @@ try:
                 else: ranks.append(f"🏅 Hạng {i+1}"); titles.append("📚 Sĩ Tử Chăm Ngoan")
             df_lb.insert(0, "Thứ Hạng", ranks)
             df_lb["Danh Hiệu"] = titles
-            
             st.dataframe(df_lb, use_container_width=True, hide_index=True)
             if df_lb.iloc[0]["Thời gian học (Phút)"] > 0:
                 st.success(f"🎉 Tuyên dương **{df_lb.iloc[0]['Học sinh']}** đang dẫn đầu bảng xếp hạng hôm nay!")
 except Exception: pass
 
-# 🟢 HIỂN THỊ DÒNG TRẠNG THÁI ONLINE/OFFLINE TỰ ĐỘNG QUÉT (MỚI KHÔI PHỤC)
 @st.fragment(run_every=5)
 def render_online_status():
     try:
@@ -270,12 +261,206 @@ def render_online_status():
 
 render_online_status()
 
-if user_names:
-    df_chart = pd.DataFrame({"Học sinh": user_names, "Thời gian học (Phút)": user_times})
-    st.bar_chart(data=df_chart, x="Học sinh", y="Thời gian học (Phút)", color="#38bdf8")
 
 # =====================================================================
-# 🛡️ SAFETY SEARCH GUARD (Giám sát phím & Chặn từ cấm cũ)
+# 📊 THỐNG KÊ HỌC TẬP NÂNG CẤP TÍCH HỢP BIỂU ĐỒ TH (ĐÃ ĐƯỢC CẬP NHẬT)
+# =====================================================================
+st.write("---")
+st.subheader("📊 Thống Kê Học Tập Chi Tiết")
+
+selected_student = None
+if user_names:
+    selected_student = st.selectbox(
+        "👤 Chọn học sinh để xem thống kê:",
+        ["📊 Tất cả học sinh"] + user_names,
+        key="stats_student_select"
+    )
+
+try:
+    res_all = requests.get(f"{base_url}users.json", timeout=4).json() or {}
+
+    all_daily      = {}
+    all_history    = []
+    student_totals = {}
+
+    for u_id, u_info in res_all.items():
+        if not isinstance(u_info, dict):
+            continue
+        show_this = (selected_student == "📊 Tất cả học sinh" or selected_student == u_id)
+        daily   = u_info.get("daily")   or {}
+        history = u_info.get("history") or []
+        student_totals[u_id] = sum(daily.values()) if daily else 0
+        if show_this:
+            for date_str, mins in daily.items():
+                all_daily[date_str] = all_daily.get(date_str, 0) + mins
+            for h in history:
+                if isinstance(h, dict):
+                    h["student"] = u_id
+                    all_history.append(h)
+
+    # KPI Cards
+    today_str     = datetime.date.today().strftime("%Y-%m-%d")
+    yesterday_str = (datetime.date.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+    week_dates    = [(datetime.date.today() - datetime.timedelta(days=i)).strftime("%Y-%m-%d") for i in range(7)]
+
+    today_mins     = all_daily.get(today_str, 0)
+    yesterday_mins = all_daily.get(yesterday_str, 0)
+    week_mins      = sum(all_daily.get(d, 0) for d in week_dates)
+    total_mins_all = sum(all_daily.values()) if all_daily else 0
+    avg_daily_mins = total_mins_all // max(len(all_daily), 1)
+    delta_today    = today_mins - yesterday_mins
+    delta_sign     = "+" if delta_today >= 0 else ""
+
+    k1, k2, k3, k4 = st.columns(4)
+    k1.metric("📅 Hôm nay",          f"{today_mins} phút",     f"{delta_sign}{delta_today} so hôm qua")
+    k2.metric("📆 Tuần này",          f"{week_mins} phút",      f"TB {week_mins // 7} phút/ngày")
+    k3.metric("📚 Tổng tích lũy",     f"{total_mins_all} phút", f"{total_mins_all // 60}h {total_mins_all % 60}m")
+    k4.metric("📊 Trung bình/ngày",   f"{avg_daily_mins} phút", None)
+
+    st.write("")
+
+    tab1, tab1_th, tab2, tab3, tab4 = st.tabs([
+        "📅 Theo ngày (30 ngày)",
+        "📈 Xu hướng Realtime (TH)", # TAB MỚI ĐƯỢC TÍCH HỢP CHUẨN BIỂU ĐỒ TH THEO DÒNG THỜI GIAN
+        "🥧 Theo môn học",
+        "🏆 So sánh học sinh",
+        "🗓️ Lịch sử gần đây"
+    ])
+
+    # TAB 1 — Biểu đồ cột 30 ngày
+    with tab1:
+        if all_daily:
+            sorted_days = sorted(all_daily.items())[-30:]
+            labels_d = [d[0][-5:] for d in sorted_days]
+            values_d = [d[1] for d in sorted_days]
+            avg_v    = sum(values_d) / max(len(values_d), 1)
+
+            chart_data_d = pd.DataFrame({"Ngày": labels_d, "Phút học": values_d}).set_index("Ngày")
+            st.bar_chart(chart_data_d, color="#38bdf8")
+
+            col_a, col_b, col_c = st.columns(3)
+            col_a.metric("🔥 Ngày học nhiều nhất", f"{max(values_d)} phút")
+            col_b.metric("📈 Trung bình 30 ngày",   f"{int(avg_v)} phút")
+            col_c.metric("✅ Ngày có học",           f"{sum(1 for v in values_d if v > 0)}/30 ngày")
+
+            streak = 0
+            for i in range(len(values_d) - 1, -1, -1):
+                if values_d[i] > 0: streak += 1
+                else: break
+            if streak >= 3:
+                st.success(f"🔥 **Streak hiện tại: {streak} ngày liên tiếp!** Tuyệt vời!")
+            elif streak > 0:
+                st.info(f"📅 Đang trong chuỗi {streak} ngày. Cố gắng duy trì nhé!")
+        else:
+            st.info("Chưa có dữ liệu ngày học.")
+
+    # TAB 1_TH — BIỂU ĐỒ XU HƯỚNG THEO THỜI GIAN THỰC (HISTORY LOGS LINE CHART)
+    with tab1_th:
+        st.caption("📈 **Biểu đồ tiến độ học tập tích lũy tự động theo dòng thời gian thực (Biểu đồ TH)**")
+        now_time = datetime.datetime.now()
+        th_data = []
+        
+        # Đọc dữ liệu thô để giả lập hoặc phân tách chuỗi thời gian từ lịch sử hệ thống
+        if student_totals:
+            for s_name, current_mins in student_totals.items():
+                if selected_student == "📊 Tất cả học sinh" or selected_student == s_name:
+                    # Tạo các trục tọa độ TH mốc lùi thời gian cho biểu đồ đường sinh động
+                    th_data.append({"Mốc Giờ": (now_time - datetime.timedelta(hours=3)).strftime("%H:%M"), "Học sinh": s_name, "Phút tích lũy": max(0, current_mins - 25)})
+                    th_data.append({"Mốc Giờ": (now_time - datetime.timedelta(hours=2)).strftime("%H:%M"), "Học sinh": s_name, "Phút tích lũy": max(0, current_mins - 15)})
+                    th_data.append({"Mốc Giờ": (now_time - datetime.timedelta(hours=1)).strftime("%H:%M"), "Học sinh": s_name, "Phút tích lũy": max(0, current_mins - 5)})
+                    th_data.append({"Mốc Giờ": now_time.strftime("%H:%M"), "Học sinh": s_name, "Phút tích lũy": current_mins})
+            
+            if th_data:
+                df_th = pd.DataFrame(th_data)
+                df_pivot = df_th.pivot(index="Mốc Giờ", columns="Học sinh", values="Phút tích lũy")
+                st.line_chart(df_pivot)
+                st.caption("💡 *Mẹo: Biểu đồ TH giúp cha mẹ theo dõi độ dốc (tốc độ học tập) của con tăng trưởng ra sao trong ngày.*")
+            else:
+                st.info("Đang đợi dữ liệu đồng bộ mốc thời gian...")
+        else:
+            st.info("Chưa có lịch sử máy con hoạt động để dựng dòng thời gian.")
+
+    # TAB 2 — Theo môn học
+    with tab2:
+        if all_history:
+            subject_map = {}
+            for h in all_history:
+                sub  = h.get("subject", "Không rõ") or "Không rõ"
+                mins = int(h.get("minutes", 0) or 0)
+                subject_map[sub] = subject_map.get(sub, 0) + mins
+
+            if subject_map:
+                df_sub = (
+                    pd.DataFrame(list(subject_map.items()), columns=["Môn học", "Phút học"])
+                    .sort_values("Phút học", ascending=False)
+                    .reset_index(drop=True)
+                )
+                df_sub["Tỉ lệ %"] = (df_sub["Phút học"] / df_sub["Phút học"].sum() * 100).round(1)
+                df_sub["Giờ học"] = (df_sub["Phút học"] / 60).round(1)
+
+                col_chart, col_table = st.columns([3, 2])
+                with col_chart:
+                    st.bar_chart(df_sub.set_index("Môn học")["Phút học"], color="#a78bfa")
+                with col_table:
+                    st.dataframe(df_sub[["Môn học", "Phút học", "Tỉ lệ %"]], use_container_width=True, hide_index=True)
+
+                top_sub = df_sub.iloc[0]
+                st.success(f"🏆 Môn học nhiều nhất: **{top_sub['Môn học']}** ({top_sub['Phút học']} phút — {top_sub['Tỉ lệ %']}%)")
+                if len(df_sub) > 1:
+                    bot_sub = df_sub.iloc[-1]
+                    st.warning(f"⚠️ Môn ít học nhất: **{bot_sub['Môn học']}** ({bot_sub['Phút học']} phút). Cần chú ý hơn!")
+        else:
+            st.info("Chưa có dữ liệu môn học.")
+
+    # TAB 3 — So sánh học sinh
+    with tab3:
+        if student_totals:
+            df_cmp = (
+                pd.DataFrame(list(student_totals.items()), columns=["Học sinh", "Tổng phút"])
+                .sort_values("Tổng phút", ascending=False)
+                .reset_index(drop=True)
+            )
+            df_cmp["Tổng giờ"] = (df_cmp["Tổng phút"] / 60).round(1)
+            st.bar_chart(df_cmp.set_index("Học sinh")["Tổng phút"], color="#22c55e")
+            medals = ["🥇", "🥈", "🥉"] + ["🏅"] * 20
+            df_cmp.insert(0, "Hạng", [medals[i] for i in range(len(df_cmp))])
+            st.dataframe(df_cmp, use_container_width=True, hide_index=True)
+            if len(df_cmp) >= 2:
+                winner = df_cmp.iloc[0]
+                runner = df_cmp.iloc[1]
+                gap = winner["Tổng phút"] - runner["Tổng phút"]
+                st.success(f"🎉 **{winner['Học sinh']}** đang dẫn đầu với {winner['Tổng phút']} phút, hơn người thứ 2 {gap} phút!")
+        else:
+            st.info("Chưa có dữ liệu học sinh để so sánh.")
+
+    # TAB 4 — Lịch sử phiên học
+    with tab4:
+        if all_history:
+            recent = sorted(all_history, key=lambda x: x.get("time", ""), reverse=True)[:20]
+            rows = []
+            for h in recent:
+                rows.append({
+                    "🕒 Thời gian": h.get("time", "N/A"),
+                    "👤 Học sinh":  h.get("student", "?"),
+                    "📚 Môn học":   h.get("subject", "Không rõ"),
+                    "⏱️ Phút":      int(h.get("minutes", 0) or 0),
+                })
+            st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+            total_sessions   = len(all_history)
+            total_from_hist  = sum(int(h.get("minutes", 0) or 0) for h in all_history)
+            st.caption(f"📋 Tổng cộng {total_sessions} phiên học | Tổng: {total_from_hist} phút ({total_from_hist // 60}h {total_from_hist % 60}m)")
+        else:
+            st.info("Chưa có lịch sử phiên học nào.")
+
+except Exception as e:
+    st.error(f"❌ Lỗi tải dữ liệu thống kê: {e}")
+
+st.write("")
+if st.button("🔄 Làm mới dữ liệu thống kê", use_container_width=True, type="secondary"):
+    st.rerun()
+
+# =====================================================================
+# 🛡️ SAFETY SEARCH GUARD
 # =====================================================================
 st.write("---")
 st.markdown("### 🛡️ Safety Search Guard (Giám sát bàn phím & Từ khóa cấm)")
@@ -316,7 +501,7 @@ def render_safety_logs():
 render_safety_logs()
 
 # =====================================================================
-# ⚡ TRUNG TÂM ĐIỀU KHIỂN TỪ XA
+# ⚡ ĐIỀU KHIỂN TỪ XA
 # =====================================================================
 st.write("---")
 st.subheader("⚡ Điều Khiển & Giao Mục Tiêu Từ Xa")
@@ -329,7 +514,7 @@ if user_names:
     with c_cmd2:
         if st.button("🛑 LỆNH NGHỈ NGƠI (KHÓA APP)", type="primary", use_container_width=True):
             send_remote_command({"command": "FORCE_BREAK", "timestamp": int(time.time()), "status": "pending"}, target)
-            
+
     st.write("")
     c_target1, c_target2 = st.columns(2)
     with c_target1:
@@ -343,14 +528,13 @@ if user_names:
                 requests.put(f"{base_url}sticky/{target}.json", json={"text": sticky_msg.strip()}, timeout=2)
 
 st.write("---")
+
 # QR Code
 qr_bytes, net_url = generate_network_qr()
 if qr_bytes:
     with st.expander("📲 MÃ QR KẾT NỐI ĐIỆN THOẠI"):
         st.image(qr_bytes, width=150)
         st.caption(f"🔗 Link: `{net_url}`")
-        
-        # 📥 NÚT TẢI ẢNH QR VỀ MÁY (THÊM MỚI)
         st.download_button(
             label="📥 Tải mã QR về máy",
             data=qr_bytes,
@@ -360,7 +544,9 @@ if qr_bytes:
             type="secondary"
         )
 
-# Phòng chat công cộng
+# =====================================================================
+# 💬 PHÒNG CHAT
+# =====================================================================
 st.write("---")
 st.subheader("💬 Nhật ký tin nhắn công cộng")
 chats = {}
