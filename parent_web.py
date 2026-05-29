@@ -341,10 +341,34 @@ try:
     k4.metric("📊 Trung bình/ngày",   f"{avg_daily_mins} phút", None)
 
     st.write("")
+    if student_target != "📊 Tất cả học sinh":
+            st.markdown(f"🎯 **Tiến độ mục tiêu hôm nay của {student_target}:**")
+            
+            # Tính toán tỷ lệ phần trăm %
+            progress_pct = min(1.0, today_mins / max(1, target_goal_mins))
+            percent_val = int(progress_pct * 100)
+            
+            # THUẬT TOÁN ĐỔI MÀU TỰ ĐỘNG DỰA TRÊN % ĐẠT ĐƯỢC
+            if percent_val < 40:
+                bar_color = "#ef4444"  # Màu Đỏ (Cần cố gắng thêm)
+            elif percent_val < 80:
+                bar_color = "#f59e0b"  # Màu Vàng (Sắp hoàn thành rồi)
+            else:
+                bar_color = "#22c55e"  # Màu Xanh Lá (Xuất sắc đạt mục tiêu)
+                
+            # Tạo thanh Progress Bar HTML tùy biến màu sắc
+            st.markdown(f"""
+                <div style="width: 100%; background-color: #334155; border-radius: 8px; height: 18px; margin: 4px 0;">
+                    <div style="width: {percent_val}%; background-color: {bar_color}; height: 100%; border-radius: 8px; transition: width 0.5s ease-in-out;"></div>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            st.caption(f"📈 Đã hoàn thành **{percent_val}%** ({today_mins}/{target_goal_mins} phút theo mục tiêu từ cha mẹ).")
+            st.write("")
 
     tab1, tab1_th, tab2, tab3, tab4 = st.tabs([
         "📅 Theo ngày (30 ngày)",
-        "📈 Xuương Realtime (TH)", 
+        "📈 Xu hướng (TH)", 
         "🥧 Theo môn học",
         "🏆 So sánh học sinh",
         "🗓️ Lịch sử gần đây"
@@ -477,22 +501,45 @@ try:
 
     # TAB 4 — Lịch sử phiên học
     with tab4:
-        if all_history:
-            recent = sorted(all_history, key=lambda x: x.get("time", ""), reverse=True)[:20]
-            rows = []
-            for h in recent:
-                rows.append({
-                    "🕒 Thời gian": h.get("time", "N/A"),
-                    "👤 Học sinh":  h.get("student", "?"),
-                    "📚 Môn học":   h.get("subject", "Không rõ"),
-                    "⏱️ Phút":      int(h.get("minutes", 0) or 0),
-                })
-            st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
-            total_sessions   = len(all_history)
-            total_from_hist  = sum(int(h.get("minutes", 0) or 0) for h in all_history)
-            st.caption(f"📋 Tổng cộng {total_sessions} phiên học | Tổng: {total_from_hist} phút ({total_from_hist // 60}h {total_from_hist % 60}m)")
-        else:
-            st.info("Chưa có lịch sử phiên học nào.")
+            if all_history:
+                # 1. Tự động lấy danh sách các môn học hiện có trong lịch sử (bỏ trùng)
+                unique_subjects = sorted(list(set([h.get("subject", "Không rõ") for h in all_history if h.get("subject")])))
+                
+                # 2. Tạo dropdown chọn môn học
+                selected_sub = st.selectbox(
+                    "🎯 Xem riêng lịch sử môn học:", 
+                    ["📚 Tất cả các môn"] + unique_subjects, 
+                    key="filter_subject_box_ultimate"
+                )
+                
+                # 3. Tiến hành lọc dữ liệu dựa trên lựa chọn
+                filtered_history = all_history
+                if selected_sub != "📚 Tất cả các môn":
+                    filtered_history = [h for h in all_history if h.get("subject") == selected_sub]
+                
+                # 4. Sắp xếp và lấy 20 phiên gần nhất CỦA MÔN ĐÓ
+                recent = sorted(filtered_history, key=lambda x: x.get("time", ""), reverse=True)[:20]
+                
+                if recent:
+                    rows = []
+                    for h in recent:
+                        rows.append({
+                            "🕒 Thời gian": h.get("time", "N/A"),
+                            "👤 Học sinh":  h.get("student", "?"),
+                            "📚 Môn học":   h.get("subject", "Không rõ"),
+                            "⏱️ Phút":      int(h.get("minutes", 0) or 0),
+                        })
+                    st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
+                    
+                    # 5. Tính toán số liệu thống kê động theo bộ lọc
+                    total_sessions   = len(filtered_history)
+                    total_from_hist  = sum(int(h.get("minutes", 0) or 0) for h in filtered_history)
+                    
+                    st.caption(f"📋 Môn [{selected_sub.replace('📚 ', '')}]: Tổng cộng {total_sessions} phiên học | Tích lũy: {total_from_hist} phút ({total_from_hist // 60}h {total_from_hist % 60}m)")
+                else:
+                    st.info(f"Không có phiên học nào khớp với môn [{selected_sub}].")
+            else:
+                st.info("Chưa có lịch sử phiên học nào.")
 
 except Exception as e:
     st.error(f"❌ Lỗi tải dữ liệu thống kê: {e}")
