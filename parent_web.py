@@ -344,22 +344,24 @@ try:
     if selected_student != "📊 Tất cả học sinh":
             st.markdown(f"🎯 **Tiến độ mục tiêu hôm nay của {selected_student}:**")
             
-            # KHỞI TẠO BIẾN MỤC TIÊU (Ví dụ mặc định là 45 phút, bạn có thể đổi thành số khác)
-            target_goal_mins = 45 
+            student_info = res_all.get(selected_student, {})
+            if isinstance(student_info, dict):
+                target_goal_mins = student_info.get("target_goal", 45)
+            else:
+                target_goal_mins = 45
             
-            # Tính toán tỷ lệ phần trăm %
+            
             progress_pct = min(1.0, today_mins / max(1, target_goal_mins))
             percent_val = int(progress_pct * 100)
             
-            # THUẬT TOÁN ĐỔI MÀU TỰ ĐỘNG DỰA TRÊN % ĐẠT ĐƯỢC
             if percent_val < 40:
-                bar_color = "#ef4444"  # Màu Đỏ (Cần cố gắng thêm)
+                bar_color = "#ef4444"  
             elif percent_val < 80:
-                bar_color = "#f59e0b"  # Màu Vàng (Sắp hoàn thành rồi)
+                bar_color = "#f59e0b"  
             else:
-                bar_color = "#22c55e"  # Màu Xanh Lá (Xuất sắc đạt mục tiêu)
+                bar_color = "#22c55e"  
                 
-            # Tạo thanh Progress Bar HTML tùy biến màu sắc
+           
             st.markdown(f"""
                 <div style="width: 100%; background-color: #334155; border-radius: 8px; height: 18px; margin: 4px 0;">
                     <div style="width: {percent_val}%; background-color: {bar_color}; height: 100%; border-radius: 8px; transition: width 0.5s ease-in-out;"></div>
@@ -610,9 +612,17 @@ if user_names:
     st.write("")
     c_target1, c_target2 = st.columns(2)
     with c_target1:
-        target_mins = st.number_input("Đặt mục tiêu học hôm nay (Phút):", min_value=5, max_value=180, value=30, step=5)
+        target_mins = st.number_input("Đặt mục tiêu học hôm nay (Phút):", min_value=5, max_value=180, value=45, step=5)
         if st.button("🚀 Gửi Mục Tiêu Thời Gian", width="stretch"):
+            
             send_remote_command({"command": "SET_GOAL", "minutes": target_mins, "timestamp": int(time.time()), "status": "pending"}, target)
+           try: 
+                requests.patch(f"{base_url}users/{target}.json", json={"target_goal": target_mins}, timeout=2)
+                st.success(f"🎯 Đã lưu mục tiêu {target_mins} phút cho {target}!")
+                time.sleep(0.5)
+                st.rerun()
+            except Exception: 
+                st.error("Lỗi lưu mục tiêu vào Firebase")
     with c_target2:
         sticky_msg = st.text_input("Lời nhắn ghim màn hình app con:", placeholder="Nhập tin nhắn nhắn nhủ...")
         if st.button("📌 Ghim Lời Nhắc", width="stretch"):
