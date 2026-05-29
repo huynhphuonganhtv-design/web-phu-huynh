@@ -341,8 +341,8 @@ try:
     k4.metric("📊 Trung bình/ngày",   f"{avg_daily_mins} phút", None)
 
     st.write("")
-    if student_target != "📊 Tất cả học sinh":
-            st.markdown(f"🎯 **Tiến độ mục tiêu hôm nay của {student_target}:**")
+    if selected_student != "📊 Tất cả học sinh":
+            st.markdown(f"🎯 **Tiến độ mục tiêu hôm nay của {selected_student}:**")
             
             # Tính toán tỷ lệ phần trăm %
             progress_pct = min(1.0, today_mins / max(1, target_goal_mins))
