@@ -109,7 +109,7 @@ def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
 # =====================================================================
-# 🔒 ĐĂNG NHẬP
+# 🔒 ĐĂNG NHẬP / ĐĂNG KÝ
 # =====================================================================
 if not st.session_state["authenticated"] and st.session_state["auth_page"] == "login":
     st.markdown("<br><br>", unsafe_allow_html=True)
@@ -117,7 +117,7 @@ if not st.session_state["authenticated"] and st.session_state["auth_page"] == "l
         st.markdown("<h2 style='text-align: center;'>🔑 ĐĂNG NHẬP PHỤ HUYNH</h2>", unsafe_allow_html=True)
         username_input = st.text_input("Tên đăng nhập:", key="login_user", placeholder="Nhập tài khoản...")
         password_input = st.text_input("Mật khẩu:", type="password", key="login_pass", placeholder="Nhập mật khẩu...")
-        if st.button("Đăng nhập hệ thống 🚀", use_container_width=True, type="primary"):
+        if st.button("Đăng nhập hệ thống 🚀", width="stretch", type="primary"):
             u = username_input.strip()
             p = password_input.strip()
             if u and p:
@@ -133,7 +133,7 @@ if not st.session_state["authenticated"] and st.session_state["auth_page"] == "l
                     else: st.error("❌ Sai tài khoản hoặc mật khẩu!")
                 except Exception: st.error("❌ Lỗi kết nối tới Firebase!")
         st.write("---")
-        if st.button("Tạo tài khoản mới (Đăng ký) ✨", use_container_width=True):
+        if st.button("Tạo tài khoản mới (Đăng ký) ✨", width="stretch"):
             st.session_state["auth_page"] = "register"
             st.rerun()
     st.stop()
@@ -145,7 +145,7 @@ if not st.session_state["authenticated"] and st.session_state["auth_page"] == "r
         reg_user = st.text_input("Tên đăng nhập mới:", key="reg_u", placeholder="Ví dụ: bame_haidang")
         reg_pass = st.text_input("Tạo mật khẩu:", type="password", key="reg_p", placeholder="Nhập mật khẩu...")
         reg_confirm = st.text_input("Nhập lại mật khẩu:", type="password", key="reg_c", placeholder="Xác nhận mật khẩu...")
-        if st.button("Hoàn tất Đăng ký 🛠️", use_container_width=True, type="primary"):
+        if st.button("Hoàn tất Đăng ký 🛠️", width="stretch", type="primary"):
             u = reg_user.strip()
             p = reg_pass.strip()
             if u and p and p == reg_confirm.strip():
@@ -196,7 +196,7 @@ st.title("👑 Trung Tâm Quản Lý Phụ Huynh Tối Thượng")
 
 with st.sidebar:
     st.write(f"### 👤 Tài khoản: `{st.session_state.get('username')}`")
-    if st.button("🔒 Đăng xuất ứng dụng", use_container_width=True):
+    if st.button("🔒 Đăng xuất ứng dụng", width="stretch"):
         st.session_state["authenticated"] = False
         st.rerun()
 
@@ -213,10 +213,7 @@ with m2:
 st.write("---")
 
 # =====================================================================
-# 🏆 BẢNG XẾP HẠNG
-# =====================================================================
-# =====================================================================
-# 🏆 BẢNG XẾP HẠNG CHĂM CHỈ & VINH DANH (CẬP NHẬT TRỰC QUAN CHUẨN)
+# 🏆 BẢNG XẾP HẠNG & LỜI KHEN
 # =====================================================================
 st.subheader("🏆 Bảng Xếp Hạng Chăm Chỉ")
 user_names, user_times = [], []
@@ -234,7 +231,6 @@ try:
                 leaderboard_data.append({"Học sinh": u_id, "Thời gian học (Phút)": study_mins, "Trạng thái": status})
         
         if leaderboard_data:
-            # Xử lý dữ liệu DataFrame sắp xếp giảm dần
             df_lb = pd.DataFrame(leaderboard_data).sort_values(by="Thời gian học (Phút)", ascending=False).reset_index(drop=True)
             
             ranks, titles = [], []
@@ -246,23 +242,19 @@ try:
             df_lb.insert(0, "Thứ Hạng", ranks)
             df_lb["Danh Hiệu"] = titles
 
-            # 1. BIỂU ĐỒ TRỰC QUAN (Hiển thị ngay trên bảng)
             chart_color = "#38bdf8" if st.session_state["theme_mode"] == "🌙 Giao diện Tối" else "#0284c7"
             st.bar_chart(df_lb.set_index("Học sinh")["Thời gian học (Phút)"], color=chart_color)
 
-            # 2. BẢNG HUY CHƯƠNG CHI TIẾT
             st.dataframe(
                 df_lb[["Thứ Hạng", "Học sinh", "Thời gian học (Phút)", "Danh Hiệu", "Trạng thái"]], 
-                use_container_width=True, 
+                width="stretch", 
                 hide_index=True
             )
             
-            # 3. LỜI KHEN ĐỘNG TUYÊN DƯƠNG
             if df_lb.iloc[0]["Thời gian học (Phút)"] > 0:
                 top_student = df_lb.iloc[0]['Học sinh']
                 top_mins = df_lb.iloc[0]['Thời gian học (Phút)']
                 
-                # Tạo lời khen ngẫu nhiên hoặc nâng cấp dựa trên số phút
                 if top_mins >= 90:
                     st.success(f"👑 **Chiến thần xuất chúng!** Tuyên dương **{top_student}** đang thống trị bảng xếp hạng với `{top_mins} phút` tập trung đỉnh cao!")
                 elif top_mins >= 45:
@@ -272,10 +264,8 @@ try:
             else:
                 st.info("💡 Hôm nay chưa có phiên học nào được ghi nhận. Sĩ tử nào sẽ giành vị trí 🥇 đầu tiên đây?")
 except Exception: 
-    pass
+    st.caption("⚠️ Không thể tải dữ liệu bảng vinh danh.")
       
-    
-
 @st.fragment(run_every=5)
 def render_online_status():
     try:
@@ -295,7 +285,7 @@ render_online_status()
 
 
 # =====================================================================
-# 📊 THỐNG KÊ HỌC TẬP NÂNG CẤP TÍCH HỢP BIỂU ĐỒ TH (ĐÃ ĐƯỢC CẬP NHẬT)
+# 📊 THỐNG KÊ HỌC TẬP NÂNG CẤP TÍCH HỢP BIỂU ĐỒ TH & CHUỖI STREAK
 # =====================================================================
 st.write("---")
 st.subheader("📊 Thống Kê Học Tập Chi Tiết")
@@ -331,9 +321,10 @@ try:
                     all_history.append(h)
 
     # KPI Cards
-    today_str     = datetime.date.today().strftime("%Y-%m-%d")
-    yesterday_str = (datetime.date.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
-    week_dates    = [(datetime.date.today() - datetime.timedelta(days=i)).strftime("%Y-%m-%d") for i in range(7)]
+    today_dt      = datetime.date.today()
+    today_str     = today_dt.strftime("%Y-%m-%d")
+    yesterday_str = (today_dt - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+    week_dates    = [(today_dt - datetime.timedelta(days=i)).strftime("%Y-%m-%d") for i in range(7)]
 
     today_mins     = all_daily.get(today_str, 0)
     yesterday_mins = all_daily.get(yesterday_str, 0)
@@ -353,50 +344,69 @@ try:
 
     tab1, tab1_th, tab2, tab3, tab4 = st.tabs([
         "📅 Theo ngày (30 ngày)",
-        "📈 Xu hướng Realtime (TH)", # TAB MỚI ĐƯỢC TÍCH HỢP CHUẨN BIỂU ĐỒ TH THEO DÒNG THỜI GIAN
+        "📈 Xuương Realtime (TH)", 
         "🥧 Theo môn học",
         "🏆 So sánh học sinh",
         "🗓️ Lịch sử gần đây"
     ])
 
-    # TAB 1 — Biểu đồ cột 30 ngày
+    # TAB 1 — Chuỗi ngày học liên tiếp chuẩn thuật toán thực tế
     with tab1:
         if all_daily:
-            sorted_days = sorted(all_daily.items())[-30:]
-            labels_d = [d[0][-5:] for d in sorted_days]
-            values_d = [d[1] for d in sorted_days]
+            sorted_days = sorted(all_daily.items())
+            last_30_days = sorted_days[-30:]
+            labels_d = [d[0][-5:] for d in last_30_days]
+            values_d = [d[1] for d in last_30_days]
             avg_v    = sum(values_d) / max(len(values_d), 1)
 
+            chart_color = "#38bdf8" if st.session_state["theme_mode"] == "🌙 Giao diện Tối" else "#0284c7"
             chart_data_d = pd.DataFrame({"Ngày": labels_d, "Phút học": values_d}).set_index("Ngày")
-            st.bar_chart(chart_data_d, color="#38bdf8")
+            st.bar_chart(chart_data_d, color=chart_color)
 
             col_a, col_b, col_c = st.columns(3)
             col_a.metric("🔥 Ngày học nhiều nhất", f"{max(values_d)} phút")
             col_b.metric("📈 Trung bình 30 ngày",   f"{int(avg_v)} phút")
             col_c.metric("✅ Ngày có học",           f"{sum(1 for v in values_d if v > 0)}/30 ngày")
 
-            streak = 0
-            for i in range(len(values_d) - 1, -1, -1):
-                if values_d[i] > 0: streak += 1
-                else: break
-            if streak >= 3:
-                st.success(f"🔥 **Streak hiện tại: {streak} ngày liên tiếp!** Tuyệt vời!")
-            elif streak > 0:
-                st.info(f"📅 Đang trong chuỗi {streak} ngày. Cố gắng duy trì nhé!")
+            # --- THUẬT TOÁN TÍNH CHUỖI STREAK LIÊN TIẾP CHUẨN XÁC ---
+            streak_count = 0
+            check_date = today_dt
+            
+            if all_daily.get(today_str, 0) == 0 and all_daily.get(yesterday_str, 0) == 0:
+                streak_count = 0
+            else:
+                if all_daily.get(today_str, 0) == 0:
+                    check_date = check_date - datetime.timedelta(days=1)
+                while True:
+                    date_key = check_date.strftime("%Y-%m-%d")
+                    if all_daily.get(date_key, 0) > 0:
+                        streak_count += 1
+                        check_date = check_date - datetime.timedelta(days=1)
+                    else:
+                        break
+
+            # Hiển thị vinh danh chuỗi ngày học
+            st.markdown("---")
+            if streak_count >= 7:
+                st.success(f"👑 **CHUỖI HỎA TỐC HUYỀN THOẠI:** Con đã học liên tiếp **{streak_count} ngày**! Phong độ vô cùng xuất sắc, cha mẹ hãy thưởng cho con nhé! 🌟")
+            elif streak_count >= 3:
+                st.success(f"🔥 **CHẤT LƯỢNG BỀN BỈ:** Duy trì chuỗi thành công **{streak_count} ngày** liên tục. Tiếp tục phát huy tinh thần tự giác nào!")
+            elif streak_count > 0:
+                st.info(f"⚡ **Chuỗi hiện tại:** Đang nhen nhóm **{streak_count} ngày** liên tiếp. Cố gắng học một phiên ngắn hôm nay để giữ chuỗi nhé!")
+            else:
+                st.warning("💤 **Chuỗi đã bị ngắt:** Hiện chưa có chuỗi học liên tục. Hãy nhắc nhở con bật đồng hồ Pomodoro ngay hôm nay để bắt đầu hành trình phát triển mới!")
         else:
             st.info("Chưa có dữ liệu ngày học.")
 
-    # TAB 1_TH — BIỂU ĐỒ XU HƯỚNG THEO THỜI GIAN THỰC (HISTORY LOGS LINE CHART)
+    # TAB 1_TH — BIỂU ĐỒ XU HƯỚNG REALTIME
     with tab1_th:
         st.caption("📈 **Biểu đồ tiến độ học tập tích lũy tự động theo dòng thời gian thực (Biểu đồ TH)**")
         now_time = datetime.datetime.now()
         th_data = []
         
-        # Đọc dữ liệu thô để giả lập hoặc phân tách chuỗi thời gian từ lịch sử hệ thống
         if student_totals:
             for s_name, current_mins in student_totals.items():
                 if selected_student == "📊 Tất cả học sinh" or selected_student == s_name:
-                    # Tạo các trục tọa độ TH mốc lùi thời gian cho biểu đồ đường sinh động
                     th_data.append({"Mốc Giờ": (now_time - datetime.timedelta(hours=3)).strftime("%H:%M"), "Học sinh": s_name, "Phút tích lũy": max(0, current_mins - 25)})
                     th_data.append({"Mốc Giờ": (now_time - datetime.timedelta(hours=2)).strftime("%H:%M"), "Học sinh": s_name, "Phút tích lũy": max(0, current_mins - 15)})
                     th_data.append({"Mốc Giờ": (now_time - datetime.timedelta(hours=1)).strftime("%H:%M"), "Học sinh": s_name, "Phút tích lũy": max(0, current_mins - 5)})
@@ -434,7 +444,7 @@ try:
                 with col_chart:
                     st.bar_chart(df_sub.set_index("Môn học")["Phút học"], color="#a78bfa")
                 with col_table:
-                    st.dataframe(df_sub[["Môn học", "Phút học", "Tỉ lệ %"]], use_container_width=True, hide_index=True)
+                    st.dataframe(df_sub[["Môn học", "Phút học", "Tỉ lệ %"]], width="stretch", hide_index=True)
 
                 top_sub = df_sub.iloc[0]
                 st.success(f"🏆 Môn học nhiều nhất: **{top_sub['Môn học']}** ({top_sub['Phút học']} phút — {top_sub['Tỉ lệ %']}%)")
@@ -456,7 +466,7 @@ try:
             st.bar_chart(df_cmp.set_index("Học sinh")["Tổng phút"], color="#22c55e")
             medals = ["🥇", "🥈", "🥉"] + ["🏅"] * 20
             df_cmp.insert(0, "Hạng", [medals[i] for i in range(len(df_cmp))])
-            st.dataframe(df_cmp, use_container_width=True, hide_index=True)
+            st.dataframe(df_cmp, width="stretch", hide_index=True)
             if len(df_cmp) >= 2:
                 winner = df_cmp.iloc[0]
                 runner = df_cmp.iloc[1]
@@ -477,7 +487,7 @@ try:
                     "📚 Môn học":   h.get("subject", "Không rõ"),
                     "⏱️ Phút":      int(h.get("minutes", 0) or 0),
                 })
-            st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+            st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
             total_sessions   = len(all_history)
             total_from_hist  = sum(int(h.get("minutes", 0) or 0) for h in all_history)
             st.caption(f"📋 Tổng cộng {total_sessions} phiên học | Tổng: {total_from_hist} phút ({total_from_hist // 60}h {total_from_hist % 60}m)")
@@ -488,7 +498,7 @@ except Exception as e:
     st.error(f"❌ Lỗi tải dữ liệu thống kê: {e}")
 
 st.write("")
-if st.button("🔄 Làm mới dữ liệu thống kê", use_container_width=True, type="secondary"):
+if st.button("🔄 Làm mới dữ liệu thống kê", width="stretch", type="secondary"):
     st.rerun()
 
 # =====================================================================
@@ -508,7 +518,7 @@ with col_bl1:
     new_word = st.text_input("Thêm từ khóa cấm mới (gõ thường, không dấu):", placeholder="Ví dụ: game, hack...", key="txt_new_badword")
 with col_bl2:
     st.write("<br>", unsafe_allow_html=True)
-    if st.button("➕ Thêm Từ Cấm", use_container_width=True):
+    if st.button("➕ Thêm Từ Cấm", width="stretch"):
         if new_word.strip() and new_word.strip().lower() not in current_blacklist:
             current_blacklist.append(new_word.strip().lower())
             requests.put(f"{base_url}blacklist_keywords.json", json=current_blacklist, timeout=2)
@@ -541,21 +551,21 @@ if user_names:
     target = st.selectbox("Chọn con để điều khiển:", user_names, key="target_select")
     c_cmd1, c_cmd2 = st.columns(2)
     with c_cmd1:
-        if st.button("🔔 PHÁT CHUÔNG CHÚ Ý", use_container_width=True):
+        if st.button("🔔 PHÁT CHUÔNG CHÚ Ý", width="stretch"):
             send_remote_command({"command": "ALERT_BUZZ", "timestamp": int(time.time()), "status": "pending"}, target)
     with c_cmd2:
-        if st.button("🛑 LỆNH NGHỈ NGƠI (KHÓA APP)", type="primary", use_container_width=True):
+        if st.button("🛑 LỆNH NGHỈ NGƠI (KHÓA APP)", type="primary", width="stretch"):
             send_remote_command({"command": "FORCE_BREAK", "timestamp": int(time.time()), "status": "pending"}, target)
 
     st.write("")
     c_target1, c_target2 = st.columns(2)
     with c_target1:
         target_mins = st.number_input("Đặt mục tiêu học hôm nay (Phút):", min_value=5, max_value=180, value=30, step=5)
-        if st.button("🚀 Gửi Mục Tiêu Thời Gian", use_container_width=True):
+        if st.button("🚀 Gửi Mục Tiêu Thời Gian", width="stretch"):
             send_remote_command({"command": "SET_GOAL", "minutes": target_mins, "timestamp": int(time.time()), "status": "pending"}, target)
     with c_target2:
         sticky_msg = st.text_input("Lời nhắn ghim màn hình app con:", placeholder="Nhập tin nhắn nhắn nhủ...")
-        if st.button("📌 Ghim Lời Nhắc", use_container_width=True):
+        if st.button("📌 Ghim Lời Nhắc", width="stretch"):
             if sticky_msg.strip():
                 requests.put(f"{base_url}sticky/{target}.json", json={"text": sticky_msg.strip()}, timeout=2)
 
@@ -572,7 +582,7 @@ if qr_bytes:
             data=qr_bytes,
             file_name="qrcode_phuhuynh.png",
             mime="image/png",
-            use_container_width=True,
+            width="stretch",
             type="secondary"
         )
 
@@ -596,9 +606,9 @@ if all_chats:
             if m.get("type") == "revoked": st.markdown(f"⚠️ *{sender} {text}*")
             else:
                 st.markdown(f'<div class="chat-box"><small style="color:#38bdf8; font-weight:bold;">{sender}</small><small style="color:#64748b; float:right;">🕒 {ts}</small><p style="margin:4px 0 6px 0; font-size:14px;">{text}</p></div>', unsafe_allow_html=True)
-                if st.button("✂️ Gỡ tin nhắn", key=f"del_{cid}", type="primary", use_container_width=True):
+                if st.button("✂️ Gỡ tin nhắn", key=f"del_{cid}", type="primary", width="stretch"):
                     revoke_msg(cid)
                     st.rerun()
 
 st.text_input("Nội dung lời nhắn công cộng:", key="widget_msg", placeholder="Nhập tin nhắn...", on_change=send_parent_msg)
-st.button("Gửi tin nhắn ➤", key="btn_send_msg", on_click=send_parent_msg, use_container_width=True, type="secondary")
+st.button("Gửi tin nhắn ➤", key="btn_send_msg", on_click=send_parent_msg, width="stretch", type="secondary")
