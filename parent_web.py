@@ -220,14 +220,21 @@ def generate_network_qr():
     img.save(buf, format="PNG")
     return buf.getvalue(), network_url
 
+# Khởi tạo session state cho ô chat ở phần đầu code
+if "widget_msg_val" not in st.session_state:
+    st.session_state.widget_msg_val = ""
+
+# Hàm xử lý gửi tin nhắn độc lập
 def send_parent_msg():
-    msg_text = st.session_state.widget_msg.strip()
+    msg_text = st.session_state.widget_msg_val.strip()
     if msg_text:
         now_vn = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=7)
         new_msg = {"sender": f"PHỤ HUYNH ({st.session_state.get('username')}) 👤", "text": msg_text, "time": now_vn.strftime("%H:%M")}
-        try: requests.post(f"{base_url}chats.json", json=new_msg, timeout=2)
-        except Exception: pass
-        st.session_state.widget_msg = ""
+        try: 
+            requests.post(f"{base_url}chats.json", json=new_msg, timeout=2)
+            st.session_state.widget_msg_val = "" # <-- CHỖ QUAN TRỌNG: Xóa rỗng ô nhập ngay lập tức khi vừa gửi xong!
+        except Exception: 
+            pass
 
 def revoke_msg(chat_id):
     try: requests.patch(f"{base_url}chats/{chat_id}.json", json={"text": "đã bị phụ huynh gỡ bỏ.", "type": "revoked"}, timeout=2)
@@ -237,7 +244,7 @@ def send_remote_command(payload, target_user):
     try: requests.put(f"{base_url}commands/{target_user}.json", json=payload, timeout=2)
     except Exception: pass
 
-st.title("👑 Trung Tâm Quản Lý Phụ Huynh Tối Thượng")
+st.title("👑 Trung Tâm Quản Lý Phụ Huynh ")
 
 with st.sidebar:
     st.write(f"### 👤 Tài khoản: `{st.session_state.get('username')}`")
@@ -562,12 +569,10 @@ try:
                     key="filter_subject_box_ultimate"
                 )
                 
-                # 3. Tiến hành lọc dữ liệu dựa trên lựa chọn
                 filtered_history = all_history
                 if selected_sub != "📚 Tất cả các môn":
                     filtered_history = [h for h in all_history if h.get("subject") == selected_sub]
                 
-                # 4. Sắp xếp và lấy 20 phiên gần nhất CỦA MÔN ĐÓ
                 recent = sorted(filtered_history, key=lambda x: x.get("time", ""), reverse=True)[:20]
                 
                 if recent:
@@ -715,5 +720,10 @@ if all_chats:
                     revoke_msg(cid)
                     st.rerun()
 
-st.text_input("Nội dung lời nhắn công cộng:", key="widget_msg", placeholder="Nhập tin nhắn...", on_change=send_parent_msg)
+st.text_input(
+    "Nhập tin nhắn gửi tới máy con:", 
+    key="widget_msg_val", 
+    placeholder="Nhập nội dung tin nhắn tại đây và bấm Enter...",
+    on_change=send_parent_msg  
+)
 st.button("Gửi tin nhắn ➤", key="btn_send_msg", on_click=send_parent_msg, width="stretch", type="secondary")
