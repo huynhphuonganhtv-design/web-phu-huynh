@@ -993,31 +993,65 @@ if qr_bytes:
 # =====================================================================
 # 💬 PHÒNG CHAT
 # =====================================================================
+
+
 st.write("---")
 st.subheader("💬 Nhật ký tin nhắn công cộng")
+
+# ── Hiển thị tin nhắn ──
 chats = {}
 try:
     res = requests.get(f"{base_url}chats.json", timeout=2).json()
     if res and isinstance(res, dict): chats = res
 except Exception: pass
 
-all_chats = {**chats, **st.session_state.local_chats}
-if all_chats:
-    for cid, m in list(all_chats.items())[-8:]:
+if chats:
+    for cid, m in list(chats.items())[-8:]:
         if not isinstance(m, dict): continue
-        sender, text, ts = m.get("sender", "Ẩn danh"), m.get("text", ""), m.get("time", "--:--")
+        sender = m.get("sender", "Ẩn danh")
+        text   = m.get("text", "")
+        ts     = m.get("time", "--:--")
         with st.container(border=True):
-            if m.get("type") == "revoked": st.markdown(f"⚠️ *{sender} {text}*")
+            if m.get("type") == "revoked":
+                st.markdown(f"⚠️ *{sender} {text}*")
             else:
-                st.markdown(f'<div class="chat-box"><small style="color:#38bdf8; font-weight:bold;">{sender}</small><small style="color:#64748b; float:right;">🕒 {ts}</small><p style="margin:4px 0 6px 0; font-size:14px;">{text}</p></div>', unsafe_allow_html=True)
-                if st.button("✂️ Gỡ tin nhắn", key=f"del_{cid}", type="primary", width="stretch"):
+                st.markdown(
+                    f'<div class="chat-box">'
+                    f'<small style="color:#38bdf8;font-weight:bold;">{sender}</small>'
+                    f'<small style="color:#64748b;float:right;">🕒 {ts}</small>'
+                    f'<p style="margin:4px 0 6px 0;font-size:14px;">{text}</p>'
+                    f'</div>',
+                    unsafe_allow_html=True
+                )
+                if st.button("✂️ Gỡ tin nhắn", key=f"del_{cid}", type="primary", use_container_width=True):
                     revoke_msg(cid)
                     st.rerun()
+else:
+    st.info("Chưa có tin nhắn nào.")
 
-st.text_input(
-    "Nhập tin nhắn gửi tới máy con:", 
-    key="widget_msg_val", 
-    placeholder="Nhập nội dung tin nhắn tại đây và bấm Enter...",
-    on_change=send_parent_msg  
+# ── Ô nhập & nút gửi — KHÔNG dùng on_change, chỉ dùng nút bấm ──
+msg_input = st.text_input(
+    "Nhập tin nhắn gửi tới máy con:",
+    key="chat_input_box",          # key mới, không trùng cũ
+    placeholder="Gõ nội dung rồi bấm nút Gửi..."
 )
-st.button("Gửi tin nhắn ➤", key="btn_send_msg", on_click=send_parent_msg, width="stretch", type="secondary")
+
+if st.button("Gửi tin nhắn ➤", type="secondary", use_container_width=True, key="btn_send_chat"):
+    text_to_send = st.session_state.get("chat_input_box", "").strip()
+    if text_to_send:
+        now_vn = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=7)
+        try:
+            requests.post(
+                f"{base_url}chats.json",
+                json={
+                    "sender": f"PHỤ HUYNH ({st.session_state.get('username')}) 👤",
+                    "text":   text_to_send,
+                    "time":   now_vn.strftime("%H:%M")
+                },
+                timeout=2
+            )
+        except Exception:
+            st.warning("Mất kết nối, tin nhắn chưa gửi được.")
+        # Xóa ô nhập bằng cách đổi key qua session_state counter
+        st.session_state["chat_counter"] = st.session_state.get("chat_counter", 0) + 1
+        st.rerun()
