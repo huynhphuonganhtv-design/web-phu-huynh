@@ -33,65 +33,384 @@ with st.sidebar:
         on_change=change_theme
     )
 
-# ==========================================
-# 🌙 CẤU HÌNH GIAO DIỆN TỐI (DARK MODE)
-# ==========================================
+
+# Thay thế toàn bộ đoạn if/else theme cũ bằng đoạn này
+
 if st.session_state["theme_mode"] == "🌙 Giao diện Tối":
     st.markdown("""
         <style>
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
-        .stApp { background-color: #0f172a; color: #f1f5f9; transition: background-color 0.3s ease; }
-        [data-testid="stHeader"] { background-color: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); }
-        
+        /* ── Font ── */
+        @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap');
+        * { font-family: 'Be Vietnam Pro', sans-serif !important; }
+
+        /* ── Nền toàn trang ── */
+        .stApp, .main, [data-testid="stAppViewContainer"] {
+            background-color: #0a1628 !important;
+            color: #e2e8f0 !important;
+        }
+
+        /* ── Mọi text mặc định đều sáng ── */
+        p, span, div, label, li, td, th, caption,
+        [data-testid="stMarkdownContainer"] * {
+            color: #e2e8f0 !important;
+        }
+
+        /* ── Header ── */
+        [data-testid="stHeader"] {
+            background-color: rgba(10,22,40,0.85) !important;
+            backdrop-filter: blur(12px);
+        }
+
+        /* ── Sidebar ── */
+        section[data-testid="stSidebar"] {
+            background-color: #060e1c !important;
+            border-right: 1px solid rgba(56,189,248,0.1) !important;
+        }
+        section[data-testid="stSidebar"] * { color: #94a3b8 !important; }
+        section[data-testid="stSidebar"] h1,
+        section[data-testid="stSidebar"] h2,
+        section[data-testid="stSidebar"] h3 {
+            color: #38bdf8 !important;
+            -webkit-text-fill-color: #38bdf8 !important;
+            background: none !important;
+        }
+
+        /* ── Tiêu đề ── */
+        h1, h2, h3 {
+            background: linear-gradient(135deg, #38bdf8, #818cf8) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+            font-weight: 700 !important;
+        }
+
+        /* ── Cards ── */
         div[data-testid="stVerticalBlockBorderWrapper"] {
-            background-color: #1e293b !important; border: 1px solid #334155 !important;
-            border-radius: 14px !important; padding: 22px !important;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3) !important;
-            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease !important;
+            background-color: #0f1e35 !important;
+            border: 1px solid rgba(56,189,248,0.15) !important;
+            border-radius: 16px !important;
+            padding: 1.4rem 1.6rem !important;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4) !important;
+            transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s !important;
         }
         div[data-testid="stVerticalBlockBorderWrapper"]:hover {
-            transform: translateY(-3px); border-color: #38bdf8 !important;
-            box-shadow: 0 15px 25px -5px rgba(56,189,248,0.15) !important;
+            border-color: rgba(56,189,248,0.4) !important;
+            box-shadow: 0 12px 40px rgba(56,189,248,0.1) !important;
+            transform: translateY(-2px) !important;
         }
-        
-        h1, h2, h3 {
-            background: linear-gradient(to right, #38bdf8, #818cf8) !important;
-            -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important; font-weight: 700 !important;
+
+        /* ── Metric ── */
+        [data-testid="stMetric"] {
+            background: #0c1829 !important;
+            border: 1px solid rgba(56,189,248,0.15) !important;
+            border-radius: 14px !important;
+            padding: 1rem 1.2rem !important;
         }
-        section[data-testid="stSidebar"] { background-color: #0b0f19 !important; border-right: 1px solid #1e293b; }
-        
-        .stTextInput input, .stNumberInput input, div[data-baseweb="select"] {
-            background-color: #0f172a !important; color: #f1f5f9 !important; border: 1px solid #475569 !important; border-radius: 8px !important;
+        [data-testid="stMetricLabel"] p  { color: #475569 !important; font-size: 0.72rem !important; text-transform: uppercase; letter-spacing: 0.07em; }
+        [data-testid="stMetricValue"]    { color: #f1f5f9 !important; font-size: 1.6rem !important; font-weight: 700 !important; }
+        [data-testid="stMetricDelta"] *  { font-size: 0.8rem !important; }
+
+        /* ── Input / Textarea ── */
+        .stTextInput input,
+        .stNumberInput input,
+        .stTextArea textarea {
+            background-color: #07101f !important;
+            color: #e2e8f0 !important;
+            border: 1px solid rgba(56,189,248,0.25) !important;
+            border-radius: 10px !important;
+            caret-color: #38bdf8 !important;
         }
-        div[data-baseweb="select"] * { color: #f1f5f9 !important; }
-        
-        @keyframes pulse-red {
-            0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
-            100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+        .stTextInput input:focus,
+        .stNumberInput input:focus,
+        .stTextArea textarea:focus {
+            border-color: #38bdf8 !important;
+            box-shadow: 0 0 0 3px rgba(56,189,248,0.15) !important;
+            outline: none !important;
         }
-        
+        .stTextInput input::placeholder,
+        .stTextArea textarea::placeholder { color: #334155 !important; }
+        /* Label của input */
+        .stTextInput label p,
+        .stNumberInput label p,
+        .stTextArea label p,
+        .stSelectbox label p { color: #94a3b8 !important; font-size: 0.85rem !important; }
+
+        /* ── Selectbox ── */
+        div[data-baseweb="select"] > div {
+            background-color: #07101f !important;
+            border: 1px solid rgba(56,189,248,0.25) !important;
+            border-radius: 10px !important;
+        }
+        div[data-baseweb="select"] *    { color: #e2e8f0 !important; background-color: #07101f !important; }
+        div[data-baseweb="popover"]     { background: #0f1e35 !important; border: 1px solid rgba(56,189,248,0.2) !important; border-radius: 12px !important; }
+        li[role="option"]:hover         { background: #1e3a5f !important; }
+
+        /* ── Number input arrows ── */
+        .stNumberInput button {
+            background: #0f1e35 !important;
+            border: 1px solid rgba(56,189,248,0.2) !important;
+            color: #e2e8f0 !important;
+            border-radius: 8px !important;
+        }
+
+        /* ── Buttons ── */
         button[data-testid="baseButton-primary"] {
-            background: linear-gradient(135deg, #ef4444, #b91c1c) !important; border: none !important; color: white !important; font-weight: bold !important;
-            border-radius: 8px !important; transition: all 0.25s ease-in-out !important; animation: pulse-red 2s infinite;
+            background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+            border: none !important;
+            color: #ffffff !important;
+            font-weight: 600 !important;
+            border-radius: 10px !important;
+            box-shadow: 0 2px 14px rgba(239,68,68,0.35) !important;
+            transition: all 0.2s ease !important;
         }
-        
+        button[data-testid="baseButton-primary"]:hover {
+            box-shadow: 0 4px 22px rgba(239,68,68,0.55) !important;
+            transform: translateY(-1px) !important;
+        }
         button[data-testid="baseButton-secondary"] {
-            background: linear-gradient(135deg, #38bdf8, #2563eb) !important; color: white !important; font-weight: bold !important; border: none !important;
-            border-radius: 8px !important; transition: all 0.25s ease-in-out !important;
+            background: linear-gradient(135deg, #0ea5e9, #6366f1) !important;
+            border: none !important;
+            color: #ffffff !important;
+            font-weight: 600 !important;
+            border-radius: 10px !important;
+            box-shadow: 0 2px 14px rgba(56,189,248,0.3) !important;
+            transition: all 0.2s ease !important;
         }
-        button[data-testid="baseButton-secondary"]:hover { transform: translateY(-1px); box-shadow: 0 0 15px rgba(56,189,248,0.6) !important; }
-        
-        .chat-box { background-color: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #38bdf8; color: #f1f5f9 !important; }
+        button[data-testid="baseButton-secondary"]:hover {
+            box-shadow: 0 4px 22px rgba(56,189,248,0.5) !important;
+            transform: translateY(-1px) !important;
+        }
+        /* Nút bình thường (không type) */
+        button[kind="tertiary"],
+        button[data-testid="baseButton-tertiary"] {
+            background: #0f1e35 !important;
+            border: 1px solid rgba(56,189,248,0.2) !important;
+            color: #94a3b8 !important;
+            border-radius: 10px !important;
+            transition: all 0.2s !important;
+        }
+        button[kind="tertiary"]:hover,
+        button[data-testid="baseButton-tertiary"]:hover {
+            border-color: #38bdf8 !important;
+            color: #38bdf8 !important;
+        }
+
+        /* ── Tabs ── */
+        [data-testid="stTabs"] [role="tablist"] {
+            background: #0c1829 !important;
+            border-radius: 12px !important;
+            padding: 4px !important;
+            border: 1px solid rgba(56,189,248,0.12) !important;
+            gap: 3px !important;
+        }
+        [data-testid="stTabs"] button[role="tab"] {
+            color: #475569 !important;
+            font-size: 0.83rem !important;
+            font-weight: 500 !important;
+            border-radius: 9px !important;
+            padding: 0.4rem 1rem !important;
+            border: none !important;
+            background: transparent !important;
+            transition: all 0.18s ease !important;
+        }
+        [data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
+            background: linear-gradient(135deg, #0ea5e9, #6366f1) !important;
+            color: #ffffff !important;
+            font-weight: 600 !important;
+            box-shadow: 0 2px 12px rgba(56,189,248,0.3) !important;
+        }
+
+        /* ── Dataframe ── */
+        [data-testid="stDataFrame"] {
+            border: 1px solid rgba(56,189,248,0.15) !important;
+            border-radius: 14px !important;
+            overflow: hidden !important;
+        }
+        [data-testid="stDataFrame"] th {
+            background: #0c1829 !important;
+            color: #475569 !important;
+            font-size: 0.72rem !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.07em !important;
+        }
+        [data-testid="stDataFrame"] td {
+            background: #0a1628 !important;
+            color: #cbd5e1 !important;
+            font-size: 0.88rem !important;
+        }
+        [data-testid="stDataFrame"] tr:hover td { background: #0f1e35 !important; }
+
+        /* ── Expander ── */
+        [data-testid="stExpander"] {
+            background: #0f1e35 !important;
+            border: 1px solid rgba(56,189,248,0.15) !important;
+            border-radius: 14px !important;
+            overflow: hidden !important;
+        }
+        [data-testid="stExpander"] summary {
+            color: #94a3b8 !important;
+            font-size: 0.88rem !important;
+            padding: 0.75rem 1rem !important;
+        }
+
+        /* ── Alerts ── */
+        [data-testid="stAlert"] {
+            border-radius: 12px !important;
+            border-left-width: 4px !important;
+        }
+        [data-testid="stAlert"] p { color: inherit !important; }
+
+        /* ── Progress bar ── */
+        [data-testid="stProgressBar"] > div {
+            background: #0c1829 !important;
+            border-radius: 99px !important;
+            height: 8px !important;
+        }
+        [data-testid="stProgressBar"] > div > div {
+            background: linear-gradient(90deg, #38bdf8, #818cf8) !important;
+            border-radius: 99px !important;
+        }
+
+        /* ── Caption ── */
+        .stCaption p, [data-testid="stCaptionContainer"] p {
+            color: #334155 !important;
+            font-size: 0.78rem !important;
+        }
+
+        /* ── Divider ── */
+        hr {
+            border: none !important;
+            border-top: 1px solid rgba(56,189,248,0.1) !important;
+            margin: 1.4rem 0 !important;
+        }
+
+        /* ── Chat box ── */
+        .chat-box {
+            background-color: #0d1e35 !important;
+            padding: 12px 14px !important;
+            border-radius: 0 12px 12px 0 !important;
+            margin-bottom: 10px !important;
+            border-left: 3px solid #38bdf8 !important;
+            color: #e2e8f0 !important;
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #07101f; }
+        ::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 6px; }
+        ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
         </style>
     """, unsafe_allow_html=True)
 
-# ==========================================
-# ☀️ CẤU HÌNH GIAO DIỆN SÁNG (LIGHT MODE)
-# ==========================================
+else:  # Giao diện Sáng
+    st.markdown("""
+        <style>
+        @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap');
+        * { font-family: 'Be Vietnam Pro', sans-serif !important; }
+
+        .stApp, .main, [data-testid="stAppViewContainer"] {
+            background-color: #f0f4f8 !important;
+            color: #0f172a !important;
+        }
+        p, span, div, label, li, td, th {
+            color: #0f172a !important;
+        }
+        [data-testid="stHeader"] {
+            background-color: rgba(240,244,248,0.85) !important;
+            backdrop-filter: blur(12px);
+        }
+        section[data-testid="stSidebar"] {
+            background-color: #f1f5f9 !important;
+            border-right: 1px solid #dde3ec !important;
+        }
+        section[data-testid="stSidebar"] * { color: #64748b !important; }
+        h1, h2, h3 {
+            color: #0284c7 !important;
+            background: none !important;
+            -webkit-text-fill-color: #0284c7 !important;
+            font-weight: 700 !important;
+        }
+        div[data-testid="stVerticalBlockBorderWrapper"] {
+            background-color: #ffffff !important;
+            border: 1px solid #dde3ec !important;
+            border-radius: 16px !important;
+            padding: 1.4rem 1.6rem !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06) !important;
+            transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s !important;
+        }
+        div[data-testid="stVerticalBlockBorderWrapper"]:hover {
+            border-color: #93c5fd !important;
+            box-shadow: 0 8px 28px rgba(2,132,199,0.1) !important;
+            transform: translateY(-2px) !important;
+        }
+        [data-testid="stMetric"] {
+            background: #f8fafc !important;
+            border: 1px solid #dde3ec !important;
+            border-radius: 14px !important;
+            padding: 1rem 1.2rem !important;
+        }
+        [data-testid="stMetricLabel"] p  { color: #64748b !important; font-size: 0.72rem !important; text-transform: uppercase; letter-spacing: 0.07em; }
+        [data-testid="stMetricValue"]    { color: #0f172a !important; font-size: 1.6rem !important; font-weight: 700 !important; }
+        .stTextInput input, .stNumberInput input, .stTextArea textarea {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            border: 1px solid #94a3b8 !important;
+            border-radius: 10px !important;
+        }
+        .stTextInput input:focus, .stNumberInput input:focus, .stTextArea textarea:focus {
+            border-color: #0284c7 !important;
+            box-shadow: 0 0 0 3px rgba(2,132,199,0.12) !important;
+        }
+        div[data-baseweb="select"] > div {
+            background-color: #ffffff !important;
+            border: 1px solid #94a3b8 !important;
+            border-radius: 10px !important;
+        }
+        div[data-baseweb="select"] * { color: #0f172a !important; background-color: #ffffff !important; }
+        button[data-testid="baseButton-primary"] {
+            background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+            border: none !important; color: #fff !important;
+            font-weight: 600 !important; border-radius: 10px !important;
+            box-shadow: 0 2px 10px rgba(239,68,68,0.3) !important;
+        }
+        button[data-testid="baseButton-secondary"] {
+            background: linear-gradient(135deg, #0284c7, #6366f1) !important;
+            border: none !important; color: #fff !important;
+            font-weight: 600 !important; border-radius: 10px !important;
+            box-shadow: 0 2px 10px rgba(2,132,199,0.25) !important;
+        }
+        [data-testid="stTabs"] [role="tablist"] {
+            background: #f1f5f9 !important;
+            border-radius: 12px !important;
+            padding: 4px !important;
+            border: 1px solid #dde3ec !important;
+        }
+        [data-testid="stTabs"] button[role="tab"] {
+            color: #64748b !important; background: transparent !important;
+            border-radius: 9px !important; border: none !important;
+            font-size: 0.83rem !important;
+        }
+        [data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
+            background: linear-gradient(135deg, #0284c7, #6366f1) !important;
+            color: #fff !important; font-weight: 600 !important;
+        }
+        [data-testid="stDataFrame"] th { background: #f1f5f9 !important; color: #64748b !important; font-size: 0.72rem !important; }
+        [data-testid="stDataFrame"] td { background: #ffffff !important; color: #0f172a !important; }
+        .chat-box {
+            background-color: #f1f5f9 !important;
+            padding: 12px 14px !important;
+            border-radius: 0 12px 12px 0 !important;
+            margin-bottom: 10px !important;
+            border-left: 3px solid #0284c7 !important;
+            color: #0f172a !important;
+        }
+        hr { border: none !important; border-top: 1px solid #e2e8f0 !important; margin: 1.4rem 0 !important; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f0f4f8; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
+        ::-webkit-scrollbar-thumb:hover { background: #0284c7; }
+        </style>
+    """, unsafe_allow_html=True)
+
 else:
     st.markdown("""
         <style>
@@ -220,11 +539,9 @@ def generate_network_qr():
     img.save(buf, format="PNG")
     return buf.getvalue(), network_url
 
-# Khởi tạo session state cho ô chat ở phần đầu code
 if "widget_msg_val" not in st.session_state:
     st.session_state.widget_msg_val = ""
 
-# Hàm xử lý gửi tin nhắn độc lập
 def send_parent_msg():
     msg_text = st.session_state.widget_msg_val.strip()
     if msg_text:
@@ -252,7 +569,6 @@ with st.sidebar:
         st.session_state["authenticated"] = False
         st.rerun()
 
-# Đồng hồ
 m1, m2 = st.columns(2)
 with m1: st.metric(label="📡 Máy chủ Firebase", value="Hoạt động tốt 🟢")
 with m2:
@@ -372,7 +688,6 @@ try:
                     h["student"] = u_id
                     all_history.append(h)
 
-    # KPI Cards
     today_dt      = datetime.date.today()
     today_str     = today_dt.strftime("%Y-%m-%d")
     yesterday_str = (today_dt - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
@@ -421,14 +736,13 @@ try:
             st.caption(f"📈 Đã hoàn thành **{percent_val}%** ({today_mins}/{target_goal_mins} phút theo mục tiêu từ cha mẹ).")
             st.write("")
 
-    # Thêm các Tab phân tích mới vào hệ thống menu
     tab1, tab1_th, tab_week, tab2, tab_time, tab3, tab4 = st.tabs([
         "📅 Theo ngày (30 ngày)",
         "📈 Xu hướng (TH)", 
-        "🗓️ Phân tích Thứ/Tuần", # Tab MỚI 1
+        "🗓️ Phân tích Thứ/Tuần", 
         "🥧 Theo môn học",
-        "🕒 Khung Giờ Tập Tập Trung", # Tab MỚI 2
-        "🏆 So sánh & Kỷ luật", # Tab Cải tiến 3
+        "🕒 Khung Giờ Tập Tập Trung", 
+        "🏆 So sánh & Kỷ luật", 
         "📋 Lịch sử gần đây"
     ])
 
@@ -478,7 +792,6 @@ try:
         else:
             st.info("Chưa có dữ liệu ngày học.")
 
-    # TAB 1_TH — BIỂU ĐỒ XU HƯỚNG REALTIME
     with tab1_th:
         st.caption("📈 **Biểu đồ tiến độ học tập tích lũy tự động theo dòng thời gian thực (Biểu đồ TH)**")
         now_time = datetime.datetime.now()
@@ -502,7 +815,6 @@ try:
         else:
             st.info("Chưa có lịch sử máy con hoạt động để dựng dòng thời gian.")
 
-    # TAB MỚI 1 — BIỂU ĐỒ NĂNG SUẤT THEO THỨ (Dữ liệu tuần)
     with tab_week:
         st.write("### 📅 Phân tích năng suất học tập theo các ngày trong tuần")
         if all_daily:
@@ -523,7 +835,6 @@ try:
         else:
             st.info("Chưa có dữ liệu phân tích tuần.")
 
-    # TAB 2 — Theo môn học
     with tab2:
         if all_history:
             subject_map = {}
@@ -555,17 +866,15 @@ try:
         else:
             st.info("Chưa có dữ liệu môn học.")
 
-    # TAB MỚI 2 — BIỂU ĐỒ KHUNG GIỜ VÀNG TRONG NGÀY
     with tab_time:
         st.write("### 🕒 Biểu đồ Khung Giờ Tập Trung (Con hay bật máy học lúc nào?)")
         if all_history:
             time_slots = {"Sáng (06h-12h)": 0, "Chiều (12h-18h)": 0, "Tối (18h-22h)": 0, "Ban Đêm (22h-06h)": 0}
             
             for h in all_history:
-                h_time = h.get("time", "")  # Định dạng "HH:MM" hoặc chứa giờ
+                h_time = h.get("time", "")  
                 if h_time and ":" in h_time:
                     try:
-                        # Tách lấy phần giờ để phân loại khung giờ hoạt động
                         hour_part = int(h_time.split(":")[-2].split()[-1])
                         mins = int(h.get("minutes", 0) or 0)
                         if 6 <= hour_part < 12:    time_slots["Sáng (06h-12h)"] += mins
@@ -578,7 +887,6 @@ try:
             df_slots = pd.DataFrame(list(time_slots.items()), columns=["Khung giờ", "Phút tích lũy"])
             st.line_chart(df_slots.set_index("Khung giờ")["Phút tích lũy"], color="#10b981")
             
-            # Đưa ra cảnh báo thông minh dựa trên hành vi thời gian thực
             if time_slots["Ban Đêm (22h-06h)"] > 45:
                 st.warning("⚠️ **Cảnh báo sức khỏe:** Con đang có xu hướng học bài rất muộn vào ban đêm (>45 phút). Cha mẹ nên nhắc con ngủ sớm để đảm bảo sức khỏe học đường.")
             else:
@@ -586,7 +894,6 @@ try:
         else:
             st.info("Chưa có dữ liệu lịch sử để phân tích khung giờ học.")
 
-    # TAB 3 — So sánh học sinh & Tỷ lệ Kỷ Luật Mục Tiêu mới
     with tab3:
         if student_totals:
             st.write("### 🏆 Bảng xếp hạng tổng thời gian tích lũy")
@@ -611,7 +918,6 @@ try:
             st.write("---")
             st.write("### 🎯 Chỉ số tự giác kỷ luật (Tỷ lệ hoàn thành mục tiêu ngày)")
             
-            # Lấy mục tiêu thời gian quy chuẩn của học sinh hiện tại chọn
             current_target = 45
             if selected_student != "📊 Tất cả học sinh" and selected_student is not None:
                 student_info = res_all.get(selected_student, {})
@@ -637,7 +943,6 @@ try:
         else:
             st.info("Chưa có dữ liệu học sinh để so sánh.")
 
-    # TAB 4 — Lịch sử phiên học
     with tab4:
             if all_history:
                 unique_subjects = sorted(list(set([h.get("subject", "Không rõ") for h in all_history if h.get("subject")])))
@@ -742,7 +1047,6 @@ if user_names:
     with c_target1:
         target_mins = st.number_input("Đặt mục tiêu học hôm nay (Phút):", min_value=5, max_value=180, value=45, step=5)
         if st.button("🚀 Gửi Mục Tiêu Thời Gian", width="stretch"):
-            # 1. Gửi lệnh xuống máy con
             send_remote_command({"command": "SET_GOAL", "minutes": target_mins, "timestamp": int(time.time()), "status": "pending"}, target)
             
             try: 
