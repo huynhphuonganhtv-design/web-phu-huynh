@@ -614,9 +614,11 @@ if user_names:
     with c_target1:
         target_mins = st.number_input("Đặt mục tiêu học hôm nay (Phút):", min_value=5, max_value=180, value=45, step=5)
         if st.button("🚀 Gửi Mục Tiêu Thời Gian", width="stretch"):
-            
+            # 1. Gửi lệnh xuống máy con
             send_remote_command({"command": "SET_GOAL", "minutes": target_mins, "timestamp": int(time.time()), "status": "pending"}, target)
-           try: 
+            
+            # 2. Lưu mục tiêu vào Firebase (Hãy chắc chắn đoạn try/except này thẳng hàng)
+            try: 
                 requests.patch(f"{base_url}users/{target}.json", json={"target_goal": target_mins}, timeout=2)
                 st.success(f"🎯 Đã lưu mục tiêu {target_mins} phút cho {target}!")
                 time.sleep(0.5)
