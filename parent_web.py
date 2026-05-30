@@ -36,7 +36,7 @@ with st.sidebar:
 
 # Thay thế toàn bộ đoạn if/else theme cũ bằng đoạn này
 
-if st.session_state["theme_mode"] == "🌙 Giao diện Tối":
+if st.session_state.get("theme_mode") == "🌙 Giao diện Tối":
     st.markdown("""
         <style>
         /* ── Font ── */
@@ -49,9 +49,8 @@ if st.session_state["theme_mode"] == "🌙 Giao diện Tối":
             color: #e2e8f0 !important;
         }
 
-        /* ── Mọi text mặc định đều sáng ── */
-        p, span, div, label, li, td, th, caption,
-        [data-testid="stMarkdownContainer"] * {
+        /* ── Mọi text mặc định của Streamlit đều sáng (Tránh ép lên thẻ HTML tự tạo) ── */
+        .stMarkdown p, .stMarkdown span, label p, td, th, caption {
             color: #e2e8f0 !important;
         }
 
@@ -105,9 +104,9 @@ if st.session_state["theme_mode"] == "🌙 Giao diện Tối":
             border-radius: 14px !important;
             padding: 1rem 1.2rem !important;
         }
-        [data-testid="stMetricLabel"] p  { color: #475569 !important; font-size: 0.72rem !important; text-transform: uppercase; letter-spacing: 0.07em; }
+        [data-testid="stMetricLabel"] p  { color: #64748b !important; font-size: 0.72rem !important; text-transform: uppercase; letter-spacing: 0.07em; }
         [data-testid="stMetricValue"]    { color: #f1f5f9 !important; font-size: 1.6rem !important; font-weight: 700 !important; }
-        [data-testid="stMetricDelta"] *  { font-size: 0.8rem !important; }
+        [data-testid="stMetricDelta"] * { font-size: 0.8rem !important; }
 
         /* ── Input / Textarea ── */
         .stTextInput input,
@@ -127,22 +126,22 @@ if st.session_state["theme_mode"] == "🌙 Giao diện Tối":
             outline: none !important;
         }
         .stTextInput input::placeholder,
-        .stTextArea textarea::placeholder { color: #334155 !important; }
-        /* Label của input */
+        .stTextArea textarea::placeholder { color: #475569 !important; }
         .stTextInput label p,
         .stNumberInput label p,
         .stTextArea label p,
         .stSelectbox label p { color: #94a3b8 !important; font-size: 0.85rem !important; }
 
-        /* ── Selectbox ── */
+        /* ── Selectbox (Sửa lỗi mất text) ── */
         div[data-baseweb="select"] > div {
             background-color: #07101f !important;
             border: 1px solid rgba(56,189,248,0.25) !important;
             border-radius: 10px !important;
         }
-        div[data-baseweb="select"] *    { color: #e2e8f0 !important; background-color: #07101f !important; }
-        div[data-baseweb="popover"]     { background: #0f1e35 !important; border: 1px solid rgba(56,189,248,0.2) !important; border-radius: 12px !important; }
-        li[role="option"]:hover         { background: #1e3a5f !important; }
+        div[data-baseweb="select"] span { color: #e2e8f0 !important; }
+        div[data-baseweb="popover"] ul { background: #0f1e35 !important; border-radius: 12px !important; }
+        li[role="option"] { color: #e2e8f0 !important; background: #0f1e35 !important; }
+        li[role="option"]:hover { background: #1e3a5f !important; }
 
         /* ── Number input arrows ── */
         .stNumberInput button {
@@ -179,19 +178,11 @@ if st.session_state["theme_mode"] == "🌙 Giao diện Tối":
             box-shadow: 0 4px 22px rgba(56,189,248,0.5) !important;
             transform: translateY(-1px) !important;
         }
-        /* Nút bình thường (không type) */
-        button[kind="tertiary"],
         button[data-testid="baseButton-tertiary"] {
             background: #0f1e35 !important;
             border: 1px solid rgba(56,189,248,0.2) !important;
             color: #94a3b8 !important;
             border-radius: 10px !important;
-            transition: all 0.2s !important;
-        }
-        button[kind="tertiary"]:hover,
-        button[data-testid="baseButton-tertiary"]:hover {
-            border-color: #38bdf8 !important;
-            color: #38bdf8 !important;
         }
 
         /* ── Tabs ── */
@@ -210,7 +201,6 @@ if st.session_state["theme_mode"] == "🌙 Giao diện Tối":
             padding: 0.4rem 1rem !important;
             border: none !important;
             background: transparent !important;
-            transition: all 0.18s ease !important;
         }
         [data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
             background: linear-gradient(135deg, #0ea5e9, #6366f1) !important;
@@ -225,37 +215,10 @@ if st.session_state["theme_mode"] == "🌙 Giao diện Tối":
             border-radius: 14px !important;
             overflow: hidden !important;
         }
-        [data-testid="stDataFrame"] th {
-            background: #0c1829 !important;
-            color: #475569 !important;
-            font-size: 0.72rem !important;
-            text-transform: uppercase !important;
-            letter-spacing: 0.07em !important;
-        }
-        [data-testid="stDataFrame"] td {
-            background: #0a1628 !important;
-            color: #cbd5e1 !important;
-            font-size: 0.88rem !important;
-        }
-        [data-testid="stDataFrame"] tr:hover td { background: #0f1e35 !important; }
-
-        /* ── Expander ── */
-        [data-testid="stExpander"] {
-            background: #0f1e35 !important;
-            border: 1px solid rgba(56,189,248,0.15) !important;
-            border-radius: 14px !important;
-            overflow: hidden !important;
-        }
-        [data-testid="stExpander"] summary {
-            color: #94a3b8 !important;
-            font-size: 0.88rem !important;
-            padding: 0.75rem 1rem !important;
-        }
 
         /* ── Alerts ── */
         [data-testid="stAlert"] {
             border-radius: 12px !important;
-            border-left-width: 4px !important;
         }
         [data-testid="stAlert"] p { color: inherit !important; }
 
@@ -272,7 +235,7 @@ if st.session_state["theme_mode"] == "🌙 Giao diện Tối":
 
         /* ── Caption ── */
         .stCaption p, [data-testid="stCaptionContainer"] p {
-            color: #334155 !important;
+            color: #475569 !important;
             font-size: 0.78rem !important;
         }
 
@@ -290,7 +253,6 @@ if st.session_state["theme_mode"] == "🌙 Giao diện Tối":
             border-radius: 0 12px 12px 0 !important;
             margin-bottom: 10px !important;
             border-left: 3px solid #38bdf8 !important;
-            color: #e2e8f0 !important;
         }
 
         /* ── Scrollbar ── */
@@ -311,7 +273,7 @@ else:  # Giao diện Sáng
             background-color: #f0f4f8 !important;
             color: #0f172a !important;
         }
-        p, span, div, label, li, td, th {
+        .stMarkdown p, .stMarkdown span, label p, td, th {
             color: #0f172a !important;
         }
         [data-testid="stHeader"] {
@@ -350,6 +312,7 @@ else:  # Giao diện Sáng
         }
         [data-testid="stMetricLabel"] p  { color: #64748b !important; font-size: 0.72rem !important; text-transform: uppercase; letter-spacing: 0.07em; }
         [data-testid="stMetricValue"]    { color: #0f172a !important; font-size: 1.6rem !important; font-weight: 700 !important; }
+        
         .stTextInput input, .stNumberInput input, .stTextArea textarea {
             background-color: #ffffff !important;
             color: #0f172a !important;
@@ -360,12 +323,15 @@ else:  # Giao diện Sáng
             border-color: #0284c7 !important;
             box-shadow: 0 0 0 3px rgba(2,132,199,0.12) !important;
         }
+        
+        /* ── Selectbox Sáng ── */
         div[data-baseweb="select"] > div {
             background-color: #ffffff !important;
             border: 1px solid #94a3b8 !important;
             border-radius: 10px !important;
         }
-        div[data-baseweb="select"] * { color: #0f172a !important; background-color: #ffffff !important; }
+        div[data-baseweb="select"] span { color: #0f172a !important; }
+        
         button[data-testid="baseButton-primary"] {
             background: linear-gradient(135deg, #ef4444, #dc2626) !important;
             border: none !important; color: #fff !important;
@@ -393,72 +359,18 @@ else:  # Giao diện Sáng
             background: linear-gradient(135deg, #0284c7, #6366f1) !important;
             color: #fff !important; font-weight: 600 !important;
         }
-        [data-testid="stDataFrame"] th { background: #f1f5f9 !important; color: #64748b !important; font-size: 0.72rem !important; }
-        [data-testid="stDataFrame"] td { background: #ffffff !important; color: #0f172a !important; }
         .chat-box {
             background-color: #f1f5f9 !important;
             padding: 12px 14px !important;
             border-radius: 0 12px 12px 0 !important;
             margin-bottom: 10px !important;
             border-left: 3px solid #0284c7 !important;
-            color: #0f172a !important;
         }
         hr { border: none !important; border-top: 1px solid #e2e8f0 !important; margin: 1.4rem 0 !important; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f0f4f8; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
         ::-webkit-scrollbar-thumb:hover { background: #0284c7; }
-        </style>
-    """, unsafe_allow_html=True)
-
-else:
-    st.markdown("""
-        <style>
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #f8fafc; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        .stApp { background-color: #f8fafc; color: #0f172a; transition: background-color 0.3s ease; }
-        [data-testid="stHeader"] { background-color: rgba(248, 250, 252, 0.8); backdrop-filter: blur(8px); }
-        
-        div[data-testid="stVerticalBlockBorderWrapper"] {
-            background-color: #ffffff !important; border: 1px solid #e2e8f0 !important; 
-            border-radius: 14px !important; padding: 22px !important; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;
-            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease !important;
-        }
-        div[data-testid="stVerticalBlockBorderWrapper"]:hover {
-            transform: translateY(-3px); border-color: #0284c7 !important;
-            box-shadow: 0 10px 20px rgba(2, 132, 199, 0.1) !important;
-        }
-        
-        h1, h2, h3 { color: #0284c7 !important; background: none !important; -webkit-text-fill-color: initial !important; font-weight: 700 !important; }
-        section[data-testid="stSidebar"] { background-color: #f1f5f9 !important; border-right: 1px solid #e2e8f0; }
-        
-        .stTextInput input, .stNumberInput input, div[data-baseweb="select"] { 
-            background-color: #ffffff !important; color: #0f172a !important; border: 1px solid #cbd5e1 !important; border-radius: 8px !important; 
-        }
-        /* FIX LỖI TÀNG HÌNH CHỮ SELECTBOX Ở LIGHT MODE */
-        div[data-baseweb="select"] * { color: #0f172a !important; }
-        
-        @keyframes pulse-red-light {
-            0% { box-shadow: 0 0 0 0 rgba(220,38,38,0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(220,38,38,0); }
-            100% { box-shadow: 0 0 0 0 rgba(220,38,38,0); }
-        }
-        
-        button[data-testid="baseButton-primary"] { 
-            background-color: #dc2626 !important; border: none !important; color: white !important; font-weight: bold !important; 
-            border-radius: 8px !important; animation: pulse-red-light 2s infinite;
-        }
-        
-        button[data-testid="baseButton-secondary"] { 
-            background-color: #0284c7 !important; color: white !important; font-weight: bold !important; border: none !important; 
-            border-radius: 8px !important; transition: all 0.25s ease-in-out !important;
-        }
-        button[data-testid="baseButton-secondary"]:hover { transform: translateY(-1px); box-shadow: 0 5px 15px rgba(2, 132, 199, 0.4) !important; }
-        
-        .chat-box { background-color: #f1f5f9; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #0284c7; color: #0f172a !important; }
         </style>
     """, unsafe_allow_html=True)
 base_url = FIREBASE_URL.strip()
