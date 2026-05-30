@@ -402,7 +402,6 @@ try:
             else:
                 target_goal_mins = 45
             
-            
             progress_pct = min(1.0, today_mins / max(1, target_goal_mins))
             percent_val = int(progress_pct * 100)
             
@@ -413,7 +412,6 @@ try:
             else:
                 bar_color = "#22c55e"  
                 
-           
             st.markdown(f"""
                 <div style="width: 100%; background-color: #334155; border-radius: 8px; height: 18px; margin: 4px 0;">
                     <div style="width: {percent_val}%; background-color: {bar_color}; height: 100%; border-radius: 8px; transition: width 0.5s ease-in-out;"></div>
@@ -423,15 +421,18 @@ try:
             st.caption(f"📈 Đã hoàn thành **{percent_val}%** ({today_mins}/{target_goal_mins} phút theo mục tiêu từ cha mẹ).")
             st.write("")
 
-    tab1, tab1_th, tab2, tab3, tab4 = st.tabs([
+    # Thêm các Tab phân tích mới vào hệ thống menu
+    tab1, tab1_th, tab_week, tab2, tab_time, tab3, tab4 = st.tabs([
         "📅 Theo ngày (30 ngày)",
         "📈 Xu hướng (TH)", 
+        "🗓️ Phân tích Thứ/Tuần", # Tab MỚI 1
         "🥧 Theo môn học",
-        "🏆 So sánh học sinh",
-        "🗓️ Lịch sử gần đây"
+        "🕒 Khung Giờ Tập Tập Trung", # Tab MỚI 2
+        "🏆 So sánh & Kỷ luật", # Tab Cải tiến 3
+        "📋 Lịch sử gần đây"
     ])
 
-    # TAB 1 — Chuỗi ngày học liên tiếp chuẩn thuật toán thực tế
+    # TAB 1 — Chuỗi ngày học liên tiếp
     with tab1:
         if all_daily:
             sorted_days = sorted(all_daily.items())
@@ -440,7 +441,7 @@ try:
             values_d = [d[1] for d in last_30_days]
             avg_v    = sum(values_d) / max(len(values_d), 1)
 
-            chart_color = "#38bdf8" if st.session_state["theme_mode"] == "🌙 Giao diện Tối" else "#0284c7"
+            chart_color = "#38bdf8" if st.session_state.get("theme_mode") == "🌙 Giao diện Tối" else "#0284c7"
             chart_data_d = pd.DataFrame({"Ngày": labels_d, "Phút học": values_d}).set_index("Ngày")
             st.bar_chart(chart_data_d, color=chart_color)
 
@@ -449,7 +450,6 @@ try:
             col_b.metric("📈 Trung bình 30 ngày",   f"{int(avg_v)} phút")
             col_c.metric("✅ Ngày có học",           f"{sum(1 for v in values_d if v > 0)}/30 ngày")
 
-            # --- THUẬT TOÁN TÍNH CHUỖI STREAK LIÊN TIẾP CHUẨN XÁC ---
             streak_count = 0
             check_date = today_dt
             
@@ -466,7 +466,6 @@ try:
                     else:
                         break
 
-            # Hiển thị vinh danh chuỗi ngày học
             st.markdown("---")
             if streak_count >= 7:
                 st.success(f"👑 **CHUỖI HỎA TỐC HUYỀN THOẠI:** Con đã học liên tiếp **{streak_count} ngày**! Phong độ vô cùng xuất sắc, cha mẹ hãy thưởng cho con nhé! 🌟")
@@ -503,6 +502,27 @@ try:
         else:
             st.info("Chưa có lịch sử máy con hoạt động để dựng dòng thời gian.")
 
+    # TAB MỚI 1 — BIỂU ĐỒ NĂNG SUẤT THEO THỨ (Dữ liệu tuần)
+    with tab_week:
+        st.write("### 📅 Phân tích năng suất học tập theo các ngày trong tuần")
+        if all_daily:
+            days_of_week = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"]
+            weekly_matrix = {d: 0 for d in days_of_week}
+            
+            for date_str, mins in all_daily.items():
+                try:
+                    dt_obj = datetime.datetime.strptime(date_str, "%Y-%m-%d")
+                    weekday_name = days_of_week[dt_obj.weekday()]
+                    weekly_matrix[weekday_name] += mins
+                except:
+                    pass
+                
+            df_week_chart = pd.DataFrame(list(weekly_matrix.items()), columns=["Thứ trong tuần", "Tổng phút học"])
+            st.bar_chart(df_week_chart.set_index("Thứ trong tuần")["Tổng phút học"], color="#f59e0b")
+            st.caption("💡 *Biểu đồ giúp cha mẹ phát hiện con thường tập trung cao độ vào đầu tuần hay cuối tuần để phân bổ lịch học phù hợp.*")
+        else:
+            st.info("Chưa có dữ liệu phân tích tuần.")
+
     # TAB 2 — Theo môn học
     with tab2:
         if all_history:
@@ -535,9 +555,41 @@ try:
         else:
             st.info("Chưa có dữ liệu môn học.")
 
-    # TAB 3 — So sánh học sinh
+    # TAB MỚI 2 — BIỂU ĐỒ KHUNG GIỜ VÀNG TRONG NGÀY
+    with tab_time:
+        st.write("### 🕒 Biểu đồ Khung Giờ Tập Trung (Con hay bật máy học lúc nào?)")
+        if all_history:
+            time_slots = {"Sáng (06h-12h)": 0, "Chiều (12h-18h)": 0, "Tối (18h-22h)": 0, "Ban Đêm (22h-06h)": 0}
+            
+            for h in all_history:
+                h_time = h.get("time", "")  # Định dạng "HH:MM" hoặc chứa giờ
+                if h_time and ":" in h_time:
+                    try:
+                        # Tách lấy phần giờ để phân loại khung giờ hoạt động
+                        hour_part = int(h_time.split(":")[-2].split()[-1])
+                        mins = int(h.get("minutes", 0) or 0)
+                        if 6 <= hour_part < 12:    time_slots["Sáng (06h-12h)"] += mins
+                        elif 12 <= hour_part < 18: time_slots["Chiều (12h-18h)"] += mins
+                        elif 18 <= hour_part < 22: time_slots["Tối (18h-22h)"] += mins
+                        else:                      time_slots["Ban Đêm (22h-06h)"] += mins
+                    except:
+                        pass
+                    
+            df_slots = pd.DataFrame(list(time_slots.items()), columns=["Khung giờ", "Phút tích lũy"])
+            st.line_chart(df_slots.set_index("Khung giờ")["Phút tích lũy"], color="#10b981")
+            
+            # Đưa ra cảnh báo thông minh dựa trên hành vi thời gian thực
+            if time_slots["Ban Đêm (22h-06h)"] > 45:
+                st.warning("⚠️ **Cảnh báo sức khỏe:** Con đang có xu hướng học bài rất muộn vào ban đêm (>45 phút). Cha mẹ nên nhắc con ngủ sớm để đảm bảo sức khỏe học đường.")
+            else:
+                st.info("✨ **Đánh giá:** Con duy trì thời gian biểu sinh hoạt và học tập rất lành mạnh, không học muộn ban đêm.")
+        else:
+            st.info("Chưa có dữ liệu lịch sử để phân tích khung giờ học.")
+
+    # TAB 3 — So sánh học sinh & Tỷ lệ Kỷ Luật Mục Tiêu mới
     with tab3:
         if student_totals:
+            st.write("### 🏆 Bảng xếp hạng tổng thời gian tích lũy")
             df_cmp = (
                 pd.DataFrame(list(student_totals.items()), columns=["Học sinh", "Tổng phút"])
                 .sort_values("Tổng phút", ascending=False)
@@ -548,21 +600,48 @@ try:
             medals = ["🥇", "🥈", "🥉"] + ["🏅"] * 20
             df_cmp.insert(0, "Hạng", [medals[i] for i in range(len(df_cmp))])
             st.dataframe(df_cmp, width="stretch", hide_index=True)
+            
             if len(df_cmp) >= 2:
                 winner = df_cmp.iloc[0]
                 runner = df_cmp.iloc[1]
                 gap = winner["Tổng phút"] - runner["Tổng phút"]
-                st.success(f"🎉 **{winner['Học sinh']}** đang dẫn đầu với {winner['Tổng phút']} phút, hơn người thứ 2 {gap} phút!")
+                st.success(f"🎉 **{winner['Học sinh']}** đang dẫn đầu với {winner['Tổng phút']} phút, hơn người thứ hai `{gap}` phút!")
+            
+            # --- BIỂU ĐỒ MỚI THỨ 3: ĐO LƯỜNG TỶ LỆ KỶ LUẬT (CHỈ SỐ ĐẠT MỤC TIÊU) ---
+            st.write("---")
+            st.write("### 🎯 Chỉ số tự giác kỷ luật (Tỷ lệ hoàn thành mục tiêu ngày)")
+            
+            # Lấy mục tiêu thời gian quy chuẩn của học sinh hiện tại chọn
+            current_target = 45
+            if selected_student != "📊 Tất cả học sinh" and selected_student is not None:
+                student_info = res_all.get(selected_student, {})
+                current_target = student_info.get("target_goal", 45) if isinstance(student_info, dict) else 45
+            
+            success_days = 0
+            failed_days = 0
+            for date_str, mins in all_daily.items():
+                if mins >= current_target:   success_days += 1
+                elif mins > 0:               failed_days += 1
+                    
+            if (success_days + failed_days) > 0:
+                df_target = pd.DataFrame({
+                    "Kết quả chỉ tiêu": ["Đạt mục tiêu cha mẹ giao 🎉", "Chưa đạt chỉ tiêu 🛠️"],
+                    "Số ngày": [success_days, failed_days]
+                })
+                st.bar_chart(df_target.set_index("Kết quả chỉ tiêu")["Số ngày"], color="#ec4899")
+                total_active_days = success_days + failed_days
+                rate = int((success_days / total_active_days) * 100)
+                st.info(f"📊 Thống kê: Con đạt mục tiêu **{success_days}/{total_active_days} ngày** học máy (Tỷ lệ hoàn thành: `{rate}%`).")
+            else:
+                st.info("Chưa có đủ lịch sử ngày học để đo lường tỷ lệ đạt chỉ tiêu.")
         else:
             st.info("Chưa có dữ liệu học sinh để so sánh.")
 
     # TAB 4 — Lịch sử phiên học
     with tab4:
             if all_history:
-                # 1. Tự động lấy danh sách các môn học hiện có trong lịch sử (bỏ trùng)
                 unique_subjects = sorted(list(set([h.get("subject", "Không rõ") for h in all_history if h.get("subject")])))
                 
-                # 2. Tạo dropdown chọn môn học
                 selected_sub = st.selectbox(
                     "🎯 Xem riêng lịch sử môn học:", 
                     ["📚 Tất cả các môn"] + unique_subjects, 
@@ -586,7 +665,6 @@ try:
                         })
                     st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
                     
-                    # 5. Tính toán số liệu thống kê động theo bộ lọc
                     total_sessions   = len(filtered_history)
                     total_from_hist  = sum(int(h.get("minutes", 0) or 0) for h in filtered_history)
                     
