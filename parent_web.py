@@ -10,93 +10,376 @@ import hashlib
 
 FIREBASE_URL = "https://pomodoroapp-701a2-default-rtdb.firebaseio.com/"
 
+# =====================================================================
+# 🎨 THAY THẾ TOÀN BỘ ĐOẠN CSS CŨ BẰNG ĐOẠN NÀY
+# Dán từ st.set_page_config(...) trở xuống, thay thế phần cũ
+# =====================================================================
+
 st.set_page_config(
-    page_title="Trung Tâm Điều Khiển Phụ Huynh", 
-    page_icon="👑", 
+    page_title="Trung Tâm Điều Khiển Phụ Huynh",
+    page_icon="👑",
     layout="centered",
     initial_sidebar_state="expanded"
 )
 
+# ── Khởi tạo theme ──
 if "theme_mode" not in st.session_state:
-    st.session_state["theme_mode"] = "🌙 Giao diện Tối"
+    st.session_state["theme_mode"] = "dark"
 
 def change_theme():
-    st.session_state["theme_mode"] = st.session_state["theme_select_box"]
+    st.session_state["theme_mode"] = st.session_state["_theme_pick"]
 
 with st.sidebar:
-    st.markdown("<h3 style='margin-top:0;'>🎨 Cài đặt Giao diện</h3>", unsafe_allow_html=True)
-    theme_choice = st.selectbox(
-        "Chọn chế độ hiển thị:",
-        ["🌙 Giao diện Tối", "☀️ Giao diện Sáng"],
-        key="theme_select_box",
-        on_change=change_theme
+    st.markdown("<div style='padding:0.3rem 0 1rem;font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#64748b;'>Giao diện</div>", unsafe_allow_html=True)
+    st.selectbox(
+        "Chế độ:",
+        options=["dark", "light"],
+        format_func=lambda x: "🌙 Tối" if x == "dark" else "☀️ Sáng",
+        key="_theme_pick",
+        index=0 if st.session_state["theme_mode"] == "dark" else 1,
+        on_change=change_theme,
+        label_visibility="collapsed"
     )
 
-if st.session_state["theme_mode"] == "🌙 Giao diện Tối":
-    st.markdown("""
-        <style>
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
-        .stApp { background-color: #0f172a; color: #f1f5f9; transition: background-color 0.3s ease; }
-        [data-testid="stHeader"] { background-color: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); }
-        div[data-testid="stVerticalBlockBorderWrapper"] {
-            background-color: #1e293b !important; border: 1px solid #334155 !important;
-            border-radius: 14px !important; padding: 22px !important;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3) !important;
-            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease !important;
-        }
-        div[data-testid="stVerticalBlockBorderWrapper"]:hover {
-            transform: translateY(-3px); border-color: #38bdf8 !important;
-            box-shadow: 0 15px 25px -5px rgba(56,189,248,0.15) !important;
-        }
-        h1, h2, h3 {
-            background: linear-gradient(to right, #38bdf8, #818cf8) !important;
-            -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important; font-weight: 700 !important;
-        }
-        section[data-testid="stSidebar"] { background-color: #0b0f19 !important; border-right: 1px solid #1e293b; }
-        .stTextInput input, .stNumberInput input, div[data-baseweb="select"] {
-            background-color: #0f172a !important; color: #f1f5f9 !important; border: 1px solid #475569 !important; border-radius: 8px !important;
-        }
-        div[data-baseweb="select"] * { color: #f1f5f9 !important; }
-        @keyframes pulse-red {
-            0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
-            100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
-        }
-        button[data-testid="baseButton-primary"] {
-            background: linear-gradient(135deg, #ef4444, #b91c1c) !important; border: none !important; color: white !important; font-weight: bold !important;
-            border-radius: 8px !important; transition: all 0.25s ease-in-out !important; animation: pulse-red 2s infinite;
-        }
-        button[data-testid="baseButton-secondary"] {
-            background: linear-gradient(135deg, #38bdf8, #2563eb) !important; color: white !important; font-weight: bold !important; border: none !important;
-            border-radius: 8px !important; transition: all 0.25s ease-in-out !important;
-        }
-        button[data-testid="baseButton-secondary"]:hover { transform: translateY(-1px); box-shadow: 0 0 15px rgba(56,189,248,0.6) !important; }
-        .chat-box { background-color: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #38bdf8; }
-        </style>
-    """, unsafe_allow_html=True)
-else:
-    st.markdown("""
-        <style>
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #f8fafc; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        .stApp { background-color: #f8fafc; color: #0f172a; transition: background-color 0.3s ease; }
-        div[data-testid="stVerticalBlockBorderWrapper"] {
-            background-color: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 14px !important; padding: 22px !important; box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;
-        }
-        h1, h2, h3 { color: #0284c7 !important; background: none !important; -webkit-text-fill-color: initial !important; font-weight: 700 !important; }
-        section[data-testid="stSidebar"] { background-color: #f1f5f9 !important; border-right: 1px solid #e2e8f0; }
-        .stTextInput input, .stNumberInput input, div[data-baseweb="select"] { background-color: #ffffff !important; color: #0f172a !important; border: 1px solid #cbd5e1 !important; border-radius: 8px !important; }
-        button[data-testid="baseButton-primary"] { background-color: #dc2626 !important; border: none !important; color: white !important; font-weight: bold !important; border-radius: 8px !important; }
-        button[data-testid="baseButton-secondary"] { background-color: #0284c7 !important; color: white !important; font-weight: bold !important; border: none !important; border-radius: 8px !important; }
-        .chat-box { background-color: #f1f5f9; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #0284c7; }
-        </style>
-    """, unsafe_allow_html=True)
+# ── Biến màu theo theme ──
+IS_DARK = st.session_state["theme_mode"] == "dark"
 
+T = {
+    "bg":        "#07101f" if IS_DARK else "#f0f4f8",
+    "bg2":       "#0c1829" if IS_DARK else "#ffffff",
+    "bg3":       "#101f33" if IS_DARK else "#f8fafc",
+    "border":    "rgba(56,189,248,0.13)" if IS_DARK else "#dde3ec",
+    "border_h":  "rgba(56,189,248,0.4)"  if IS_DARK else "#93c5fd",
+    "text":      "#e8f0fe" if IS_DARK else "#0f172a",
+    "sub":       "#4e6a8a" if IS_DARK else "#64748b",
+    "accent":    "#38bdf8" if IS_DARK else "#0284c7",
+    "accent2":   "#818cf8" if IS_DARK else "#6366f1",
+    "sidebar":   "#060e1c" if IS_DARK else "#f1f5f9",
+    "sidebar_b": "#0c1829" if IS_DARK else "#e2e8f0",
+    "input_bg":  "#080f1c" if IS_DARK else "#ffffff",
+    "input_b":   "rgba(56,189,248,0.22)" if IS_DARK else "#94a3b8",
+    "card_sh":   "0 8px 32px rgba(0,0,0,0.45)" if IS_DARK else "0 4px 20px rgba(0,0,0,0.07)",
+    "chat_bg":   "#0d1e35" if IS_DARK else "#f1f5f9",
+    "chat_b":    "#38bdf8" if IS_DARK else "#0284c7",
+    "h_color":   "transparent"           if IS_DARK else "#0284c7",
+    "h_grad":    "linear-gradient(135deg,#38bdf8,#818cf8)" if IS_DARK else "none",
+    "h_fill":    "transparent"           if IS_DARK else "#0284c7",
+}
+
+st.markdown(f"""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+
+*, *::before, *::after {{
+    font-family: 'Be Vietnam Pro', -apple-system, sans-serif !important;
+    box-sizing: border-box;
+}}
+
+/* ── Nền tổng ── */
+.stApp {{
+    background: {T['bg']} !important;
+    color: {T['text']} !important;
+    transition: background 0.35s ease, color 0.35s ease;
+}}
+
+/* ── Block container ── */
+.block-container {{
+    padding: 1.8rem 1.5rem 4rem !important;
+    max-width: 860px !important;
+}}
+
+/* ── Header ── */
+[data-testid="stHeader"] {{
+    background: {T['bg']}cc !important;
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    border-bottom: 1px solid {T['border']};
+}}
+
+/* ── Sidebar ── */
+section[data-testid="stSidebar"] {{
+    background: {T['sidebar']} !important;
+    border-right: 1px solid {T['sidebar_b']} !important;
+}}
+section[data-testid="stSidebar"] .stMarkdown p,
+section[data-testid="stSidebar"] label,
+section[data-testid="stSidebar"] span {{
+    color: {T['sub']} !important;
+    font-size: 0.85rem !important;
+}}
+
+/* ── Tiêu đề h1 / h2 / h3 ── */
+h1 {{
+    background: {T['h_grad']} !important;
+    -webkit-background-clip: {'text' if IS_DARK else 'unset'} !important;
+    -webkit-text-fill-color: {T['h_fill']} !important;
+    color: {T['h_color']} !important;
+    font-size: 1.75rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.4px !important;
+    line-height: 1.25 !important;
+}}
+h2 {{
+    background: {T['h_grad']} !important;
+    -webkit-background-clip: {'text' if IS_DARK else 'unset'} !important;
+    -webkit-text-fill-color: {T['h_fill']} !important;
+    color: {T['h_color']} !important;
+    font-size: 1.2rem !important;
+    font-weight: 600 !important;
+}}
+h3 {{
+    background: {T['h_grad']} !important;
+    -webkit-background-clip: {'text' if IS_DARK else 'unset'} !important;
+    -webkit-text-fill-color: {T['h_fill']} !important;
+    color: {T['h_color']} !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+}}
+
+/* ── Cards / Containers ── */
+div[data-testid="stVerticalBlockBorderWrapper"] {{
+    background: {T['bg2']} !important;
+    border: 1px solid {T['border']} !important;
+    border-radius: 18px !important;
+    padding: 1.4rem 1.6rem !important;
+    box-shadow: {T['card_sh']} !important;
+    transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease !important;
+}}
+div[data-testid="stVerticalBlockBorderWrapper"]:hover {{
+    border-color: {T['border_h']} !important;
+    box-shadow: {'0 12px 36px rgba(56,189,248,0.1)' if IS_DARK else '0 8px 28px rgba(2,132,199,0.1)'} !important;
+    transform: translateY(-2px) !important;
+}}
+
+/* ── Metric ── */
+[data-testid="stMetric"] {{
+    background: {T['bg3']} !important;
+    border: 1px solid {T['border']} !important;
+    border-radius: 14px !important;
+    padding: 1rem 1.2rem !important;
+    transition: border-color 0.2s !important;
+}}
+[data-testid="stMetric"]:hover {{ border-color: {T['border_h']} !important; }}
+[data-testid="stMetricLabel"] {{
+    color: {T['sub']} !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.07em !important;
+}}
+[data-testid="stMetricValue"] {{
+    color: {T['text']} !important;
+    font-size: 1.6rem !important;
+    font-weight: 700 !important;
+}}
+
+/* ── Inputs ── */
+.stTextInput input,
+.stNumberInput input,
+.stTextArea textarea {{
+    background: {T['input_bg']} !important;
+    color: {T['text']} !important;
+    border: 1px solid {T['input_b']} !important;
+    border-radius: 10px !important;
+    font-size: 0.9rem !important;
+    padding: 0.55rem 0.9rem !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+}}
+.stTextInput input:focus,
+.stNumberInput input:focus,
+.stTextArea textarea:focus {{
+    border-color: {T['accent']} !important;
+    box-shadow: 0 0 0 3px {'rgba(56,189,248,0.15)' if IS_DARK else 'rgba(2,132,199,0.12)'} !important;
+    outline: none !important;
+}}
+
+/* ── Selectbox ── */
+div[data-baseweb="select"] > div {{
+    background: {T['input_bg']} !important;
+    border: 1px solid {T['input_b']} !important;
+    border-radius: 10px !important;
+}}
+div[data-baseweb="select"] * {{ color: {T['text']} !important; }}
+div[data-baseweb="popover"] {{ background: {T['bg2']} !important; border: 1px solid {T['border']} !important; border-radius: 12px !important; }}
+li[role="option"]:hover {{ background: {T['bg3']} !important; }}
+
+/* ── Tabs ── */
+[data-testid="stTabs"] [role="tablist"] {{
+    background: {T['bg3']} !important;
+    border-radius: 12px !important;
+    padding: 4px !important;
+    gap: 4px !important;
+    border: 1px solid {T['border']} !important;
+}}
+[data-testid="stTabs"] button[role="tab"] {{
+    color: {T['sub']} !important;
+    font-size: 0.83rem !important;
+    font-weight: 500 !important;
+    border-radius: 9px !important;
+    padding: 0.4rem 1rem !important;
+    border: none !important;
+    transition: all 0.18s ease !important;
+}}
+[data-testid="stTabs"] button[role="tab"][aria-selected="true"] {{
+    background: {'linear-gradient(135deg,#0ea5e9,#6366f1)' if IS_DARK else T['accent']} !important;
+    color: #fff !important;
+    font-weight: 600 !important;
+    box-shadow: {'0 2px 12px rgba(56,189,248,0.3)' if IS_DARK else '0 2px 8px rgba(2,132,199,0.25)'} !important;
+}}
+
+/* ── Buttons ── */
+button[data-testid="baseButton-primary"] {{
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    border: none !important;
+    color: #fff !important;
+    font-weight: 600 !important;
+    border-radius: 10px !important;
+    font-size: 0.88rem !important;
+    letter-spacing: 0.01em !important;
+    box-shadow: 0 2px 14px rgba(239,68,68,0.35) !important;
+    transition: all 0.2s ease !important;
+}}
+button[data-testid="baseButton-primary"]:hover {{
+    box-shadow: 0 4px 22px rgba(239,68,68,0.55) !important;
+    transform: translateY(-1px) !important;
+    filter: brightness(1.08) !important;
+}}
+button[data-testid="baseButton-secondary"] {{
+    background: linear-gradient(135deg, {T['accent']}, {T['accent2']}) !important;
+    border: none !important;
+    color: #fff !important;
+    font-weight: 600 !important;
+    border-radius: 10px !important;
+    font-size: 0.88rem !important;
+    box-shadow: {'0 2px 14px rgba(56,189,248,0.3)' if IS_DARK else '0 2px 10px rgba(2,132,199,0.2)'} !important;
+    transition: all 0.2s ease !important;
+}}
+button[data-testid="baseButton-secondary"]:hover {{
+    box-shadow: {'0 4px 22px rgba(56,189,248,0.5)' if IS_DARK else '0 4px 18px rgba(2,132,199,0.35)'} !important;
+    transform: translateY(-1px) !important;
+    filter: brightness(1.08) !important;
+}}
+
+/* ── Dataframe ── */
+[data-testid="stDataFrame"] {{
+    border: 1px solid {T['border']} !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+}}
+[data-testid="stDataFrame"] th {{
+    background: {T['bg3']} !important;
+    color: {T['sub']} !important;
+    font-size: 0.72rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.07em !important;
+    font-weight: 600 !important;
+}}
+[data-testid="stDataFrame"] td {{
+    color: {T['text']} !important;
+    font-size: 0.88rem !important;
+}}
+[data-testid="stDataFrame"] tr:hover td {{
+    background: {T['bg3']} !important;
+}}
+
+/* ── Expander ── */
+[data-testid="stExpander"] {{
+    background: {T['bg2']} !important;
+    border: 1px solid {T['border']} !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+}}
+[data-testid="stExpander"] summary {{
+    color: {T['sub']} !important;
+    font-size: 0.88rem !important;
+    font-weight: 500 !important;
+    padding: 0.75rem 1rem !important;
+}}
+[data-testid="stExpander"] summary:hover {{
+    color: {T['accent']} !important;
+}}
+
+/* ── Alerts ── */
+[data-testid="stAlert"] {{
+    border-radius: 12px !important;
+    border-left-width: 4px !important;
+    font-size: 0.88rem !important;
+}}
+
+/* ── Progress bar ── */
+[data-testid="stProgressBar"] > div > div {{
+    background: linear-gradient(90deg, {T['accent']}, {T['accent2']}) !important;
+    border-radius: 99px !important;
+}}
+[data-testid="stProgressBar"] > div {{
+    background: {T['bg3']} !important;
+    border-radius: 99px !important;
+    height: 8px !important;
+}}
+
+/* ── Caption / small text ── */
+.stCaption, [data-testid="stCaptionContainer"] p {{
+    color: {T['sub']} !important;
+    font-size: 0.78rem !important;
+}}
+
+/* ── Divider ── */
+hr {{
+    border: none !important;
+    border-top: 1px solid {T['border']} !important;
+    margin: 1.4rem 0 !important;
+}}
+
+/* ── Chat box ── */
+.chat-box {{
+    background: {T['chat_bg']};
+    border-left: 3px solid {T['chat_b']};
+    border-radius: 0 12px 12px 0;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+}}
+.chat-box:hover {{ border-left-color: {T['accent2']}; }}
+
+/* ── Badge / pill ── */
+.badge {{
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.73rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}}
+.badge-green  {{ background: {'rgba(34,197,94,0.13)' if IS_DARK else '#dcfce7'}; color: {'#4ade80' if IS_DARK else '#16a34a'}; }}
+.badge-blue   {{ background: {'rgba(56,189,248,0.13)' if IS_DARK else '#e0f2fe'}; color: {'#38bdf8' if IS_DARK else '#0284c7'}; }}
+.badge-red    {{ background: {'rgba(239,68,68,0.13)'  if IS_DARK else '#fee2e2'}; color: {'#f87171' if IS_DARK else '#dc2626'}; }}
+.badge-yellow {{ background: {'rgba(234,179,8,0.13)'  if IS_DARK else '#fef9c3'}; color: {'#facc15' if IS_DARK else '#ca8a04'}; }}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {{ width: 6px; height: 6px; }}
+::-webkit-scrollbar-track {{ background: {T['bg']}; }}
+::-webkit-scrollbar-thumb {{ background: {'#1e3a5f' if IS_DARK else '#cbd5e1'}; border-radius: 6px; }}
+::-webkit-scrollbar-thumb:hover {{ background: {T['accent']}; }}
+
+/* ── Radio buttons ── */
+[data-testid="stRadio"] label {{
+    color: {T['sub']} !important;
+    font-size: 0.88rem !important;
+}}
+[data-testid="stRadio"] label:has(input:checked) {{
+    color: {T['accent']} !important;
+    font-weight: 600 !important;
+}}
+
+/* ── Number input arrows ── */
+.stNumberInput button {{
+    background: {T['bg3']} !important;
+    border: 1px solid {T['border']} !important;
+    color: {T['text']} !important;
+    border-radius: 8px !important;
+}}
+</style>
+""", unsafe_allow_html=True)
 base_url = FIREBASE_URL.strip()
 if not base_url.endswith("/"): base_url += "/"
 
@@ -617,7 +900,6 @@ if user_names:
             # 1. Gửi lệnh xuống máy con
             send_remote_command({"command": "SET_GOAL", "minutes": target_mins, "timestamp": int(time.time()), "status": "pending"}, target)
             
-            # 2. Lưu mục tiêu vào Firebase (Hãy chắc chắn đoạn try/except này thẳng hàng)
             try: 
                 requests.patch(f"{base_url}users/{target}.json", json={"target_goal": target_mins}, timeout=2)
                 st.success(f"🎯 Đã lưu mục tiêu {target_mins} phút cho {target}!")
@@ -633,7 +915,6 @@ if user_names:
 
 st.write("---")
 
-# QR Code
 qr_bytes, net_url = generate_network_qr()
 if qr_bytes:
     with st.expander("📲 MÃ QR KẾT NỐI ĐIỆN THOẠI"):
