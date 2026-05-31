@@ -1103,7 +1103,7 @@ def call_gemini(prompt: str, system_instruction: str = "") -> str:
         
         # Gọi Gemini với cấu hình system_instruction trực tiếp
         gemini_model = genai.GenerativeModel(
-            model_name='gemini-1.5-flash',
+            model_name='gemini-1.5-flash-latest',
             system_instruction=sys_msg
         )
         
