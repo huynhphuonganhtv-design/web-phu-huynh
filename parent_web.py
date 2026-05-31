@@ -1073,14 +1073,16 @@ load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # Cấu hình Gemini
-try:
-    if not GEMINI_API_KEY:
-        st.error("❌ Không tìm thấy GEMINI_API_KEY trong file .env! Vui lòng kiểm tra lại.")
-    else:
+# Cấu hình Gemini chuẩn phiên bản mới (Đã sửa thụt lề)
+if GEMINI_API_KEY:
+    try:
         genai.configure(api_key=GEMINI_API_KEY)
-        model = genai.GenerativeModel('gemini-1.5-flash')
-except Exception as e:
-    st.error(f"Lỗi cấu hình Gemini: {e}")
+        # SỬA Ở ĐÂY: Dùng bản -latest để tránh lỗi 404 trên Streamlit Cloud
+        model = genai.GenerativeModel('gemini-1.5-flash-latest')
+    except Exception as e:
+        st.error(f"Lỗi cấu hình Gemini: {e}")
+else:
+    st.error("❌ Không tìm thấy GEMINI_API_KEY!")
 
 st.write("---")
 st.subheader("🤖 Trợ Lý AI Phụ Huynh")
