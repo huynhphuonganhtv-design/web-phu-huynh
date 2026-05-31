@@ -1055,12 +1055,12 @@ if qr_bytes:
             mime="image/png",
             use_container_width=True  # Sử dụng cái này thay cho width="stretch" để nút khít giao diện
         )
-
+import streamlit as st
 import google.generativeai as genai
 import datetime
 import requests
 import os
-import streamlit as st  # ✅ ĐÃ SỬA: Thêm import streamlit ở đầu file
+import json  # Thêm nếu code phía dưới của bạn có dùng json
 from dotenv import load_dotenv
 
 # ✅ ĐÃ SỬA: Khai báo biến base_url (Bạn nhớ thay link Firebase thật của bạn vào đây)
