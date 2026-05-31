@@ -1055,97 +1055,71 @@ if qr_bytes:
             mime="image/png",
             use_container_width=True  # Sử dụng cái này thay cho width="stretch" để nút khít giao diện
         )
-# =====================================================================
-# 🤖 PHẦN AI PHỤ HUYNH (ĐÃ CHUYỂN SANG GEMINI API)
-# Cần cài đặt trước: pip install google-generativeai
-# =====================================================================
+
 import google.generativeai as genai
 import datetime
 import requests
-import os  # Thêm thư viện hệ thống
-from dotenv import load_dotenv  # Thêm thư viện đọc file .env
-
-# ── CẤU HÌNH BẢO MẬT BIẾN MÔI TRƯỜNG ──
-# Tự động quét và tải dữ liệu từ file .env lên hệ thống ngầm
+import os
+from dotenv import load_dotenv
+ 
 load_dotenv()
-
-# Lấy API Key từ file .env ra. Từ nay code của bạn hoàn toàn sạch, không dính chữ AQ.Ab8... nữa!
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-
-# Cấu hình Gemini
-# Cấu hình Gemini chuẩn phiên bản mới (Đã sửa thụt lề)
+ 
 if GEMINI_API_KEY:
     try:
         genai.configure(api_key=GEMINI_API_KEY)
-        # SỬA Ở ĐÂY: Dùng bản -latest để tránh lỗi 404 trên Streamlit Cloud
-        model = genai.GenerativeModel('gemini-1.5-flash-latest')
     except Exception as e:
         st.error(f"Lỗi cấu hình Gemini: {e}")
 else:
-    st.error("❌ Không tìm thấy GEMINI_API_KEY!")
-
-st.write("---")
-st.subheader("🤖 Trợ Lý AI Phụ Huynh")
-
-ai_tab1, ai_tab2 = st.tabs([
-    "📊 AI Phân Tích Học Tập",
-    "📝 AI Tạo Nhận Xét / Báo Cáo"
-])
-
-# ── Hàm gọi Gemini API (Thay thế cho hàm call_claude) ──
+    st.warning("⚠️ Chưa có GEMINI_API_KEY — tính năng AI sẽ bị tắt.")
+ 
 def call_gemini(prompt: str, system_instruction: str = "") -> str:
+    if not GEMINI_API_KEY:
+        return "❌ Chưa cấu hình GEMINI_API_KEY (Kiểm tra file .env hoặc mục Secrets trên Streamlit)"
+ 
     try:
-        # Cấu hình system instruction mặc định nếu không có truyền vào
         sys_msg = system_instruction or (
             "Bạn là trợ lý AI hỗ trợ phụ huynh Việt Nam theo dõi việc học của con. "
             "Trả lời bằng tiếng Việt, ngắn gọn, thực tế, ấm áp như một người tư vấn giáo dục."
         )
-        
-        # Gọi Gemini với cấu hình system_instruction trực tiếp
         gemini_model = genai.GenerativeModel(
-            model_name='gemini-1.5-flash-latest',
+            model_name="models/gemini-1.5-flash-latest",
             system_instruction=sys_msg
         )
-        
         response = gemini_model.generate_content(
             prompt,
-            # Giới hạn token đầu ra tương đương max_tokens cũ
             generation_config=genai.types.GenerationConfig(max_output_tokens=1000)
         )
-        
         if response.text:
             return response.text
-        else:
-            return "❌ Lỗi: AI không trả về nội dung text."
+        return "❌ Lỗi: AI không trả về nội dung text."
     except Exception as e:
         return f"❌ Lỗi kết nối Gemini: {e}"
-
-# ── Hàm tóm tắt dữ liệu học sinh thành text (Giữ nguyên logic của bạn) ──
+ 
+ 
 def build_student_summary(name: str, u_info: dict) -> str:
     daily   = u_info.get("daily") or {}
     history = u_info.get("history") or []
     xp      = u_info.get("xp", 0)
     level   = u_info.get("level", 1)
-    streak  = u_info.get("streak", 0)
     target  = u_info.get("target_goal", 45)
-
-    today_str = datetime.date.today().strftime("%Y-%m-%d")
-    today_m   = daily.get(today_str, 0)
-    total_m   = sum(daily.values()) if daily else 0
+ 
+    today_str  = datetime.date.today().strftime("%Y-%m-%d")
+    today_m    = daily.get(today_str, 0)
+    total_m    = sum(daily.values()) if daily else 0
     week_dates = [(datetime.date.today() - datetime.timedelta(days=i)).strftime("%Y-%m-%d") for i in range(7)]
-    week_m    = sum(daily.get(d, 0) for d in week_dates)
-
+    week_m     = sum(daily.get(d, 0) for d in week_dates)
+ 
     subject_map = {}
     for h in history:
         if isinstance(h, dict):
             sub  = h.get("subject", "Không rõ") or "Không rõ"
             mins = int(h.get("minutes", 0) or 0)
             subject_map[sub] = subject_map.get(sub, 0) + mins
-
+ 
     top_subjects = sorted(subject_map.items(), key=lambda x: x[1], reverse=True)[:3]
     top_str = ", ".join([f"{s}({m}p)" for s, m in top_subjects]) or "Chưa có"
-
-    # Streak tính
+ 
     streak_count = 0
     check = datetime.date.today()
     if daily.get(today_str, 0) == 0:
@@ -1157,12 +1131,12 @@ def build_student_summary(name: str, u_info: dict) -> str:
             check -= datetime.timedelta(days=1)
         else:
             break
-
+ 
     return (
         f"Học sinh: {name}\n"
         f"- Hôm nay: {today_m} phút (mục tiêu: {target} phút)\n"
         f"- Tuần này: {week_m} phút\n"
-        f"- Tổng tích lũy: {total_m} calendar phút\n"
+        f"- Tổng tích lũy: {total_m} phút\n"
         f"- Chuỗi học liên tiếp: {streak_count} ngày\n"
         f"- Level: {level} | XP: {xp}\n"
         f"- Môn học nhiều nhất: {top_str}\n"
