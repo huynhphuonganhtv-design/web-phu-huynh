@@ -3,3 +3,5 @@ requests
 qrcode
 pandas
 pillow
+google-generativeai
+python-dotenv
