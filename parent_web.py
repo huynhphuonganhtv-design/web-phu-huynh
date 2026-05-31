@@ -132,7 +132,7 @@ if st.session_state.get("theme_mode") == "🌙 Giao diện Tối":
         .stTextArea label p,
         .stSelectbox label p { color: #94a3b8 !important; font-size: 0.85rem !important; }
 
-        /* ── Selectbox (Sửa lỗi mất text) ── */
+        /* ── Selectbox ── */
         div[data-baseweb="select"] > div {
             background-color: #07101f !important;
             border: 1px solid rgba(56,189,248,0.25) !important;
@@ -216,6 +216,26 @@ if st.session_state.get("theme_mode") == "🌙 Giao diện Tối":
             overflow: hidden !important;
         }
 
+        /* ── Expander Tối (Sửa lỗi .arrow_right) ── */
+        [data-testid="stExpander"] {
+            background: #0f1e35 !important;
+            border: 1px solid rgba(56,189,248,0.15) !important;
+            border-radius: 14px !important;
+        }
+        [data-testid="stExpander"] summary {
+            color: #94a3b8 !important;
+            font-size: 0.88rem !important;
+            padding: 0.75rem 1rem !important;
+        }
+        [data-testid="stExpander"] summary * {
+            font-family: inherit !important;
+        }
+        [data-testid="stExpander"] summary p {
+            display: inline-block !important;
+            margin-left: 10px !important;
+            color: #e2e8f0 !important;
+        }
+
         /* ── Alerts ── */
         [data-testid="stAlert"] {
             border-radius: 12px !important;
@@ -266,31 +286,43 @@ if st.session_state.get("theme_mode") == "🌙 Giao diện Tối":
 else:  # Giao diện Sáng
     st.markdown("""
         <style>
+        /* ── Font ── */
         @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap');
         * { font-family: 'Be Vietnam Pro', sans-serif !important; }
 
+        /* ── Nền toàn trang ── */
         .stApp, .main, [data-testid="stAppViewContainer"] {
             background-color: #f0f4f8 !important;
             color: #0f172a !important;
         }
+        
+        /* ── Text mặc định ── */
         .stMarkdown p, .stMarkdown span, label p, td, th {
             color: #0f172a !important;
         }
+        
+        /* ── Header ── */
         [data-testid="stHeader"] {
             background-color: rgba(240,244,248,0.85) !important;
             backdrop-filter: blur(12px);
         }
+        
+        /* ── Sidebar ── */
         section[data-testid="stSidebar"] {
             background-color: #f1f5f9 !important;
             border-right: 1px solid #dde3ec !important;
         }
         section[data-testid="stSidebar"] * { color: #64748b !important; }
+        
+        /* ── Tiêu đề ── */
         h1, h2, h3 {
             color: #0284c7 !important;
             background: none !important;
             -webkit-text-fill-color: #0284c7 !important;
             font-weight: 700 !important;
         }
+        
+        /* ── Cards ── */
         div[data-testid="stVerticalBlockBorderWrapper"] {
             background-color: #ffffff !important;
             border: 1px solid #dde3ec !important;
@@ -304,6 +336,8 @@ else:  # Giao diện Sáng
             box-shadow: 0 8px 28px rgba(2,132,199,0.1) !important;
             transform: translateY(-2px) !important;
         }
+        
+        /* ── Metric ── */
         [data-testid="stMetric"] {
             background: #f8fafc !important;
             border: 1px solid #dde3ec !important;
@@ -313,6 +347,7 @@ else:  # Giao diện Sáng
         [data-testid="stMetricLabel"] p  { color: #64748b !important; font-size: 0.72rem !important; text-transform: uppercase; letter-spacing: 0.07em; }
         [data-testid="stMetricValue"]    { color: #0f172a !important; font-size: 1.6rem !important; font-weight: 700 !important; }
         
+        /* ── Inputs ── */
         .stTextInput input, .stNumberInput input, .stTextArea textarea {
             background-color: #ffffff !important;
             color: #0f172a !important;
@@ -324,7 +359,7 @@ else:  # Giao diện Sáng
             box-shadow: 0 0 0 3px rgba(2,132,199,0.12) !important;
         }
         
-        /* ── Selectbox Sáng ── */
+        /* ── Selectbox ── */
         div[data-baseweb="select"] > div {
             background-color: #ffffff !important;
             border: 1px solid #94a3b8 !important;
@@ -332,6 +367,7 @@ else:  # Giao diện Sáng
         }
         div[data-baseweb="select"] span { color: #0f172a !important; }
         
+        /* ── Buttons ── */
         button[data-testid="baseButton-primary"] {
             background: linear-gradient(135deg, #ef4444, #dc2626) !important;
             border: none !important; color: #fff !important;
@@ -344,6 +380,8 @@ else:  # Giao diện Sáng
             font-weight: 600 !important; border-radius: 10px !important;
             box-shadow: 0 2px 10px rgba(2,132,199,0.25) !important;
         }
+        
+        /* ── Tabs ── */
         [data-testid="stTabs"] [role="tablist"] {
             background: #f1f5f9 !important;
             border-radius: 12px !important;
@@ -359,13 +397,38 @@ else:  # Giao diện Sáng
             background: linear-gradient(135deg, #0284c7, #6366f1) !important;
             color: #fff !important; font-weight: 600 !important;
         }
+        
+        /* ── Expander Sáng (Sửa lỗi .arrow_right) ── */
+        [data-testid="stExpander"] {
+            background: #ffffff !important;
+            border: 1px solid #dde3ec !important;
+            border-radius: 14px !important;
+        }
+        [data-testid="stExpander"] summary {
+            color: #0f172a !important;
+            font-size: 0.88rem !important;
+            padding: 0.75rem 1rem !important;
+        }
+        [data-testid="stExpander"] summary * {
+            font-family: inherit !important;
+        }
+        [data-testid="stExpander"] summary p {
+            display: inline-block !important;
+            margin-left: 10px !important;
+            color: #0f172a !important;
+        }
+
+        /* ── Chat box ── */
         .chat-box {
             background-color: #f1f5f9 !important;
             padding: 12px 14px !important;
             border-radius: 0 12px 12px 0 !important;
             margin-bottom: 10px !important;
             border-left: 3px solid #0284c7 !important;
+            color: #0f172a !important;
         }
+        
+        /* ── Cấu phần khác ── */
         hr { border: none !important; border-top: 1px solid #e2e8f0 !important; margin: 1.4rem 0 !important; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f0f4f8; }
@@ -978,18 +1041,355 @@ st.write("---")
 
 qr_bytes, net_url = generate_network_qr()
 if qr_bytes:
-    with st.expander("📲 MÃ QR KẾT NỐI ĐIỆN THOẠI"):
+    # Thêm icon trực tiếp bằng emoji, tránh dùng các ký tự lạ gây lỗi giao diện
+    with st.expander("📲 MÃ QR KẾT NỐI ĐIỆN THOẠI", expanded=False):
+        # Căn giữa ảnh bằng cách dùng st.columns nếu muốn, hoặc để mặc định
         st.image(qr_bytes, width=150)
         st.caption(f"🔗 Link: `{net_url}`")
+        
+        # Sửa lại các tham số chuẩn của st.download_button
         st.download_button(
             label="📥 Tải mã QR về máy",
             data=qr_bytes,
             file_name="qrcode_phuhuynh.png",
             mime="image/png",
-            width="stretch",
-            type="secondary"
+            use_container_width=True  # Sử dụng cái này thay cho width="stretch" để nút khít giao diện
+        )
+# =====================================================================
+# 🤖 PHẦN AI PHỤ HUYNH (ĐÃ CHUYỂN SANG GEMINI API)
+# Cần cài đặt trước: pip install google-generativeai
+# =====================================================================
+import google.generativeai as genai
+import datetime
+import requests
+import os  # Thêm thư viện hệ thống
+from dotenv import load_dotenv  # Thêm thư viện đọc file .env
+
+# ── CẤU HÌNH BẢO MẬT BIẾN MÔI TRƯỜNG ──
+# Tự động quét và tải dữ liệu từ file .env lên hệ thống ngầm
+load_dotenv()
+
+# Lấy API Key từ file .env ra. Từ nay code của bạn hoàn toàn sạch, không dính chữ AQ.Ab8... nữa!
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+# Cấu hình Gemini
+try:
+    if not GEMINI_API_KEY:
+        st.error("❌ Không tìm thấy GEMINI_API_KEY trong file .env! Vui lòng kiểm tra lại.")
+    else:
+        genai.configure(api_key=GEMINI_API_KEY)
+        model = genai.GenerativeModel('gemini-1.5-flash')
+except Exception as e:
+    st.error(f"Lỗi cấu hình Gemini: {e}")
+
+st.write("---")
+st.subheader("🤖 Trợ Lý AI Phụ Huynh")
+
+ai_tab1, ai_tab2 = st.tabs([
+    "📊 AI Phân Tích Học Tập",
+    "📝 AI Tạo Nhận Xét / Báo Cáo"
+])
+
+# ── Hàm gọi Gemini API (Thay thế cho hàm call_claude) ──
+def call_gemini(prompt: str, system_instruction: str = "") -> str:
+    try:
+        # Cấu hình system instruction mặc định nếu không có truyền vào
+        sys_msg = system_instruction or (
+            "Bạn là trợ lý AI hỗ trợ phụ huynh Việt Nam theo dõi việc học của con. "
+            "Trả lời bằng tiếng Việt, ngắn gọn, thực tế, ấm áp như một người tư vấn giáo dục."
+        )
+        
+        # Gọi Gemini với cấu hình system_instruction trực tiếp
+        gemini_model = genai.GenerativeModel(
+            model_name='gemini-1.5-flash',
+            system_instruction=sys_msg
+        )
+        
+        response = gemini_model.generate_content(
+            prompt,
+            # Giới hạn token đầu ra tương đương max_tokens cũ
+            generation_config=genai.types.GenerationConfig(max_output_tokens=1000)
+        )
+        
+        if response.text:
+            return response.text
+        else:
+            return "❌ Lỗi: AI không trả về nội dung text."
+    except Exception as e:
+        return f"❌ Lỗi kết nối Gemini: {e}"
+
+# ── Hàm tóm tắt dữ liệu học sinh thành text (Giữ nguyên logic của bạn) ──
+def build_student_summary(name: str, u_info: dict) -> str:
+    daily   = u_info.get("daily") or {}
+    history = u_info.get("history") or []
+    xp      = u_info.get("xp", 0)
+    level   = u_info.get("level", 1)
+    streak  = u_info.get("streak", 0)
+    target  = u_info.get("target_goal", 45)
+
+    today_str = datetime.date.today().strftime("%Y-%m-%d")
+    today_m   = daily.get(today_str, 0)
+    total_m   = sum(daily.values()) if daily else 0
+    week_dates = [(datetime.date.today() - datetime.timedelta(days=i)).strftime("%Y-%m-%d") for i in range(7)]
+    week_m    = sum(daily.get(d, 0) for d in week_dates)
+
+    subject_map = {}
+    for h in history:
+        if isinstance(h, dict):
+            sub  = h.get("subject", "Không rõ") or "Không rõ"
+            mins = int(h.get("minutes", 0) or 0)
+            subject_map[sub] = subject_map.get(sub, 0) + mins
+
+    top_subjects = sorted(subject_map.items(), key=lambda x: x[1], reverse=True)[:3]
+    top_str = ", ".join([f"{s}({m}p)" for s, m in top_subjects]) or "Chưa có"
+
+    # Streak tính
+    streak_count = 0
+    check = datetime.date.today()
+    if daily.get(today_str, 0) == 0:
+        check -= datetime.timedelta(days=1)
+    while True:
+        key = check.strftime("%Y-%m-%d")
+        if daily.get(key, 0) > 0:
+            streak_count += 1
+            check -= datetime.timedelta(days=1)
+        else:
+            break
+
+    return (
+        f"Học sinh: {name}\n"
+        f"- Hôm nay: {today_m} phút (mục tiêu: {target} phút)\n"
+        f"- Tuần này: {week_m} phút\n"
+        f"- Tổng tích lũy: {total_m} calendar phút\n"
+        f"- Chuỗi học liên tiếp: {streak_count} ngày\n"
+        f"- Level: {level} | XP: {xp}\n"
+        f"- Môn học nhiều nhất: {top_str}\n"
+        f"- Tổng số phiên học: {len(history)}"
+    )
+
+# ── Lấy dữ liệu tất cả học sinh từ Firebase ──
+try:
+    res_ai = requests.get(f"{base_url}users.json", timeout=3).json() or {}
+except:
+    res_ai = {}
+
+ai_user_names = [uid for uid, info in res_ai.items() if isinstance(info, dict)]
+
+# =====================================================================
+# TAB 1 — AI PHÂN TÍCH HỌC TẬP (CẬP NHẬT GEMINI)
+# =====================================================================
+with ai_tab1:
+    st.markdown("Chọn học sinh để AI phân tích toàn diện tình hình học tập và đưa ra lời khuyên.")
+
+    if not ai_user_names:
+        st.warning("Chưa có dữ liệu học sinh.")
+    else:
+        col_sel, col_btn = st.columns([3, 1])
+        with col_sel:
+            ai_target = st.selectbox(
+                "Chọn học sinh:",
+                ai_user_names,
+                key="ai_analyze_select"
+            )
+        with col_btn:
+            st.write("")
+            st.write("")
+            run_analysis = st.button("🔍 Phân tích ngay", type="secondary",
+                                     use_container_width=True, key="btn_ai_analyze")
+
+        # Tuỳ chọn nâng cao
+        with st.expander("⚙️ Tuỳ chỉnh phân tích"):
+            focus_area = st.multiselect(
+                "Tập trung vào:",
+                ["Thời gian học", "Môn học yếu", "Chuỗi streak", "So sánh mục tiêu", "Lời khuyên cải thiện"],
+                default=["Thời gian học", "Lời khuyên cải thiện"],
+                key="ai_focus"
+            )
+            tone = st.radio(
+                "Giọng văn:",
+                ["Ấm áp, khích lệ", "Nghiêm túc, chuyên nghiệp", "Vui vẻ, hài hước"],
+                horizontal=True,
+                key="ai_tone"
+            )
+
+        if run_analysis and ai_target:
+            u_info = res_ai.get(ai_target, {})
+            summary = build_student_summary(ai_target, u_info)
+
+            focus_str = ", ".join(focus_area) if focus_area else "tổng quan"
+            tone_map = {
+                "Ấm áp, khích lệ": "Dùng giọng ấm áp, khích lệ, như người thân trong gia đình.",
+                "Nghiêm túc, chuyên nghiệp": "Dùng giọng chuyên nghiệp, như chuyên gia tư vấn giáo dục.",
+                "Vui vẻ, hài hước": "Dùng giọng vui vẻ, hài hước nhẹ nhàng để phụ huynh dễ đọc."
+            }
+            tone_instruction = tone_map.get(tone, "")
+
+            prompt = (
+                f"Dưới đây là dữ liệu học tập của học sinh:\n\n{summary}\n\n"
+                f"Hãy phân tích tập trung vào: {focus_str}.\n"
+                f"{tone_instruction}\n\n"
+                f"Trình bày theo cấu trúc chuẩn bằng Markdown:\n"
+                f"1. 📊 Đánh giá tổng quan (2-3 câu)\n"
+                f"2. ✅ Điểm tích cực nổi bật\n"
+                f"3. ⚠️ Điểm cần cải thiện\n"
+                f"4. 💡 Lời khuyên cụ thể cho phụ huynh (3 hành động)\n"
+                f"5. 🎯 Mục tiêu đề xuất cho tuần tới"
+            )
+
+            with st.spinner("🤖 Gemini đang phân tích dữ liệu học tập..."):
+                result = call_gemini(prompt)
+
+            st.markdown("---")
+            st.markdown(f"**📋 Kết quả phân tích cho: {ai_target}**")
+            with st.container(border=True):
+                st.markdown(result)
+
+            # Nút lưu vào Firebase
+            if st.button("💾 Lưu phân tích này vào Firebase", key="save_analysis"):
+                try:
+                    now_vn = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=7)
+                    requests.patch(
+                        f"{base_url}users/{ai_target}.json",
+                        json={"last_ai_analysis": result, "last_analysis_time": now_vn.strftime("%d/%m/%Y %H:%M")},
+                        timeout=3
+                    )
+                    st.success("✅ Đã lưu phân tích!")
+                except:
+                    st.error("Lỗi lưu Firebase.")
+
+# =====================================================================
+# TAB 2 — AI TẠO NHẬN XÉT / BÁO CÁO (CẬP NHẬT GEMINI)
+# =====================================================================
+with ai_tab2:
+    st.markdown("AI tự động soạn nhận xét học tập để phụ huynh gửi cho con hoặc chia sẻ với giáo viên.")
+
+    if not ai_user_names:
+        st.warning("Chưa có dữ liệu học sinh.")
+    else:
+        r_col1, r_col2 = st.columns(2)
+        with r_col1:
+            report_target = st.selectbox(
+                "Chọn học sinh:",
+                ai_user_names,
+                key="ai_report_select"
+            )
+        with r_col2:
+            report_type = st.selectbox(
+                "Loại nhận xét:",
+                [
+                    "📩 Nhắn nhủ động viên gửi cho con",
+                    "📋 Báo cáo tuần gửi giáo viên",
+                    "👨‍👩‍👧 Tóm tắt chia sẻ với ông bà",
+                    "🏆 Lời khen thưởng khi đạt mục tiêu",
+                    "⚠️ Nhắc nhở nhẹ nhàng khi chưa đạt"
+                ],
+                key="ai_report_type"
+            )
+
+        extra_note = st.text_input(
+            "Ghi chú thêm cho AI (không bắt buộc):",
+            placeholder="Ví dụ: Con đang chuẩn bị thi học kỳ, cần tập trung Toán...",
+            key="ai_extra_note"
         )
 
+        gen_report = st.button("✍️ Tạo nhận xét", type="secondary",
+                               use_container_width=True, key="btn_gen_report")
+
+        if gen_report and report_target:
+            u_info  = res_ai.get(report_target, {})
+            summary = build_student_summary(report_target, u_info)
+
+            type_prompts = {
+                "📩 Nhắn nhủ động viên gửi cho con": (
+                    f"Viết một tin nhắn ngắn (5-7 câu) từ phụ huynh gửi cho con tên {report_target}, "
+                    f"dựa trên dữ liệu học tập này:\n{summary}\n"
+                    f"Giọng ấm áp, thương yêu, khích lệ con tiếp tục cố gắng. "
+                    f"{'Ghi chú thêm: ' + extra_note if extra_note else ''}"
+                ),
+                "📋 Báo cáo tuần gửi giáo viên": (
+                    f"Soạn báo cáo học tập tuần này của học sinh {report_target} để phụ huynh gửi giáo viên. "
+                    f"Dữ liệu:\n{summary}\n"
+                    f"Viết chuyên nghiệp, trình bày rõ ràng theo cấu trúc: "
+                    f"Tổng quan / Môn học / Thời gian / Nhận xét / Kiến nghị. "
+                    f"{'Ghi chú: ' + extra_note if extra_note else ''}"
+                ),
+                "👨‍👩‍👧 Tóm tắt chia sẻ với ông bà": (
+                    f"Viết đoạn tóm tắt ngắn (3-5 câu) về tình hình học tập của {report_target} "
+                    f"để phụ huynh chia sẻ với ông bà. Giọng vui vẻ, tự hào, dễ hiểu. "
+                    f"Dữ liệu:\n{summary}\n"
+                    f"{'Ghi chú: ' + extra_note if extra_note else ''}"
+                ),
+                "🏆 Lời khen thưởng khi đạt mục tiêu": (
+                    f"Viết lời khen ngợi (4-6 câu) dành cho {report_target} vì đã đạt mục tiêu học tập. "
+                    f"Dữ liệu:\n{summary}\n"
+                    f"Giọng hào hứng, tự hào, có thể đề xuất phần thưởng phù hợp. "
+                    f"{'Ghi chú: ' + extra_note if extra_note else ''}"
+                ),
+                "⚠️ Nhắc nhở nhẹ nhàng khi chưa đạt": (
+                    f"Viết lời nhắc nhở nhẹ nhàng (4-6 câu) cho {report_target} khi chưa đạt mục tiêu. "
+                    f"Dữ liệu:\n{summary}\n"
+                    f"Giọng quan tâm, không la mắng, giúp con hiểu cần cố gắng hơn. "
+                    f"{'Ghi chú: ' + extra_note if extra_note else ''}"
+                ),
+            }
+
+            prompt = type_prompts.get(report_type, "")
+
+            with st.spinner("✍️ Gemini đang soạn nội dung..."):
+                report_result = call_gemini(prompt)
+
+            st.markdown("---")
+            st.markdown(f"**📄 Nội dung được tạo — {report_type}**")
+            with st.container(border=True):
+                st.markdown(report_result)
+
+            # Nút copy / gửi chat
+            c_copy, c_send = st.columns(2)
+            with c_copy:
+                st.download_button(
+                    "📥 Tải về file .txt",
+                    data=report_result,
+                    file_name=f"nhan_xet_{report_target}_{datetime.date.today()}.txt",
+                    mime="text/plain",
+                    use_container_width=True,
+                    type="secondary",
+                    key="dl_report"
+                )
+            with c_send:
+                if st.button("📤 Gửi vào phòng chat luôn", use_container_width=True,
+                             type="secondary", key="send_report_chat"):
+                    try:
+                        now_vn = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=7)
+                        requests.post(
+                            f"{base_url}chats.json",
+                            json={
+                                "sender": f"🤖 AI PHUY HUYNH ({st.session_state.get('username')})",
+                                "text": report_result,
+                                "time": now_vn.strftime("%H:%M")
+                            },
+                            timeout=2
+                        )
+                        st.success("✅ Đã gửi vào phòng chat!")
+                    except:
+                        st.error("Lỗi gửi chat.")
+
+            # Lưu nhận xét vào Firebase
+            if st.button("💾 Lưu nhận xét vào hồ sơ học sinh", key="save_report",
+                         use_container_width=True):
+                try:
+                    now_vn = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=7)
+                    requests.patch(
+                        f"{base_url}users/{report_target}.json",
+                        json={
+                            "last_report": report_result,
+                            "last_report_type": report_type,
+                            "last_report_time": now_vn.strftime("%d/%m/%Y %H:%M")
+                        },
+                        timeout=3
+                    )
+                    st.success("✅ Đã lưu vào hồ sơ!")
+                except:
+                    st.error("Lỗi lưu Firebase.")
 # =====================================================================
 # 💬 PHÒNG CHAT
 # =====================================================================
