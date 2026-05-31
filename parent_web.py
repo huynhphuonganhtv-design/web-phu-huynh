@@ -1064,8 +1064,7 @@ import streamlit as st  # ✅ ĐÃ SỬA: Thêm import streamlit ở đầu file
 from dotenv import load_dotenv
 
 # ✅ ĐÃ SỬA: Khai báo biến base_url (Bạn nhớ thay link Firebase thật của bạn vào đây)
-base_url = "https://your-firebase-database-url.firebaseio.com/" 
-
+base_url = "https://pomodoroapp-701a2-default-rtdb.firebaseio.com/" 
 load_dotenv()
 # Nhận diện thông minh: Lấy từ file .env (ở máy) HOẶC lấy từ Secrets (trên Streamlit Cloud)
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or st.secrets.get("GEMINI_API_KEY")
