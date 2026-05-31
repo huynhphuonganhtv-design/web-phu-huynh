@@ -1060,11 +1060,16 @@ import google.generativeai as genai
 import datetime
 import requests
 import os
+import streamlit as st  # ✅ ĐÃ SỬA: Thêm import streamlit ở đầu file
 from dotenv import load_dotenv
- 
+
+# ✅ ĐÃ SỬA: Khai báo biến base_url (Bạn nhớ thay link Firebase thật của bạn vào đây)
+base_url = "https://your-firebase-database-url.firebaseio.com/" 
+
 load_dotenv()
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
- 
+# Nhận diện thông minh: Lấy từ file .env (ở máy) HOẶC lấy từ Secrets (trên Streamlit Cloud)
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or st.secrets.get("GEMINI_API_KEY")
+
 if GEMINI_API_KEY:
     try:
         genai.configure(api_key=GEMINI_API_KEY)
@@ -1072,11 +1077,11 @@ if GEMINI_API_KEY:
         st.error(f"Lỗi cấu hình Gemini: {e}")
 else:
     st.warning("⚠️ Chưa có GEMINI_API_KEY — tính năng AI sẽ bị tắt.")
- 
+
 def call_gemini(prompt: str, system_instruction: str = "") -> str:
     if not GEMINI_API_KEY:
         return "❌ Chưa cấu hình GEMINI_API_KEY (Kiểm tra file .env hoặc mục Secrets trên Streamlit)"
- 
+
     try:
         sys_msg = system_instruction or (
             "Bạn là trợ lý AI hỗ trợ phụ huynh Việt Nam theo dõi việc học của con. "
@@ -1095,31 +1100,31 @@ def call_gemini(prompt: str, system_instruction: str = "") -> str:
         return "❌ Lỗi: AI không trả về nội dung text."
     except Exception as e:
         return f"❌ Lỗi kết nối Gemini: {e}"
- 
- 
+
+
 def build_student_summary(name: str, u_info: dict) -> str:
     daily   = u_info.get("daily") or {}
     history = u_info.get("history") or []
     xp      = u_info.get("xp", 0)
     level   = u_info.get("level", 1)
     target  = u_info.get("target_goal", 45)
- 
+
     today_str  = datetime.date.today().strftime("%Y-%m-%d")
     today_m    = daily.get(today_str, 0)
     total_m    = sum(daily.values()) if daily else 0
     week_dates = [(datetime.date.today() - datetime.timedelta(days=i)).strftime("%Y-%m-%d") for i in range(7)]
     week_m     = sum(daily.get(d, 0) for d in week_dates)
- 
+
     subject_map = {}
     for h in history:
         if isinstance(h, dict):
             sub  = h.get("subject", "Không rõ") or "Không rõ"
             mins = int(h.get("minutes", 0) or 0)
             subject_map[sub] = subject_map.get(sub, 0) + mins
- 
+
     top_subjects = sorted(subject_map.items(), key=lambda x: x[1], reverse=True)[:3]
     top_str = ", ".join([f"{s}({m}p)" for s, m in top_subjects]) or "Chưa có"
- 
+
     streak_count = 0
     check = datetime.date.today()
     if daily.get(today_str, 0) == 0:
@@ -1131,7 +1136,7 @@ def build_student_summary(name: str, u_info: dict) -> str:
             check -= datetime.timedelta(days=1)
         else:
             break
- 
+
     return (
         f"Học sinh: {name}\n"
         f"- Hôm nay: {today_m} phút (mục tiêu: {target} phút)\n"
