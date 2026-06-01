@@ -974,42 +974,89 @@ if st.button("🔄 Làm mới dữ liệu thống kê", width="stretch", type="s
 # =====================================================================
 st.write("---")
 st.markdown("### 🛡️ Safety Search Guard (Giám sát bàn phím & Từ khóa cấm)")
+
+# Thêm biến an toàn đề phòng chưa có selected_user ở menu chọn học sinh
+if 'selected_user' not in locals() and 'selected_user' not in globals():
+    selected_user = "hoc_sing_vinh" # Tên mặc định dự phòng
+
+# ── 1. ĐỒNG BỘ ĐƯỜNG DẪN LẤY DANH SÁCH TỪ CẤM ──
 current_blacklist = []
+db_keywords = {}
 try:
-    res_bl = requests.get(f"{base_url}blacklist_keywords.json", timeout=2).json()
-    if res_bl: current_blacklist = res_bl
-except Exception: pass
+    # Lấy đúng từ thư mục blocked_keywords của học sinh đang được chọn
+    res_bl = requests.get(f"{base_url}users/{selected_user}/blocked_keywords.json", timeout=2).json()
+    if res_bl:
+        if isinstance(res_bl, dict):
+            db_keywords = res_bl
+            current_blacklist = list(res_bl.values())
+        elif isinstance(res_bl, list):
+            current_blacklist = [x for x in res_bl if x]
+except Exception: 
+    pass
 
 st.write(f"Danh sách từ khóa đang cấm: `{', '.join(current_blacklist) if current_blacklist else 'Trống'}`")
+
 col_bl1, col_bl2 = st.columns([3, 1])
 with col_bl1:
-    new_word = st.text_input("Thêm từ khóa cấm mới (gõ thường, không dấu):", placeholder="Ví dụ: game, hack...", key="txt_new_badword")
+    new_word = st.text_input("Thêm từ khóa cấm mới (gõ thường, không dấu):", placeholder="Ví dụ: game, hack...", key="txt_new_badword", label_visibility="collapsed")
 with col_bl2:
-    st.write("<br>", unsafe_allow_html=True)
-    if st.button("➕ Thêm Từ Cấm", width="stretch"):
-        if new_word.strip() and new_word.strip().lower() not in current_blacklist:
-            current_blacklist.append(new_word.strip().lower())
-            requests.put(f"{base_url}blacklist_keywords.json", json=current_blacklist, timeout=2)
-            st.rerun()
+    # ✅ ĐÃ SỬA: Thay width="stretch" bằng use_container_width=True
+    if st.button("➕ Thêm Từ Cấm", use_container_width=True):
+        word_clean = new_word.strip().lower()
+        if word_clean and word_clean not in current_blacklist:
+            try:
+                # Dùng POST để tự sinh key ngẫu nhiên bảo mật, không sợ ghi đè dữ liệu
+                requests.post(f"{base_url}users/{selected_user}/blocked_keywords.json", json=word_clean, timeout=2)
+                st.toast(f"🎉 Đã thêm từ khóa cấm: {word_clean}")
+                time.sleep(0.5)
+                st.rerun()
+            except Exception:
+                st.error("Lỗi kết nối Firebase!")
 
+# ── 2. ĐỒNG BỘ NHẬT KÝ LIVE TỰ ĐỘNG CẬP NHẬT ──
 @st.fragment(run_every=4)
 def render_safety_logs():
+    # Đồng bộ với phần 'violations' (Cảnh báo vi phạm) của máy con
     try:
-        res_alerts = requests.get(f"{base_url}safety_alerts.json", timeout=2).json()
-        if res_alerts:
+        res_alerts = requests.get(f"{base_url}users/{selected_user}/violations.json", timeout=2).json()
+        if res_alerts and isinstance(res_alerts, dict):
+            st.markdown("##### 🚨 Cảnh báo vi phạm mới nhất:")
+            # Chỉ lấy 2 vi phạm mới nhất để hiển thị
             for aid, info in list(res_alerts.items())[-2:]:
-                st.error(f"🚨 MÁY CON VI PHẠM: Vừa gõ từ khóa cấm [{info.get('keyword')}] lúc {info.get('time')}. Hệ thống đã cưỡng chế tắt trình duyệt!")
-    except Exception: pass
+                st.error(f"⚠️ MÁY CON VI PHẠM: Gõ từ khóa cấm `[{info.get('keyword')}]` lúc {info.get('timestamp')}. Hệ thống đã ghi nhận!")
+    except Exception: 
+        pass
+        
+    st.write("") # Tạo khoảng cách nhỏ
+    
+    # Đồng bộ với phần 'live_logs' (Nhật ký gõ phím theo câu) của máy con
     try:
-        res_logs = requests.get(f"{base_url}key_logs.json", timeout=2).json()
-        if res_logs:
-            st.write("📋 **Nhật ký gõ phím từ máy con (Live):**")
+        res_logs = requests.get(f"{base_url}users/{selected_user}/live_logs.json", timeout=2).json()
+        if res_logs and isinstance(res_logs, dict):
+            st.write("📋 **Nhật ký gõ phím từ máy con (Live tự động):**")
+            # Hiển thị 4 câu gần nhất con gõ
             for lid, text_line in list(res_logs.items())[-4:]:
                 st.caption(f"🕒 {text_line.get('time', '--:--')} → `{text_line.get('text', '')}`")
-    except Exception: pass
+    except Exception: 
+        pass
 
+    # ── 3. NÚT XÓA NHẬT KÝ ĐÃ NÂNG CẤP ──
+    col_del1, col_del2 = st.columns(2)
+    with col_del1:
+        if st.button("🗑️ Dọn sạch Nhật ký gõ phím", use_container_width=True, key="clear_live_frag"):
+            try:
+                requests.delete(f"{base_url}users/{selected_user}/live_logs.json", timeout=2)
+                st.rerun()
+            except: pass
+    with col_del2:
+        if st.button("🗑️ Xóa Lịch sử Vi phạm", use_container_width=True, key="clear_violate_frag"):
+            try:
+                requests.delete(f"{base_url}users/{selected_user}/violations.json", timeout=2)
+                st.rerun()
+            except: pass
+
+# Gọi hàm chạy fragment
 render_safety_logs()
-
 # =====================================================================
 # ⚡ ĐIỀU KHIỂN TỪ XA
 # =====================================================================
