@@ -1071,10 +1071,8 @@ import os
 import json  # Thêm nếu code phía dưới của bạn có dùng json
 from dotenv import load_dotenv
 
-# ✅ ĐÃ SỬA: Khai báo biến base_url (Bạn nhớ thay link Firebase thật của bạn vào đây)
 base_url = "https://pomodoroapp-701a2-default-rtdb.firebaseio.com/" 
 load_dotenv()
-# Nhận diện thông minh: Lấy từ file .env (ở máy) HOẶC lấy từ Secrets (trên Streamlit Cloud)
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or st.secrets.get("GEMINI_API_KEY")
 
 if GEMINI_API_KEY:
@@ -1192,7 +1190,6 @@ with ai_tab1:
             run_analysis = st.button("🔍 Phân tích ngay", type="secondary",
                                      use_container_width=True, key="btn_ai_analyze")
 
-        # Tuỳ chọn nâng cao
         with st.expander("⚙️ Tuỳ chỉnh phân tích"):
             focus_area = st.multiselect(
                 "Tập trung vào:",
@@ -1338,7 +1335,6 @@ with ai_tab2:
             with st.container(border=True):
                 st.markdown(report_result)
 
-            # Nút copy / gửi chat
             c_copy, c_send = st.columns(2)
             with c_copy:
                 st.download_button(
@@ -1368,7 +1364,6 @@ with ai_tab2:
                     except:
                         st.error("Lỗi gửi chat.")
 
-            # Lưu nhận xét vào Firebase
             if st.button("💾 Lưu nhận xét vào hồ sơ học sinh", key="save_report",
                          use_container_width=True):
                 try:
@@ -1388,8 +1383,7 @@ with ai_tab2:
 # =====================================================================
 # 💬 PHÒNG CHAT
 # =====================================================================
-
-
+cat > /mnt/user-data/outputs/chat_emoji.py << 'ENDOFFILE'
 st.write("---")
 st.subheader("💬 Nhật ký tin nhắn công cộng")
 
@@ -1406,47 +1400,134 @@ if chats:
         sender = m.get("sender", "Ẩn danh")
         text   = m.get("text", "")
         ts     = m.get("time", "--:--")
+        is_parent = "PHỤ HUYNH" in sender.upper() or "AI" in sender.upper()
+        
+        # Màu border & avatar theo người gửi
+        border_color = "#a78bfa" if is_parent else "#38bdf8"
+        avatar = "👑" if "PHỤ HUYNH" in sender.upper() else "🤖" if "AI" in sender.upper() else "👤"
+        
         with st.container(border=True):
             if m.get("type") == "revoked":
-                st.markdown(f"⚠️ *{sender} {text}*")
-            else:
                 st.markdown(
-                    f'<div class="chat-box">'
-                    f'<small style="color:#38bdf8;font-weight:bold;">{sender}</small>'
-                    f'<small style="color:#64748b;float:right;">🕒 {ts}</small>'
-                    f'<p style="margin:4px 0 6px 0;font-size:14px;">{text}</p>'
-                    f'</div>',
+                    f'<div style="color:#475569;font-style:italic;font-size:0.83rem;padding:4px 0;">'
+                    f'🚫 <em>{sender} đã thu hồi một tin nhắn.</em></div>',
                     unsafe_allow_html=True
                 )
-                if st.button("✂️ Gỡ tin nhắn", key=f"del_{cid}", type="primary", use_container_width=True):
-                    revoke_msg(cid)
-                    st.rerun()
+            else:
+                # Kiểm tra nếu là emoji reaction thuần túy
+                is_reaction = len(text.strip()) <= 4 and not text.strip().isascii()
+                if is_reaction:
+                    st.markdown(
+                        f'<div style="display:flex;align-items:center;gap:10px;padding:6px 0;">'
+                        f'<span style="font-size:2rem;">{text}</span>'
+                        f'<span style="color:#475569;font-size:0.78rem;">{avatar} {sender} · {ts}</span>'
+                        f'</div>',
+                        unsafe_allow_html=True
+                    )
+                else:
+                    st.markdown(
+                        f'<div style="background:{"rgba(167,139,250,0.07)" if is_parent else "rgba(56,189,248,0.07)"}; '
+                        f'border-left:3px solid {border_color};border-radius:0 12px 12px 0;'
+                        f'padding:10px 14px;margin-bottom:2px;">'
+                        f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'
+                        f'<span style="color:{border_color};font-weight:600;font-size:0.82rem;">{avatar} {sender}</span>'
+                        f'<span style="color:#475569;font-size:0.74rem;">🕒 {ts}</span>'
+                        f'</div>'
+                        f'<div style="color:#e2e8f0;font-size:0.92rem;line-height:1.5;">{text}</div>'
+                        f'</div>',
+                        unsafe_allow_html=True
+                    )
+                
+                col_r1, col_r2, col_r3 = st.columns([1, 1, 4])
+                with col_r1:
+                    if st.button("✂️ Gỡ", key=f"del_{cid}", type="primary", use_container_width=True):
+                        try:
+                            requests.patch(f"{base_url}chats/{cid}.json", json={"text": "", "type": "revoked"}, timeout=2)
+                        except: pass
+                        st.rerun()
+                with col_r2:
+                    if st.button("❤️", key=f"react_{cid}", use_container_width=True):
+                        try:
+                            now_vn = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=7)
+                            requests.post(f"{base_url}chats.json", json={
+                                "sender": f"PHỤ HUYNH ({st.session_state.get('username', 'Phụ huynh')}) 👑",
+                                "text": "❤️",
+                                "time": now_vn.strftime("%H:%M"),
+                                "type": "reaction"
+                            }, timeout=2)
+                        except: pass
+                        st.rerun()
 else:
-    st.info("Chưa có tin nhắn nào.")
+    st.markdown(
+        '<div style="text-align:center;padding:2rem;color:#475569;">'
+        '<div style="font-size:2.5rem;margin-bottom:0.5rem;">💬</div>'
+        '<div style="font-size:0.9rem;">Chưa có tin nhắn nào. Hãy gửi lời nhắn đầu tiên!</div>'
+        '</div>',
+        unsafe_allow_html=True
+    )
 
-# ── Ô nhập & nút gửi — KHÔNG dùng on_change, chỉ dùng nút bấm ──
+# ── Emoji quick-pick ──
+st.markdown("<div style='margin:8px 0 4px;font-size:0.8rem;color:#475569;'>Gửi nhanh emoji:</div>", unsafe_allow_html=True)
+emoji_cols = st.columns(8)
+quick_emojis = ["👍", "❤️", "🔥", "🎉", "💪", "😊", "👏", "⭐"]
+
+for i, em in enumerate(quick_emojis):
+    with emoji_cols[i]:
+        if st.button(em, key=f"qemoji_{em}", use_container_width=True):
+            try:
+                now_vn = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=7)
+                requests.post(f"{base_url}chats.json", json={
+                    "sender": f"PHỤ HUYNH ({st.session_state.get('username', 'Phụ huynh')}) 👑",
+                    "text": em,
+                    "time": now_vn.strftime("%H:%M"),
+                    "type": "reaction"
+                }, timeout=2)
+            except: pass
+            st.rerun()
+
+# ── Ô nhập tin nhắn ──
+st.markdown("<div style='margin-top:8px;'></div>", unsafe_allow_html=True)
+
+# Khởi tạo giá trị trong session state nếu chưa có để tránh lỗi sập ô nhập liệu
+if "temp_text" not in st.session_state:
+    st.session_state["temp_text"] = ""
+
 msg_input = st.text_input(
-    "Nhập tin nhắn gửi tới máy con:",
-    key="chat_input_box",          # key mới, không trùng cũ
-    placeholder="Gõ nội dung rồi bấm nút Gửi..."
+    "Nhập tin nhắn:",
+    value=st.session_state["temp_text"],
+    key="chat_input_box",
+    placeholder="💬 Gõ nội dung rồi bấm Gửi...",
+    label_visibility="collapsed"
 )
 
-if st.button("Gửi tin nhắn ➤", type="secondary", use_container_width=True, key="btn_send_chat"):
-    text_to_send = st.session_state.get("chat_input_box", "").strip()
-    if text_to_send:
-        now_vn = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=7)
-        try:
-            requests.post(
-                f"{base_url}chats.json",
-                json={
-                    "sender": f"PHỤ HUYNH ({st.session_state.get('username')}) 👤",
-                    "text":   text_to_send,
-                    "time":   now_vn.strftime("%H:%M")
-                },
-                timeout=2
-            )
-        except Exception:
-            st.warning("Mất kết nối, tin nhắn chưa gửi được.")
-        # Xóa ô nhập bằng cách đổi key qua session_state counter
+send_col, clear_col = st.columns([4, 1])
+with send_col:
+    # Để trống hoặc dùng nút mặc định thay vì 'secondary' để tránh kén theme giao diện
+    if st.button("📤 Gửi tin nhắn", use_container_width=True, key="btn_send_chat"):
+        text_to_send = msg_input.strip()
+        if text_to_send:
+            now_vn = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=7)
+            try:
+                requests.post(
+                    f"{base_url}chats.json",
+                    json={
+                        "sender": f"PHỤ HUYNH ({st.session_state.get('username', 'Phụ huynh')}) 👑",
+                        "text":   text_to_send,
+                        "time":   now_vn.strftime("%H:%M")
+                    },
+                    timeout=2
+                )
+                st.session_state["temp_text"] = "" # Xóa rỗng ô chữ sau khi gửi thành công
+            except Exception:
+                st.warning("⚠️ Mất kết nối, tin nhắn chưa gửi được.")
+            st.session_state["chat_counter"] = st.session_state.get("chat_counter", 0) + 1
+            st.rerun()
+
+with clear_col:
+    if st.button("🗑️ Xóa", use_container_width=True, key="btn_clear_chat"):
+        st.session_state["temp_text"] = "" # ✅ ĐÃ SỬA: Xóa sạch chữ trong ô nhập liệu thực tế
         st.session_state["chat_counter"] = st.session_state.get("chat_counter", 0) + 1
         st.rerun()
+ENDOFFILE
+echo "Done"
+
