@@ -1422,15 +1422,16 @@ if chats:
                         unsafe_allow_html=True
                     )
                 else:
+                    # ✅ ĐÃ NÂNG CẤP: Sử dụng biến màu của Streamlit để tự động tương phản nền Sáng/Tối
                     st.markdown(
-                        f'<div style="background:{"rgba(167,139,250,0.07)" if is_parent else "rgba(56,189,248,0.07)"}; '
-                        f'border-left:3px solid {border_color};border-radius:0 12px 12px 0;'
-                        f'padding:10px 14px;margin-bottom:2px;">'
-                        f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'
-                        f'<span style="color:{border_color};font-weight:600;font-size:0.82rem;">{avatar} {sender}</span>'
-                        f'<span style="color:#475569;font-size:0.74rem;">🕒 {ts}</span>'
+                        f'<div style="background:{"rgba(167,139,250,0.15)" if is_parent else "rgba(56,189,248,0.15)"}; '
+                        f'border-left:4px solid {border_color}; border-radius:0 12px 12px 0;'
+                        f'padding:10px 14px; margin-bottom:2px;">'
+                        f'<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">'
+                        f'<span style="color:{border_color}; font-weight:700; font-size:0.85rem;">{avatar} {sender}</span>'
+                        f'<span style="color:var(--text-color); opacity:0.6; font-size:0.75rem;">🕒 {ts}</span>'
                         f'</div>'
-                        f'<div style="color:#e2e8f0;font-size:0.92rem;line-height:1.5;">{text}</div>'
+                        f'<div style="color:var(--text-color); font-weight:500; font-size:0.95rem; line-height:1.5;">{text}</div>'
                         f'</div>',
                         unsafe_allow_html=True
                     )
