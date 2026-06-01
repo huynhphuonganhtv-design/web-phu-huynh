@@ -1383,7 +1383,6 @@ with ai_tab2:
 # =====================================================================
 # 💬 PHÒNG CHAT
 # =====================================================================
-cat > /mnt/user-data/outputs/chat_emoji.py << 'ENDOFFILE'
 st.write("---")
 st.subheader("💬 Nhật ký tin nhắn công cộng")
 
@@ -1402,7 +1401,6 @@ if chats:
         ts     = m.get("time", "--:--")
         is_parent = "PHỤ HUYNH" in sender.upper() or "AI" in sender.upper()
         
-        # Màu border & avatar theo người gửi
         border_color = "#a78bfa" if is_parent else "#38bdf8"
         avatar = "👑" if "PHỤ HUYNH" in sender.upper() else "🤖" if "AI" in sender.upper() else "👤"
         
@@ -1414,7 +1412,6 @@ if chats:
                     unsafe_allow_html=True
                 )
             else:
-                # Kiểm tra nếu là emoji reaction thuần túy
                 is_reaction = len(text.strip()) <= 4 and not text.strip().isascii()
                 if is_reaction:
                     st.markdown(
@@ -1488,7 +1485,6 @@ for i, em in enumerate(quick_emojis):
 # ── Ô nhập tin nhắn ──
 st.markdown("<div style='margin-top:8px;'></div>", unsafe_allow_html=True)
 
-# Khởi tạo giá trị trong session state nếu chưa có để tránh lỗi sập ô nhập liệu
 if "temp_text" not in st.session_state:
     st.session_state["temp_text"] = ""
 
@@ -1502,7 +1498,6 @@ msg_input = st.text_input(
 
 send_col, clear_col = st.columns([4, 1])
 with send_col:
-    # Để trống hoặc dùng nút mặc định thay vì 'secondary' để tránh kén theme giao diện
     if st.button("📤 Gửi tin nhắn", use_container_width=True, key="btn_send_chat"):
         text_to_send = msg_input.strip()
         if text_to_send:
@@ -1517,7 +1512,7 @@ with send_col:
                     },
                     timeout=2
                 )
-                st.session_state["temp_text"] = "" # Xóa rỗng ô chữ sau khi gửi thành công
+                st.session_state["temp_text"] = ""
             except Exception:
                 st.warning("⚠️ Mất kết nối, tin nhắn chưa gửi được.")
             st.session_state["chat_counter"] = st.session_state.get("chat_counter", 0) + 1
@@ -1525,9 +1520,6 @@ with send_col:
 
 with clear_col:
     if st.button("🗑️ Xóa", use_container_width=True, key="btn_clear_chat"):
-        st.session_state["temp_text"] = "" # ✅ ĐÃ SỬA: Xóa sạch chữ trong ô nhập liệu thực tế
+        st.session_state["temp_text"] = ""
         st.session_state["chat_counter"] = st.session_state.get("chat_counter", 0) + 1
         st.rerun()
-ENDOFFILE
-echo "Done"
-
