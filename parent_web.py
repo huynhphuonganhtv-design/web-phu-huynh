@@ -11,9 +11,7 @@ import json
 import google.generativeai as genai
 from dotenv import load_dotenv
 
-# =====================================================================
-# CẤU HÌNH TRANG
-# =====================================================================
+
 FIREBASE_URL = "https://pomodoroapp-701a2-default-rtdb.firebaseio.com/"
 
 st.set_page_config(
@@ -23,9 +21,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# =====================================================================
-# THEME
-# =====================================================================
+
 if "theme_mode" not in st.session_state:
     st.session_state["theme_mode"] = "🌙 Giao diện Tối"
 
@@ -160,8 +156,11 @@ else:
     """, unsafe_allow_html=True)
 
 # =====================================================================
-# 🧭 NAVIGATION BAR — render động theo theme
+# 🧭 NAVIGATION BAR — Render động & Điều hướng chuẩn Python State
 # =====================================================================
+if "current_page" not in st.session_state:
+    st.session_state["current_page"] = "Tổng quan"
+
 is_dark = st.session_state.get("theme_mode") == "🌙 Giao diện Tối"
 nav_bg     = "rgba(10,22,40,0.96)"   if is_dark else "rgba(255,255,255,0.97)"
 nav_border = "rgba(56,189,248,0.2)"  if is_dark else "#dde3ec"
@@ -176,70 +175,61 @@ st.markdown(f"""
 #nav-bar-container {{
     position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;
     display: flex; align-items: stretch; height: 68px;
-    background-color: {nav_bg};
-    border-top: 1px solid {nav_border};
+    background-color: {nav_bg}; border-top: 1px solid {nav_border};
     backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
     box-shadow: 0 -4px 24px {nav_shadow};
 }}
-.nav-item {{
-    flex: 1; display: flex; flex-direction: column; align-items: center;
-    justify-content: center; gap: 4px; text-decoration: none;
-    font-size: 11px; font-family: 'Be Vietnam Pro', sans-serif;
-    font-weight: 500; color: {nav_color}; cursor: pointer;
-    transition: color 0.2s ease; position: relative; padding-bottom: 2px;
-    border: none; background: none;
+div.stButton > button[key^="nav_btn_"] {{
+    flex: 1; width: 100%; height: 68px !important;
+    display: flex !important; flex-direction: column !important;
+    align-items: center !important; justify-content: center !important;
+    gap: 2px !important; background: transparent !important;
+    border: none !important; color: {nav_color} !important;
+    font-size: 11px !important; font-weight: 500 !important;
+    border-radius: 0px !important; padding: 0 !important;
+    box-shadow: none !important; transform: none !important;
 }}
-.nav-item .nav-icon {{ font-size: 20px; line-height: 1; transition: transform 0.2s ease; }}
-.nav-item:hover {{ color: {nav_active}; }}
-.nav-item:hover .nav-icon {{ transform: translateY(-2px); }}
-.nav-item.active {{ color: {nav_active}; }}
-.nav-item.active::before {{
+div.stButton > button[key^="nav_btn_"]:hover {{
+    color: {nav_active} !important; background: transparent !important;
+}}
+.nav-box-wrapper {{
+    flex: 1; display: flex; flex-direction: column; position: relative;
+}}
+.nav-box-wrapper.active::before {{
     content: ''; position: absolute; top: 0; left: 20%; right: 20%;
-    height: 2.5px; background: {nav_bar_indicator};
-    border-radius: 0 0 4px 4px;
+    height: 3px; background: {nav_bar_indicator}; border-radius: 0 0 4px 4px;
+    z-index: 10000;
 }}
 </style>
-
-<div id="nav-bar-container">
-    <a class="nav-item active" href="#trung-t-m-qu-n-l-ph-huynh" onclick="setNav(this)">
-        <span class="nav-icon">🏆</span><span>Tổng quan</span>
-    </a>
-    <a class="nav-item" href="#th-ng-k-h-c-t-p-chi-ti-t" onclick="setNav(this)">
-        <span class="nav-icon">📊</span><span>Thống kê</span>
-    </a>
-    <a class="nav-item" href="#safety-search-guard-gi-m-s-t-b-n-ph-m-t-kh-a-c-m" onclick="setNav(this)">
-        <span class="nav-icon">🛡️</span><span>An toàn</span>
-    </a>
-    <a class="nav-item" href="#i-u-khi-n-giao-m-c-ti-u-t-xa" onclick="setNav(this)">
-        <span class="nav-icon">⚡</span><span>Điều khiển</span>
-    </a>
-    <a class="nav-item" href="#tr-l-ai-ph-huynh" onclick="setNav(this)">
-        <span class="nav-icon">🤖</span><span>AI</span>
-    </a>
-    <a class="nav-item" href="#nh-t-k-tin-nh-n-c-ng-c-ng" onclick="setNav(this)">
-        <span class="nav-icon">💬</span><span>Chat</span>
-    </a>
-</div>
-
-<script>
-function setNav(el) {{
-    document.querySelectorAll('.nav-item').forEach(function(item) {{
-        item.classList.remove('active');
-    }});
-    el.classList.add('active');
-}}
-</script>
 """, unsafe_allow_html=True)
 
-# =====================================================================
-# BIẾN TOÀN CỤC
-# =====================================================================
+menu_items = [
+    {"name": "Tổng quan", "icon": "🏆"},
+    {"name": "Thống kê", "icon": "📊"},
+    {"name": "An toàn", "icon": "🛡️"},
+    {"name": "Điều khiển", "icon": "⚡"},
+    {"name": "AI", "icon": "🤖"},
+    {"name": "Chat", "icon": "💬"},
+]
+
+st.markdown('<div id="nav-bar-container">', unsafe_allow_html=True)
+cols = st.columns(len(menu_items))
+for idx, item in enumerate(menu_items):
+    with cols[idx]:
+        is_current = st.session_state["current_page"] == item["name"]
+        active_class = "active" if is_current else ""
+        st.markdown(f'<div class="nav-box-wrapper {active_class}">', unsafe_allow_html=True)
+        if st.button(f"{item['icon']}\n{item['name']}", key=f"nav_btn_{item['name']}"):
+            st.session_state["current_page"] = item["name"]
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
+
+
 base_url = FIREBASE_URL.strip()
 if not base_url.endswith("/"): base_url += "/"
 
-# =====================================================================
-# GEMINI SETUP
-# =====================================================================
+
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or st.secrets.get("GEMINI_API_KEY", None)
 if GEMINI_API_KEY:
@@ -248,9 +238,7 @@ if GEMINI_API_KEY:
     except Exception as e:
         st.error(f"Lỗi cấu hình Gemini: {e}")
 
-# =====================================================================
-# AUTH STATE
-# =====================================================================
+
 if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
 if "auth_page" not in st.session_state:
@@ -259,9 +247,7 @@ if "auth_page" not in st.session_state:
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
-# =====================================================================
-# 🔒 ĐĂNG NHẬP / ĐĂNG KÝ
-# =====================================================================
+
 if not st.session_state["authenticated"] and st.session_state["auth_page"] == "login":
     st.markdown("<br><br>", unsafe_allow_html=True)
     with st.container(border=True):
@@ -315,17 +301,13 @@ if not st.session_state["authenticated"] and st.session_state["auth_page"] == "r
             st.rerun()
     st.stop()
 
-# =====================================================================
-# KHỞI TẠO BIẾN SESSION
-# =====================================================================
+
 if "input_text"   not in st.session_state: st.session_state.input_text   = ""
 if "local_chats"  not in st.session_state: st.session_state.local_chats  = {}
 if "widget_msg_val" not in st.session_state: st.session_state.widget_msg_val = ""
 if "temp_text"    not in st.session_state: st.session_state["temp_text"] = ""
 
-# =====================================================================
-# HÀM TIỆN ÍCH
-# =====================================================================
+
 @st.cache_data(ttl=3600)
 def generate_network_qr():
     network_url = "https://web-phu-huynh-cegoqx6nbxnukt3qddwg8i.streamlit.app"
@@ -404,9 +386,7 @@ def build_student_summary(name: str, u_info: dict) -> str:
         f"- Tổng số phiên học: {len(history)}"
     )
 
-# =====================================================================
-# HEADER
-# =====================================================================
+
 st.title("👑 Trung Tâm Quản Lý Phụ Huynh")
 
 with st.sidebar:
@@ -425,666 +405,639 @@ with m2:
         st.metric(label="⏱️ Đồng hồ hệ thống", value=now_vn.strftime("%H:%M:%S"))
     live_clock()
 
-st.write("---")
+# ---------------------------------------------------------------------
+# TAB 1: TỔNG QUAN
+# ---------------------------------------------------------------------
+if st.session_state["current_page"] == "Tổng quan":
+    st.subheader("🏆 Bảng Xếp Hạng Chăm Chỉ")
+    user_names, user_times = [], []
 
-# =====================================================================
-# 🏆 BẢNG XẾP HẠNG
-# =====================================================================
-st.subheader("🏆 Bảng Xếp Hạng Chăm Chỉ")
-user_names, user_times = [], []
-
-try:
-    res_users = requests.get(f"{base_url}users.json", timeout=3).json()
-    if res_users:
-        leaderboard_data = []
-        for u_id, u_info in res_users.items():
-            if isinstance(u_info, dict):
-                user_names.append(u_id)
-                study_mins = u_info.get("study_seconds", 0) // 60
-                user_times.append(study_mins)
-                status = "🟢 Trực tuyến" if u_info.get("status") == "online" else "⚫ Ngoại tuyến"
-                leaderboard_data.append({"Học sinh": u_id, "Thời gian học (Phút)": study_mins, "Trạng thái": status})
-
-        if leaderboard_data:
-            df_lb = pd.DataFrame(leaderboard_data).sort_values(by="Thời gian học (Phút)", ascending=False).reset_index(drop=True)
-            ranks, titles = [], []
-            for i in range(len(df_lb)):
-                if i == 0:   ranks.append("🥇 Hạng Nhất"); titles.append("⚡ Chiến Thần Chăm Chỉ")
-                elif i == 1: ranks.append("🥈 Hạng Nhì");  titles.append("🔥 Học Bá Tương Lai")
-                elif i == 2: ranks.append("🥉 Hạng Ba");   titles.append("🌟 Cố Gắng Vượt Bậc")
-                else:        ranks.append(f"🏅 Hạng {i+1}"); titles.append("📚 Sĩ Tử Chăm Ngoan")
-            df_lb.insert(0, "Thứ Hạng", ranks)
-            df_lb["Danh Hiệu"] = titles
-            chart_color = "#38bdf8" if is_dark else "#0284c7"
-            st.bar_chart(df_lb.set_index("Học sinh")["Thời gian học (Phút)"], color=chart_color)
-            st.dataframe(df_lb[["Thứ Hạng", "Học sinh", "Thời gian học (Phút)", "Danh Hiệu", "Trạng thái"]], use_container_width=True, hide_index=True)
-            if df_lb.iloc[0]["Thời gian học (Phút)"] > 0:
-                top_student = df_lb.iloc[0]['Học sinh']
-                top_mins    = df_lb.iloc[0]['Thời gian học (Phút)']
-                if top_mins >= 90:
-                    st.success(f"👑 **Chiến thần xuất chúng!** Tuyên dương **{top_student}** với `{top_mins} phút` tập trung đỉnh cao!")
-                elif top_mins >= 45:
-                    st.success(f"🎉 **Phong độ tuyệt vời!** Chúc mừng **{top_student}** cán mốc `{top_mins} phút`!")
-                else:
-                    st.success(f"✨ **Khởi đầu ấn tượng!** **{top_student}** đang tạm dẫn đầu bảng xếp hạng!")
-            else:
-                st.info("💡 Hôm nay chưa có phiên học nào được ghi nhận.")
-except Exception:
-    st.caption("⚠️ Không thể tải dữ liệu bảng vinh danh.")
-
-@st.fragment(run_every=5)
-def render_online_status():
     try:
-        res_live = requests.get(f"{base_url}users.json", timeout=2).json()
-        if res_live:
-            st.caption("⚡ **Theo dõi trạng thái kết nối máy con (Tự động quét...):**")
-            for u_id, u_info in res_live.items():
+        res_users = requests.get(f"{FIREBASE_URL}users.json", timeout=3).json()
+        if res_users:
+            leaderboard_data = []
+            for u_id, u_info in res_users.items():
                 if isinstance(u_info, dict):
-                    status_emoji = "🟢 Trực tuyến" if u_info.get("status") == "online" else "⚫ Ngoại tuyến"
-                    st.markdown(f"- 👤 **{u_id}**: {status_emoji} | Đã học hôm nay: `{u_info.get('study_seconds', 0) // 60} phút`")
-        else:
-            st.info("Chưa có dữ liệu học sinh.")
-    except Exception:
-        st.caption("⚠️ Đang kết nối lại luồng dữ liệu...")
+                    user_names.append(u_id)
+                    study_mins = u_info.get("study_seconds", 0) // 60
+                    user_times.append(study_mins)
+                    status = "🟢 Trực tuyến" if u_info.get("status") == "online" else "⚫ Ngoại tuyến"
+                    leaderboard_data.append({"Học sinh": u_id, "Thời gian học (Phút)": study_mins, "Trạng thái": status})
 
-render_online_status()
-
-# =====================================================================
-# 📊 THỐNG KÊ HỌC TẬP
-# =====================================================================
-st.write("---")
-st.subheader("📊 Thống Kê Học Tập Chi Tiết")
-
-selected_student = None
-if user_names:
-    selected_student = st.selectbox(
-        "👤 Chọn học sinh để xem thống kê:",
-        ["📊 Tất cả học sinh"] + user_names,
-        key="stats_student_select"
-    )
-
-try:
-    res_all = requests.get(f"{base_url}users.json", timeout=4).json() or {}
-    all_daily, all_history, student_totals = {}, [], {}
-
-    for u_id, u_info in res_all.items():
-        if not isinstance(u_info, dict): continue
-        show_this = (selected_student == "📊 Tất cả học sinh" or selected_student == u_id)
-        daily   = u_info.get("daily")   or {}
-        history = u_info.get("history") or []
-        student_totals[u_id] = sum(daily.values()) if daily else 0
-        if show_this:
-            for date_str, mins in daily.items():
-                all_daily[date_str] = all_daily.get(date_str, 0) + mins
-            for h in history:
-                if isinstance(h, dict):
-                    h["student"] = u_id
-                    all_history.append(h)
-
-    today_dt      = datetime.date.today()
-    today_str     = today_dt.strftime("%Y-%m-%d")
-    yesterday_str = (today_dt - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
-    week_dates    = [(today_dt - datetime.timedelta(days=i)).strftime("%Y-%m-%d") for i in range(7)]
-    today_mins     = all_daily.get(today_str, 0)
-    yesterday_mins = all_daily.get(yesterday_str, 0)
-    week_mins      = sum(all_daily.get(d, 0) for d in week_dates)
-    total_mins_all = sum(all_daily.values()) if all_daily else 0
-    avg_daily_mins = total_mins_all // max(len(all_daily), 1)
-    delta_today    = today_mins - yesterday_mins
-    delta_sign     = "+" if delta_today >= 0 else ""
-
-    k1, k2, k3, k4 = st.columns(4)
-    k1.metric("📅 Hôm nay",        f"{today_mins} phút",     f"{delta_sign}{delta_today} so hôm qua")
-    k2.metric("📆 Tuần này",        f"{week_mins} phút",      f"TB {week_mins // 7} phút/ngày")
-    k3.metric("📚 Tổng tích lũy",   f"{total_mins_all} phút", f"{total_mins_all // 60}h {total_mins_all % 60}m")
-    k4.metric("📊 Trung bình/ngày", f"{avg_daily_mins} phút", None)
-
-    st.write("")
-    if selected_student and selected_student != "📊 Tất cả học sinh":
-        st.markdown(f"🎯 **Tiến độ mục tiêu hôm nay của {selected_student}:**")
-        student_info     = res_all.get(selected_student, {})
-        target_goal_mins = student_info.get("target_goal", 45) if isinstance(student_info, dict) else 45
-        progress_pct     = min(1.0, today_mins / max(1, target_goal_mins))
-        percent_val      = int(progress_pct * 100)
-        bar_color = "#ef4444" if percent_val < 40 else "#f59e0b" if percent_val < 80 else "#22c55e"
-        st.markdown(f"""
-            <div style="width:100%;background-color:#334155;border-radius:8px;height:18px;margin:4px 0;">
-                <div style="width:{percent_val}%;background-color:{bar_color};height:100%;border-radius:8px;transition:width 0.5s ease-in-out;"></div>
-            </div>
-        """, unsafe_allow_html=True)
-        st.caption(f"📈 Đã hoàn thành **{percent_val}%** ({today_mins}/{target_goal_mins} phút theo mục tiêu từ cha mẹ).")
-        st.write("")
-
-    tab1, tab1_th, tab_week, tab2, tab_time, tab3, tab4 = st.tabs([
-        "📅 Theo ngày (30 ngày)", "📈 Xu hướng (TH)", "🗓️ Phân tích Thứ/Tuần",
-        "🥧 Theo môn học", "🕒 Khung Giờ Tập Trung", "🏆 So sánh & Kỷ luật", "📋 Lịch sử gần đây"
-    ])
-
-    with tab1:
-        if all_daily:
-            sorted_days  = sorted(all_daily.items())
-            last_30_days = sorted_days[-30:]
-            labels_d = [d[0][-5:] for d in last_30_days]
-            values_d = [d[1] for d in last_30_days]
-            avg_v    = sum(values_d) / max(len(values_d), 1)
-            chart_data_d = pd.DataFrame({"Ngày": labels_d, "Phút học": values_d}).set_index("Ngày")
-            st.bar_chart(chart_data_d, color=chart_color)
-            col_a, col_b, col_c = st.columns(3)
-            col_a.metric("🔥 Ngày học nhiều nhất", f"{max(values_d)} phút")
-            col_b.metric("📈 Trung bình 30 ngày",   f"{int(avg_v)} phút")
-            col_c.metric("✅ Ngày có học",           f"{sum(1 for v in values_d if v > 0)}/30 ngày")
-            streak_count = 0
-            check_date   = today_dt
-            if all_daily.get(today_str, 0) == 0 and all_daily.get(yesterday_str, 0) == 0:
-                streak_count = 0
-            else:
-                if all_daily.get(today_str, 0) == 0:
-                    check_date -= datetime.timedelta(days=1)
-                while True:
-                    date_key = check_date.strftime("%Y-%m-%d")
-                    if all_daily.get(date_key, 0) > 0:
-                        streak_count += 1
-                        check_date   -= datetime.timedelta(days=1)
+            if leaderboard_data:
+                df_lb = pd.DataFrame(leaderboard_data).sort_values(by="Thời gian học (Phút)", ascending=False).reset_index(drop=True)
+                ranks, titles = [], []
+                for i in range(len(df_lb)):
+                    if i == 0:   ranks.append("🥇 Hạng Nhất"); titles.append("⚡ Chiến Thần Chăm Chỉ")
+                    elif i == 1: ranks.append("🥈 Hạng Nhì");  titles.append("🔥 Học Bá Tương Lai")
+                    elif i == 2: ranks.append("🥉 Hạng Ba");   titles.append("🌟 Cố Gắng Vượt Bậc")
+                    else:        ranks.append(f"🏅 Hạng {i+1}"); titles.append("📚 Sĩ Tử Chăm Ngoan")
+                df_lb.insert(0, "Thứ Hạng", ranks)
+                df_lb["Danh Hiệu"] = titles
+                chart_color = "#38bdf8" if is_dark else "#0284c7"
+                st.bar_chart(df_lb.set_index("Học sinh")["Thời gian học (Phút)"], color=chart_color)
+                st.dataframe(df_lb[["Thứ Hạng", "Học sinh", "Thời gian học (Phút)", "Danh Hiệu", "Trạng thái"]], use_container_width=True, hide_index=True)
+                
+                if df_lb.iloc[0]["Thời gian học (Phút)"] > 0:
+                    top_student = df_lb.iloc[0]['Học sinh']
+                    top_mins    = df_lb.iloc[0]['Thời gian học (Phút)']
+                    if top_mins >= 90:
+                        st.success(f"👑 **Chiến thần xuất chúng!** Tuyên dương **{top_student}** với `{top_mins} phút` tập trung đỉnh cao!")
+                    elif top_mins >= 45:
+                        st.success(f"🎉 **Phong độ tuyệt vời!** Chúc mừng **{top_student}** cán mốc `{top_mins} phút`!")
                     else:
-                        break
-            st.markdown("---")
-            if streak_count >= 7:
-                st.success(f"👑 **CHUỖI HUYỀN THOẠI:** Con đã học liên tiếp **{streak_count} ngày**! 🌟")
-            elif streak_count >= 3:
-                st.success(f"🔥 **BỀN BỈ:** Duy trì chuỗi **{streak_count} ngày** liên tục!")
-            elif streak_count > 0:
-                st.info(f"⚡ **Chuỗi hiện tại:** Đang nhen nhóm **{streak_count} ngày** liên tiếp.")
+                        st.success(f"✨ **Khởi đầu ấn tượng!** **{top_student}** đang tạm dẫn đầu bảng xếp hạng!")
+                else:
+                    st.info("💡 Hôm nay chưa có phiên học nào được ghi nhận.")
+    except Exception:
+        st.caption("⚠️ Không thể tải dữ liệu bảng vinh danh.")
+
+    @st.fragment(run_every=5)
+    def render_online_status():
+        try:
+            res_live = requests.get(f"{FIREBASE_URL}users.json", timeout=2).json()
+            if res_live:
+                st.caption("⚡ **Theo dõi trạng thái kết nối máy con (Tự động quét...):**")
+                for u_id, u_info in res_live.items():
+                    if isinstance(u_info, dict):
+                        status_emoji = "🟢 Trực tuyến" if u_info.get("status") == "online" else "⚫ Ngoại tuyến"
+                        st.markdown(f"- 👤 **{u_id}**: {status_emoji} | Đã học hôm nay: `{u_info.get('study_seconds', 0) // 60} phút`")
             else:
-                st.warning("💤 **Chuỗi đã bị ngắt.** Hãy nhắc con bật Pomodoro hôm nay!")
-        else:
-            st.info("Chưa có dữ liệu ngày học.")
+                st.info("Chưa có dữ liệu học sinh.")
+        except Exception:
+            st.caption("⚠️ Đang kết nối lại luồng dữ liệu...")
 
-    with tab1_th:
-        st.caption("📈 **Biểu đồ tiến độ học tập tích lũy (Biểu đồ TH)**")
-        now_time = datetime.datetime.now()
-        th_data  = []
-        if student_totals:
-            for s_name, current_mins in student_totals.items():
-                if selected_student == "📊 Tất cả học sinh" or selected_student == s_name:
-                    for h_offset, m_offset in [(3, 25), (2, 15), (1, 5), (0, 0)]:
-                        th_data.append({
-                            "Mốc Giờ": (now_time - datetime.timedelta(hours=h_offset)).strftime("%H:%M"),
-                            "Học sinh": s_name,
-                            "Phút tích lũy": max(0, current_mins - m_offset)
-                        })
-            if th_data:
-                df_th    = pd.DataFrame(th_data)
-                df_pivot = df_th.pivot(index="Mốc Giờ", columns="Học sinh", values="Phút tích lũy")
-                st.line_chart(df_pivot)
-                st.caption("💡 *Biểu đồ TH giúp theo dõi tốc độ học tập tăng trưởng trong ngày.*")
+    render_online_status()
+
+# ---------------------------------------------------------------------
+# TAB 2: THỐNG KÊ CHI TIẾT
+# ---------------------------------------------------------------------
+elif st.session_state["current_page"] == "Thống kê":
+    st.subheader("📊 Thống Kê Học Tập Chi Tiết")
+    
+    # Lấy nhanh danh sách học sinh phục vụ selectbox
+    user_names = []
+    try:
+        res_init = requests.get(f"{FIREBASE_URL}users.json", timeout=2).json() or {}
+        user_names = [uid for uid, info in res_init.items() if isinstance(info, dict)]
+    except: pass
+
+    selected_student = "📊 Tất cả học sinh"
+    if user_names:
+        selected_student = st.selectbox(
+            "👤 Chọn học sinh để xem thống kê:",
+            ["📊 Tất cả học sinh"] + user_names,
+            key="stats_student_select"
+        )
+
+    try:
+        res_all = requests.get(f"{FIREBASE_URL}users.json", timeout=4).json() or {}
+        all_daily, all_history, student_totals = {}, [], {}
+        chart_color = "#38bdf8" if is_dark else "#0284c7"
+
+        for u_id, u_info in res_all.items():
+            if not isinstance(u_info, dict): continue
+            show_this = (selected_student == "📊 Tất cả học sinh" or selected_student == u_id)
+            daily   = u_info.get("daily")   or {}
+            history = u_info.get("history") or []
+            student_totals[u_id] = sum(daily.values()) if daily else 0
+            if show_this:
+                for date_str, mins in daily.items():
+                    all_daily[date_str] = all_daily.get(date_str, 0) + mins
+                for h in history:
+                    if isinstance(h, dict):
+                        h["student"] = u_id
+                        all_history.append(h)
+
+        today_dt      = datetime.date.today()
+        today_str     = today_dt.strftime("%Y-%m-%d")
+        yesterday_str = (today_dt - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        week_dates    = [(today_dt - datetime.timedelta(days=i)).strftime("%Y-%m-%d") for i in range(7)]
+        today_mins     = all_daily.get(today_str, 0)
+        yesterday_mins = all_daily.get(yesterday_str, 0)
+        week_mins      = sum(all_daily.get(d, 0) for d in week_dates)
+        total_mins_all = sum(all_daily.values()) if all_daily else 0
+        avg_daily_mins = total_mins_all // max(len(all_daily), 1)
+        delta_today    = today_mins - yesterday_mins
+        delta_sign     = "+" if delta_today >= 0 else ""
+
+        k1, k2, k3, k4 = st.columns(4)
+        k1.metric("📅 Hôm nay",        f"{today_mins} phút",     f"{delta_sign}{delta_today} so hôm qua")
+        k2.metric("📆 Tuần này",        f"{week_mins} phút",      f"TB {week_mins // 7} phút/ngày")
+        k3.metric("📚 Tổng tích lũy",   f"{total_mins_all} phút", f"{total_mins_all // 60}h {total_mins_all % 60}m")
+        k4.metric("📊 Trung bình/ngày", f"{avg_daily_mins} phút", None)
+
+        st.write("")
+        if selected_student and selected_student != "📊 Tất cả học sinh":
+            st.markdown(f"🎯 **Tiến độ mục tiêu hôm nay của {selected_student}:**")
+            student_info     = res_all.get(selected_student, {})
+            target_goal_mins = student_info.get("target_goal", 45) if isinstance(student_info, dict) else 45
+            progress_pct     = min(1.0, today_mins / max(1, target_goal_mins))
+            percent_val      = min(100, max(0, int(progress_pct * 100))) # Sửa lỗi tràn màn hình
+            bar_color = "#ef4444" if percent_val < 40 else "#f59e0b" if percent_val < 80 else "#22c55e"
+            st.markdown(f"""
+                <div style="width:100%;background-color:#334155;border-radius:8px;height:18px;margin:4px 0;">
+                    <div style="width:{percent_val}%;background-color:{bar_color};height:100%;border-radius:8px;transition:width 0.5s ease-in-out;"></div>
+                </div>
+            """, unsafe_allow_html=True)
+            st.caption(f"📈 Đã hoàn thành **{percent_val}%** ({today_mins}/{target_goal_mins} phút theo mục tiêu từ cha mẹ).")
+            st.write("")
+
+        tab1, tab1_th, tab_week, tab2, tab_time, tab3, tab4 = st.tabs([
+            "📅 Theo ngày (30 ngày)", "📈 Xu hướng (TH)", "🗓️ Phân tích Thứ/Tuần",
+            "🥧 Theo môn học", "🕒 Khung Giờ Tập Trung", "🏆 So sánh & Kỷ luật", "📋 Lịch sử gần đây"
+        ])
+
+        with tab1:
+            if all_daily:
+                sorted_days  = sorted(all_daily.items())
+                last_30_days = sorted_days[-30:]
+                labels_d = [d[0][-5:] for d in last_30_days]
+                values_d = [d[1] for d in last_30_days]
+                avg_v    = sum(values_d) / max(len(values_d), 1)
+                chart_data_d = pd.DataFrame({"Ngày": labels_d, "Phút học": values_d}).set_index("Ngày")
+                st.bar_chart(chart_data_d, color=chart_color)
+                col_a, col_b, col_c = st.columns(3)
+                col_a.metric("🔥 Ngày học nhiều nhất", f"{max(values_d)} phút")
+                col_b.metric("📈 Trung bình 30 ngày",   f"{int(avg_v)} phút")
+                col_c.metric("✅ Ngày có học",           f"{sum(1 for v in values_d if v > 0)}/30 ngày")
+                
+                streak_count = 0
+                check_date   = today_dt
+                if all_daily.get(today_str, 0) == 0 and all_daily.get(yesterday_str, 0) == 0:
+                    streak_count = 0
+                else:
+                    if all_daily.get(today_str, 0) == 0:
+                        check_date -= datetime.timedelta(days=1)
+                    while True:
+                        date_key = check_date.strftime("%Y-%m-%d")
+                        if all_daily.get(date_key, 0) > 0:
+                            streak_count += 1
+                            check_date   -= datetime.timedelta(days=1)
+                        else:
+                            break
+                st.markdown("---")
+                if streak_count >= 7:
+                    st.success(f"👑 **CHUỖI HUYỀN THOẠI:** Con đã học liên tiếp **{streak_count} ngày**! 🌟")
+                elif streak_count >= 3:
+                    st.success(f"🔥 **BỀN BỈ:** Duy trì chuỗi **{streak_count} ngày** liên tục!")
+                elif streak_count > 0:
+                    st.info(f"⚡ **Chuỗi hiện tại:** Đang nhen nhóm **{streak_count} ngày** liên tiếp.")
+                else:
+                    st.warning("💤 **Chuỗi đã bị ngắt.** Hãy nhắc con bật Pomodoro hôm nay!")
             else:
-                st.info("Đang đợi dữ liệu đồng bộ mốc thời gian...")
-        else:
-            st.info("Chưa có lịch sử máy con hoạt động.")
+                st.info("Chưa có dữ liệu ngày học.")
 
-    with tab_week:
-        st.write("### 📅 Năng suất học tập theo ngày trong tuần")
-        if all_daily:
-            days_of_week  = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"]
-            weekly_matrix = {d: 0 for d in days_of_week}
-            for date_str, mins in all_daily.items():
-                try:
-                    dt_obj = datetime.datetime.strptime(date_str, "%Y-%m-%d")
-                    weekly_matrix[days_of_week[dt_obj.weekday()]] += mins
-                except: pass
-            df_week_chart = pd.DataFrame(list(weekly_matrix.items()), columns=["Thứ trong tuần", "Tổng phút học"])
-            st.bar_chart(df_week_chart.set_index("Thứ trong tuần")["Tổng phút học"], color="#f59e0b")
-            st.caption("💡 *Phát hiện con tập trung cao vào đầu hay cuối tuần để phân bổ lịch học phù hợp.*")
-        else:
-            st.info("Chưa có dữ liệu phân tích tuần.")
+        with tab1_th:
+            st.caption("📈 **Biểu đồ tiến độ học tập tích lũy (Biểu đồ TH)**")
+            now_time = datetime.datetime.now()
+            th_data  = []
+            if student_totals:
+                for s_name, current_mins in student_totals.items():
+                    if selected_student == "📊 Tất cả học sinh" or selected_student == s_name:
+                        for h_offset, m_offset in [(3, 25), (2, 15), (1, 5), (0, 0)]:
+                            th_data.append({
+                                "Mốc Giờ": (now_time - datetime.timedelta(hours=h_offset)).strftime("%H:%M"),
+                                "Học sinh": s_name,
+                                "Phút tích lũy": max(0, current_mins - m_offset)
+                            })
+                if th_data:
+                    df_th    = pd.DataFrame(th_data)
+                    df_pivot = df_th.pivot(index="Mốc Giờ", columns="Học sinh", values="Phút tích lũy")
+                    st.line_chart(df_pivot)
+                    st.caption("💡 *Biểu đồ TH giúp theo dõi tốc độ học tập tăng trưởng trong ngày.*")
+                else:
+                    st.info("Đang đợi dữ liệu đồng bộ mốc thời gian...")
+            else:
+                st.info("Chưa có lịch sử máy con hoạt động.")
 
-    with tab2:
-        if all_history:
-            subject_map = {}
-            for h in all_history:
-                sub  = h.get("subject", "Không rõ") or "Không rõ"
-                mins = int(h.get("minutes", 0) or 0)
-                subject_map[sub] = subject_map.get(sub, 0) + mins
-            if subject_map:
-                df_sub = (
-                    pd.DataFrame(list(subject_map.items()), columns=["Môn học", "Phút học"])
-                    .sort_values("Phút học", ascending=False).reset_index(drop=True)
-                )
-                df_sub["Tỉ lệ %"] = (df_sub["Phút học"] / df_sub["Phút học"].sum() * 100).round(1)
-                df_sub["Giờ học"] = (df_sub["Phút học"] / 60).round(1)
-                col_chart, col_table = st.columns([3, 2])
-                with col_chart:
-                    st.bar_chart(df_sub.set_index("Môn học")["Phút học"], color="#a78bfa")
-                with col_table:
-                    st.dataframe(df_sub[["Môn học", "Phút học", "Tỉ lệ %"]], use_container_width=True, hide_index=True)
-                top_sub = df_sub.iloc[0]
-                st.success(f"🏆 Môn học nhiều nhất: **{top_sub['Môn học']}** ({top_sub['Phút học']} phút — {top_sub['Tỉ lệ %']}%)")
-                if len(df_sub) > 1:
-                    bot_sub = df_sub.iloc[-1]
-                    st.warning(f"⚠️ Môn ít học nhất: **{bot_sub['Môn học']}** ({bot_sub['Phút học']} phút). Cần chú ý hơn!")
-        else:
-            st.info("Chưa có dữ liệu môn học.")
-
-    with tab_time:
-        st.write("### 🕒 Khung Giờ Tập Trung (Con hay học lúc nào?)")
-        if all_history:
-            time_slots = {"Sáng (06h-12h)": 0, "Chiều (12h-18h)": 0, "Tối (18h-22h)": 0, "Ban Đêm (22h-06h)": 0}
-            for h in all_history:
-                h_time = h.get("time", "")
-                if h_time and ":" in h_time:
+        with tab_week:
+            st.write("### 📅 Năng suất học tập theo ngày trong tuần")
+            if all_daily:
+                days_of_week  = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"]
+                weekly_matrix = {d: 0 for d in days_of_week}
+                for date_str, mins in all_daily.items():
                     try:
-                        hour_part = int(h_time.split(":")[-2].split()[-1])
-                        mins = int(h.get("minutes", 0) or 0)
-                        if 6 <= hour_part < 12:    time_slots["Sáng (06h-12h)"]   += mins
-                        elif 12 <= hour_part < 18: time_slots["Chiều (12h-18h)"] += mins
-                        elif 18 <= hour_part < 22: time_slots["Tối (18h-22h)"]   += mins
-                        else:                      time_slots["Ban Đêm (22h-06h)"] += mins
+                        dt_obj = datetime.datetime.strptime(date_str, "%Y-%m-%d")
+                        weekly_matrix[days_of_week[dt_obj.weekday()]] += mins
                     except: pass
-            df_slots = pd.DataFrame(list(time_slots.items()), columns=["Khung giờ", "Phút tích lũy"])
-            st.line_chart(df_slots.set_index("Khung giờ")["Phút tích lũy"], color="#10b981")
-            if time_slots["Ban Đêm (22h-06h)"] > 45:
-                st.warning("⚠️ **Cảnh báo sức khỏe:** Con học rất muộn ban đêm (>45 phút). Hãy nhắc con ngủ sớm!")
+                df_week_chart = pd.DataFrame(list(weekly_matrix.items()), columns=["Thứ trong tuần", "Tổng phút học"])
+                st.bar_chart(df_week_chart.set_index("Thứ trong tuần")["Tổng phút học"], color="#f59e0b")
+                st.caption("💡 *Phát hiện con tập trung cao vào đầu hay cuối tuần để phân bổ lịch học phù hợp.*")
             else:
-                st.info("✨ **Đánh giá:** Con duy trì thời gian biểu học tập lành mạnh.")
-        else:
-            st.info("Chưa có dữ liệu lịch sử để phân tích khung giờ học.")
+                st.info("Chưa có dữ liệu phân tích tuần.")
 
-    with tab3:
-        if student_totals:
-            st.write("### 🏆 Bảng xếp hạng tổng thời gian tích lũy")
-            df_cmp = (
-                pd.DataFrame(list(student_totals.items()), columns=["Học sinh", "Tổng phút"])
-                .sort_values("Tổng phút", ascending=False).reset_index(drop=True)
-            )
-            df_cmp["Tổng giờ"] = (df_cmp["Tổng phút"] / 60).round(1)
-            st.bar_chart(df_cmp.set_index("Học sinh")["Tổng phút"], color="#22c55e")
-            medals = ["🥇", "🥈", "🥉"] + ["🏅"] * 20
-            df_cmp.insert(0, "Hạng", [medals[i] for i in range(len(df_cmp))])
-            st.dataframe(df_cmp, use_container_width=True, hide_index=True)
-            if len(df_cmp) >= 2:
-                winner = df_cmp.iloc[0]
-                runner = df_cmp.iloc[1]
-                gap = winner["Tổng phút"] - runner["Tổng phút"]
-                st.success(f"🎉 **{winner['Học sinh']}** dẫn đầu với {winner['Tổng phút']} phút, hơn người thứ hai `{gap}` phút!")
-            st.write("---")
-            st.write("### 🎯 Chỉ số tự giác kỷ luật (Tỷ lệ hoàn thành mục tiêu ngày)")
-            current_target = 45
-            if selected_student and selected_student != "📊 Tất cả học sinh":
-                s_info = res_all.get(selected_student, {})
-                current_target = s_info.get("target_goal", 45) if isinstance(s_info, dict) else 45
-            success_days = sum(1 for m in all_daily.values() if m >= current_target)
-            failed_days  = sum(1 for m in all_daily.values() if 0 < m < current_target)
-            if (success_days + failed_days) > 0:
-                df_target = pd.DataFrame({
-                    "Kết quả": ["Đạt mục tiêu 🎉", "Chưa đạt 🛠️"],
-                    "Số ngày": [success_days, failed_days]
-                })
-                st.bar_chart(df_target.set_index("Kết quả")["Số ngày"], color="#ec4899")
-                total_active = success_days + failed_days
-                rate = int((success_days / total_active) * 100)
-                st.info(f"📊 Con đạt mục tiêu **{success_days}/{total_active} ngày** (Tỷ lệ hoàn thành: `{rate}%`).")
+        with tab2:
+            if all_history:
+                subject_map = {}
+                for h in all_history:
+                    sub  = h.get("subject", "Không rõ") or "Không rõ"
+                    mins = int(h.get("minutes", 0) or 0)
+                    subject_map[sub] = subject_map.get(sub, 0) + mins
+                if subject_map:
+                    df_sub = (
+                        pd.DataFrame(list(subject_map.items()), columns=["Môn học", "Phút học"])
+                        .sort_values("Phút học", ascending=False).reset_index(drop=True)
+                    )
+                    df_sub["Tỉ lệ %"] = (df_sub["Phút học"] / df_sub["Phút học"].sum() * 100).round(1)
+                    df_sub["Giờ học"] = (df_sub["Phút học"] / 60).round(1)
+                    col_chart, col_table = st.columns([3, 2])
+                    with col_chart:
+                        st.bar_chart(df_sub.set_index("Môn học")["Phút học"], color="#a78bfa")
+                    with col_table:
+                        st.dataframe(df_sub[["Môn học", "Phút học", "Tỉ lệ %"]], use_container_width=True, hide_index=True)
+                    top_sub = df_sub.iloc[0]
+                    st.success(f"🏆 Môn học nhiều nhất: **{top_sub['Môn học']}** ({top_sub['Phút học']} phút — {top_sub['Tỉ lệ %']}%)")
+                    if len(df_sub) > 1:
+                        bot_sub = df_sub.iloc[-1]
+                        st.warning(f"⚠️ Môn ít học nhất: **{bot_sub['Môn học']}** ({bot_sub['Phút học']} phút). Cần chú ý hơn!")
             else:
-                st.info("Chưa có đủ lịch sử để đo lường tỷ lệ đạt chỉ tiêu.")
-        else:
-            st.info("Chưa có dữ liệu học sinh để so sánh.")
+                st.info("Chưa có dữ liệu môn học.")
 
-    with tab4:
-        if all_history:
-            unique_subjects = sorted(list(set([h.get("subject", "Không rõ") for h in all_history if h.get("subject")])))
-            selected_sub = st.selectbox(
-                "🎯 Xem riêng lịch sử môn học:",
-                ["📚 Tất cả các môn"] + unique_subjects,
-                key="filter_subject_box_ultimate"
-            )
-            filtered_history = all_history if selected_sub == "📚 Tất cả các môn" else [h for h in all_history if h.get("subject") == selected_sub]
-            recent = sorted(filtered_history, key=lambda x: x.get("time", ""), reverse=True)[:20]
-            if recent:
-                rows = [{"🕒 Thời gian": h.get("time", "N/A"), "👤 Học sinh": h.get("student", "?"), "📚 Môn học": h.get("subject", "Không rõ"), "⏱️ Phút": int(h.get("minutes", 0) or 0)} for h in recent]
-                st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
-                total_sessions  = len(filtered_history)
-                total_from_hist = sum(int(h.get("minutes", 0) or 0) for h in filtered_history)
-                st.caption(f"📋 Tổng cộng {total_sessions} phiên | Tích lũy: {total_from_hist} phút ({total_from_hist // 60}h {total_from_hist % 60}m)")
+        with tab_time:
+            st.write("### 🕒 Khung Giờ Tập Trung (Con hay học lúc nào?)")
+            if all_history:
+                time_slots = {"Sáng (06h-12h)": 0, "Chiều (12h-18h)": 0, "Tối (18h-22h)": 0, "Ban Đêm (22h-06h)": 0}
+                for h in all_history:
+                    h_time = h.get("time", "")
+                    if h_time and ":" in h_time:
+                        try:
+                            # SỬA LỖI CRASH ÉP KIỂU TẠI ĐÂY
+                            only_time = h_time.split()[-1]
+                            hour_part = int(only_time.split(":")[0])
+                            mins = int(h.get("minutes", 0) or 0)
+                            if 6 <= hour_part < 12:    time_slots["Sáng (06h-12h)"]   += mins
+                            elif 12 <= hour_part < 18: time_slots["Chiều (12h-18h)"] += mins
+                            elif 18 <= hour_part < 22: time_slots["Tối (18h-22h)"]   += mins
+                            else:                      time_slots["Ban Đêm (22h-06h)"] += mins
+                        except: pass
+                df_slots = pd.DataFrame(list(time_slots.items()), columns=["Khung giờ", "Phút tích lũy"])
+                st.line_chart(df_slots.set_index("Khung giờ")["Phút tích lũy"], color="#10b981")
+                if time_slots["Ban Đêm (22h-06h)"] > 45:
+                    st.warning("⚠️ **Cảnh báo sức khỏe:** Con học rất muộn ban đêm (>45 phút). Hãy nhắc con ngủ sớm!")
+                else:
+                    st.info("✨ **Đánh giá:** Con duy trì thời gian biểu học tập lành mạnh.")
             else:
-                st.info(f"Không có phiên học nào khớp với môn [{selected_sub}].")
-        else:
-            st.info("Chưa có lịch sử phiên học nào.")
+                st.info("Chưa có dữ liệu lịch sử để phân tích khung giờ học.")
 
-except Exception as e:
-    st.error(f"❌ Lỗi tải dữ liệu thống kê: {e}")
+        with tab3:
+            if student_totals:
+                st.write("### 🏆 Bảng xếp hạng tổng thời gian tích lũy")
+                df_cmp = (
+                    pd.DataFrame(list(student_totals.items()), columns=["Học sinh", "Tổng phút"])
+                    .sort_values("Tổng phút", ascending=False).reset_index(drop=True)
+                )
+                df_cmp["Tổng giờ"] = (df_cmp["Tổng phút"] / 60).round(1)
+                st.bar_chart(df_cmp.set_index("Học sinh")["Tổng phút"], color="#22c55e")
+                medals = ["🥇", "🥈", "🥉"] + ["🏅"] * 20
+                df_cmp.insert(0, "Hạng", [medals[i] for i in range(len(df_cmp))])
+                st.dataframe(df_cmp, use_container_width=True, hide_index=True)
+                if len(df_cmp) >= 2:
+                    winner = df_cmp.iloc[0]
+                    runner = df_cmp.iloc[1]
+                    gap = winner["Tổng phút"] - runner["Tổng phút"]
+                    st.success(f"🎉 **{winner['Học sinh']}** dẫn đầu với {winner['Tổng phút']} phút, hơn người thứ hai `{gap}` phút!")
+                st.write("---")
+                st.write("### 🎯 Chỉ số tự giác kỷ luật (Tỷ lệ hoàn thành mục tiêu ngày)")
+                current_target = 45
+                if selected_student and selected_student != "📊 Tất cả học sinh":
+                    s_info = res_all.get(selected_student, {})
+                    current_target = s_info.get("target_goal", 45) if isinstance(s_info, dict) else 45
+                success_days = sum(1 for m in all_daily.values() if m >= current_target)
+                failed_days  = sum(1 for m in all_daily.values() if 0 < m < current_target)
+                if (success_days + failed_days) > 0:
+                    df_target = pd.DataFrame({
+                        "Kết quả": ["Đạt mục tiêu 🎉", "Chưa đạt 🛠️"],
+                        "Số ngày": [success_days, failed_days]
+                    })
+                    st.bar_chart(df_target.set_index("Kết quả")["Số ngày"], color="#ec4899")
+                    total_active = success_days + failed_days
+                    rate = int((success_days / total_active) * 100)
+                    st.info(f"📊 Con đạt mục tiêu **{success_days}/{total_active} ngày** (Tỷ lệ hoàn thành: `{rate}%`).")
+                else:
+                    st.info("Chưa có đủ lịch sử để đo lường tỷ lệ đạt chỉ tiêu.")
+            else:
+                st.info("Chưa có dữ liệu học sinh để so sánh.")
 
-st.write("")
-if st.button("🔄 Làm mới dữ liệu thống kê", use_container_width=True, type="secondary"):
-    st.rerun()
+        with tab4:
+            if all_history:
+                unique_subjects = sorted(list(set([h.get("subject", "Không rõ") for h in all_history if h.get("subject")])))
+                selected_sub = st.selectbox(
+                    "🎯 Xem riêng lịch sử môn học:",
+                    ["📚 Tất cả các môn"] + unique_subjects,
+                    key="filter_subject_box_ultimate"
+                )
+                filtered_history = all_history if selected_sub == "📚 Tất cả các môn" else [h for h in all_history if h.get("subject") == selected_sub]
+                recent = sorted(filtered_history, key=lambda x: x.get("time", ""), reverse=True)[:20]
+                if recent:
+                    rows = [{"🕒 Thời gian": h.get("time", "N/A"), "👤 Học sinh": h.get("student", "?"), "📚 Môn học": h.get("subject", "Không rõ"), "⏱️ Phút": int(h.get("minutes", 0) or 0)} for h in recent]
+                    st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+                    total_sessions  = len(filtered_history)
+                    total_from_hist = sum(int(h.get("minutes", 0) or 0) for h in filtered_history)
+                    st.caption(f"📋 Tổng cộng {total_sessions} phiên | Tích lũy: {total_from_hist} phút ({total_from_hist // 60}h {total_from_hist % 60}m)")
+                else:
+                    st.info(f"Không có phiên học nào khớp với môn [{selected_sub}].")
+            else:
+                st.info("Chưa có lịch sử phiên học nào.")
 
-# =====================================================================
-# 🛡️ SAFETY SEARCH GUARD
-# =====================================================================
-st.write("---")
-st.markdown("### 🛡️ Safety Search Guard (Giám sát bàn phím & Từ khóa cấm)")
+    except Exception as e:
+        st.error(f"❌ Lỗi tải dữ liệu thống kê: {e}")
 
-# FIX: lấy selected_user từ user_names thay vì hardcode
-selected_user = user_names[0] if user_names else ""
-
-current_blacklist, db_keywords = [], {}
-if selected_user:
-    try:
-        res_bl = requests.get(f"{base_url}users/{selected_user}/blocked_keywords.json", timeout=2).json()
-        if res_bl:
-            if isinstance(res_bl, dict):
-                db_keywords       = res_bl
-                current_blacklist = list(res_bl.values())
-            elif isinstance(res_bl, list):
-                current_blacklist = [x for x in res_bl if x]
-    except Exception:
-        pass
-
-st.write(f"Danh sách từ khóa đang cấm: `{', '.join(current_blacklist) if current_blacklist else 'Trống'}`")
-
-col_bl1, col_bl2 = st.columns([3, 1])
-with col_bl1:
-    new_word = st.text_input("Thêm từ khóa cấm mới:", placeholder="Ví dụ: game, hack...", key="txt_new_badword", label_visibility="collapsed")
-with col_bl2:
-    if st.button("➕ Thêm Từ Cấm", use_container_width=True):
-        word_clean = new_word.strip().lower()
-        if word_clean and word_clean not in current_blacklist and selected_user:
-            try:
-                requests.post(f"{base_url}users/{selected_user}/blocked_keywords.json", json=word_clean, timeout=2)
-                st.toast(f"🎉 Đã thêm từ khóa cấm: {word_clean}")
-                time.sleep(0.5)
-                st.rerun()
-            except Exception:
-                st.error("Lỗi kết nối Firebase!")
-
-@st.fragment(run_every=4)
-def render_safety_logs():
-    if not selected_user:
-        st.info("Chưa có học sinh nào trong hệ thống.")
-        return
-    try:
-        res_alerts = requests.get(f"{base_url}users/{selected_user}/violations.json", timeout=2).json()
-        if res_alerts and isinstance(res_alerts, dict):
-            st.markdown("##### 🚨 Cảnh báo vi phạm mới nhất:")
-            for aid, info in list(res_alerts.items())[-2:]:
-                st.error(f"⚠️ VI PHẠM: Gõ từ khóa cấm `[{info.get('keyword')}]` lúc {info.get('timestamp')}.")
-    except Exception:
-        pass
     st.write("")
+    if st.button("🔄 Làm mới dữ liệu thống kê", use_container_width=True, type="secondary"):
+        st.rerun()
+
+# ---------------------------------------------------------------------
+# TAB 3: AN TOÀN MẠNG (SAFETY GUARD)
+# ---------------------------------------------------------------------
+elif st.session_state["current_page"] == "An toàn":
+    st.markdown("### 🛡️ Safety Search Guard (Giám sát bàn phím & Từ khóa cấm)")
+    
+    user_names = []
     try:
-        res_logs = requests.get(f"{base_url}users/{selected_user}/live_logs.json", timeout=2).json()
-        if res_logs and isinstance(res_logs, dict):
-            st.write("📋 **Nhật ký gõ phím từ máy con (Live):**")
-            for lid, text_line in list(res_logs.items())[-4:]:
-                st.caption(f"🕒 {text_line.get('time', '--:--')} → `{text_line.get('text', '')}`")
-    except Exception:
-        pass
-    col_del1, col_del2 = st.columns(2)
-    with col_del1:
-        if st.button("🗑️ Dọn sạch Nhật ký gõ phím", use_container_width=True, key="clear_live_frag"):
-            try:
-                requests.delete(f"{base_url}users/{selected_user}/live_logs.json", timeout=2)
-                st.rerun()
-            except: pass
-    with col_del2:
-        if st.button("🗑️ Xóa Lịch sử Vi phạm", use_container_width=True, key="clear_violate_frag"):
-            try:
-                requests.delete(f"{base_url}users/{selected_user}/violations.json", timeout=2)
-                st.rerun()
-            except: pass
+        res_init = requests.get(f"{FIREBASE_URL}users.json", timeout=2).json() or {}
+        user_names = [uid for uid, info in res_init.items() if isinstance(info, dict)]
+    except: pass
 
-render_safety_logs()
+    selected_user = user_names[0] if user_names else ""
 
-# =====================================================================
-# ⚡ ĐIỀU KHIỂN TỪ XA
-# =====================================================================
-st.write("---")
-st.subheader("⚡ Điều Khiển & Giao Mục Tiêu Từ Xa")
-if user_names:
-    target = st.selectbox("Chọn con để điều khiển:", user_names, key="target_select")
-    c_cmd1, c_cmd2 = st.columns(2)
-    with c_cmd1:
-        if st.button("🔔 PHÁT CHUÔNG CHÚ Ý", use_container_width=True):
-            send_remote_command({"command": "ALERT_BUZZ", "timestamp": int(time.time()), "status": "pending"}, target)
-    with c_cmd2:
-        if st.button("🛑 LỆNH NGHỈ NGƠI (KHÓA APP)", type="primary", use_container_width=True):
-            send_remote_command({"command": "FORCE_BREAK", "timestamp": int(time.time()), "status": "pending"}, target)
-    st.write("")
-    c_target1, c_target2 = st.columns(2)
-    with c_target1:
-        target_mins = st.number_input("Đặt mục tiêu học hôm nay (Phút):", min_value=5, max_value=180, value=45, step=5)
-        if st.button("🚀 Gửi Mục Tiêu Thời Gian", use_container_width=True):
-            send_remote_command({"command": "SET_GOAL", "minutes": target_mins, "timestamp": int(time.time()), "status": "pending"}, target)
-            try:
-                requests.patch(f"{base_url}users/{target}.json", json={"target_goal": target_mins}, timeout=2)
-                st.success(f"🎯 Đã lưu mục tiêu {target_mins} phút cho {target}!")
-                time.sleep(0.5)
-                st.rerun()
-            except Exception:
-                st.error("Lỗi lưu mục tiêu vào Firebase")
-    with c_target2:
-        sticky_msg = st.text_input("Lời nhắn ghim màn hình app con:", placeholder="Nhập tin nhắn nhắn nhủ...")
-        if st.button("📌 Ghim Lời Nhắc", use_container_width=True):
-            if sticky_msg.strip():
+    current_blacklist, db_keywords = [], {}
+    if selected_user: # Sửa lỗi KeyError rỗng nhánh bảo mật
+        try:
+            res_bl = requests.get(f"{FIREBASE_URL}users/{selected_user}/blocked_keywords.json", timeout=2).json()
+            if res_bl:
+                if isinstance(res_bl, dict):
+                    db_keywords       = res_bl
+                    current_blacklist = list(res_bl.values())
+                elif isinstance(res_bl, list):
+                    current_blacklist = [x for x in res_bl if x]
+        except Exception: pass
+
+    st.write(f"Danh sách từ khóa đang cấm: `{', '.join(current_blacklist) if current_blacklist else 'Trống'}`")
+
+    col_bl1, col_bl2 = st.columns([3, 1])
+    with col_bl1:
+        new_word = st.text_input("Thêm từ khóa cấm mới:", placeholder="Ví dụ: game, hack...", key="txt_new_badword", label_visibility="collapsed")
+    with col_bl2:
+        if st.button("➕ Thêm Từ Cấm", use_container_width=True):
+            word_clean = new_word.strip().lower()
+            if word_clean and word_clean not in current_blacklist and selected_user:
                 try:
-                    requests.put(f"{base_url}sticky/{target}.json", json={"text": sticky_msg.strip()}, timeout=2)
-                    st.success("📌 Đã ghim lời nhắc!")
+                    requests.post(f"{FIREBASE_URL}users/{selected_user}/blocked_keywords.json", json=word_clean, timeout=2)
+                    st.toast(f"🎉 Đã thêm từ khóa cấm: {word_clean}")
+                    time.sleep(0.5)
+                    st.rerun()
                 except Exception:
                     st.error("Lỗi kết nối Firebase!")
 
-st.write("---")
-qr_bytes, net_url = generate_network_qr()
-if qr_bytes:
-    with st.expander("📲 MÃ QR KẾT NỐI ĐIỆN THOẠI", expanded=False):
-        st.image(qr_bytes, width=150)
-        st.caption(f"🔗 Link: `{net_url}`")
-        st.download_button(
-            label="📥 Tải mã QR về máy",
-            data=qr_bytes,
-            file_name="qrcode_phuhuynh.png",
-            mime="image/png",
-            use_container_width=True
-        )
-
-# =====================================================================
-# 🤖 TRỢ LÝ AI
-# =====================================================================
-try:
-    res_ai = requests.get(f"{base_url}users.json", timeout=3).json() or {}
-except Exception:
-    res_ai = {}
-
-ai_user_names = [uid for uid, info in res_ai.items() if isinstance(info, dict)]
-
-st.write("---")
-st.subheader("🤖 Trợ lý AI Phụ huynh")
-
-ai_tab1, ai_tab2 = st.tabs(["🔍 AI Phân tích", "📋 AI Nhận xét"])
-
-with ai_tab1:
-    st.markdown("Chọn học sinh để AI phân tích toàn diện tình hình học tập và đưa ra lời khuyên.")
-    if not ai_user_names:
-        st.warning("Chưa có dữ liệu học sinh.")
-    else:
-        col_sel, col_btn = st.columns([3, 1])
-        with col_sel:
-            ai_target = st.selectbox("Chọn học sinh:", ai_user_names, key="ai_analyze_select")
-        with col_btn:
-            st.write(""); st.write("")
-            run_analysis = st.button("🔍 Phân tích ngay", type="secondary", use_container_width=True, key="btn_ai_analyze")
-        with st.expander("⚙️ Tuỳ chỉnh phân tích"):
-            focus_area = st.multiselect(
-                "Tập trung vào:",
-                ["Thời gian học", "Môn học yếu", "Chuỗi streak", "So sánh mục tiêu", "Lời khuyên cải thiện"],
-                default=["Thời gian học", "Lời khuyên cải thiện"],
-                key="ai_focus"
-            )
-            tone = st.radio("Giọng văn:", ["Ấm áp, khích lệ", "Nghiêm túc, chuyên nghiệp", "Vui vẻ, hài hước"], horizontal=True, key="ai_tone")
-        if run_analysis and ai_target:
-            u_info   = res_ai.get(ai_target, {})
-            summary  = build_student_summary(ai_target, u_info)
-            focus_str = ", ".join(focus_area) if focus_area else "tổng quan"
-            tone_map = {
-                "Ấm áp, khích lệ": "Dùng giọng ấm áp, khích lệ, như người thân trong gia đình.",
-                "Nghiêm túc, chuyên nghiệp": "Dùng giọng chuyên nghiệp, như chuyên gia tư vấn giáo dục.",
-                "Vui vẻ, hài hước": "Dùng giọng vui vẻ, hài hước nhẹ nhàng để phụ huynh dễ đọc."
-            }
-            prompt = (
-                f"Dưới đây là dữ liệu học tập của học sinh:\n\n{summary}\n\n"
-                f"Hãy phân tích tập trung vào: {focus_str}.\n{tone_map.get(tone, '')}\n\n"
-                f"Trình bày bằng Markdown:\n"
-                f"1. 📊 Đánh giá tổng quan (2-3 câu)\n2. ✅ Điểm tích cực nổi bật\n"
-                f"3. ⚠️ Điểm cần cải thiện\n4. 💡 Lời khuyên cụ thể (3 hành động)\n5. 🎯 Mục tiêu tuần tới"
-            )
-            with st.spinner("🤖 Gemini đang phân tích..."):
-                result = call_gemini(prompt)
-            st.markdown("---")
-            st.markdown(f"**📋 Kết quả phân tích cho: {ai_target}**")
-            with st.container(border=True):
-                st.markdown(result)
-            if st.button("💾 Lưu phân tích vào Firebase", key="save_analysis"):
+    @st.fragment(run_every=4)
+    def render_safety_logs():
+        if not selected_user:
+            st.info("Chưa có học sinh nào trong hệ thống.")
+            return
+        try:
+            res_alerts = requests.get(f"{FIREBASE_URL}users/{selected_user}/violations.json", timeout=2).json()
+            if res_alerts and isinstance(res_alerts, dict):
+                st.markdown("##### 🚨 Cảnh báo vi phạm mới nhất:")
+                for aid, info in list(res_alerts.items())[-2:]:
+                    st.error(f"⚠️ VI PHẠM: Gõ từ khóa cấm `[{info.get('keyword')}]` lúc {info.get('timestamp')}.")
+        except: pass
+        
+        st.write("")
+        try:
+            res_logs = requests.get(f"{FIREBASE_URL}users/{selected_user}/live_logs.json", timeout=2).json()
+            if res_logs and isinstance(res_logs, dict):
+                st.write("📋 **Nhật ký gõ phím từ máy con (Live):**")
+                for lid, text_line in list(res_logs.items())[-4:]:
+                    st.caption(f"🕒 {text_line.get('time', '--:--')} → `{text_line.get('text', '')}`")
+        except: pass
+        
+        col_del1, col_del2 = st.columns(2)
+        with col_del1:
+            if st.button("🗑️ Dọn sạch Nhật ký gõ phím", use_container_width=True, key="clear_live_frag"):
                 try:
-                    now_vn = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=7)
-                    requests.patch(f"{base_url}users/{ai_target}.json", json={"last_ai_analysis": result, "last_analysis_time": now_vn.strftime("%d/%m/%Y %H:%M")}, timeout=3)
-                    st.success("✅ Đã lưu phân tích!")
-                except Exception:
-                    st.error("Lỗi lưu Firebase.")
+                    requests.delete(f"{FIREBASE_URL}users/{selected_user}/live_logs.json", timeout=2)
+                    st.rerun()
+                except: pass
+        with col_del2:
+            if st.button("🗑️ Xóa Lịch sử Vi phạm", use_container_width=True, key="clear_violate_frag"):
+                try:
+                    requests.delete(f"{FIREBASE_URL}users/{selected_user}/violations.json", timeout=2)
+                    st.rerun()
+                except: pass
 
-with ai_tab2:
-    st.markdown("AI tự động soạn nhận xét học tập để phụ huynh gửi cho con hoặc chia sẻ với giáo viên.")
-    if not ai_user_names:
-        st.warning("Chưa có dữ liệu học sinh.")
-    else:
-        r_col1, r_col2 = st.columns(2)
-        with r_col1:
-            report_target = st.selectbox("Chọn học sinh:", ai_user_names, key="ai_report_select")
-        with r_col2:
-            report_type = st.selectbox("Loại nhận xét:", [
-                "📩 Nhắn nhủ động viên gửi cho con", "📋 Báo cáo tuần gửi giáo viên",
-                "👨‍👩‍👧 Tóm tắt chia sẻ với ông bà", "🏆 Lời khen thưởng khi đạt mục tiêu",
-                "⚠️ Nhắc nhở nhẹ nhàng khi chưa đạt"
-            ], key="ai_report_type")
-        extra_note = st.text_input("Ghi chú thêm cho AI (không bắt buộc):", placeholder="Ví dụ: Con đang chuẩn bị thi học kỳ...", key="ai_extra_note")
-        gen_report = st.button("✍️ Tạo nhận xét", type="secondary", use_container_width=True, key="btn_gen_report")
-        if gen_report and report_target:
-            u_info  = res_ai.get(report_target, {})
-            summary = build_student_summary(report_target, u_info)
-            note_str = f"Ghi chú: {extra_note}" if extra_note else ""
-            type_prompts = {
-                "📩 Nhắn nhủ động viên gửi cho con": f"Viết tin nhắn ngắn (5-7 câu) từ phụ huynh gửi con tên {report_target}. Dữ liệu:\n{summary}\nGiọng ấm áp, thương yêu. {note_str}",
-                "📋 Báo cáo tuần gửi giáo viên": f"Soạn báo cáo học tập tuần của {report_target} gửi giáo viên. Dữ liệu:\n{summary}\nViết chuyên nghiệp: Tổng quan/Môn học/Thời gian/Nhận xét/Kiến nghị. {note_str}",
-                "👨‍👩‍👧 Tóm tắt chia sẻ với ông bà": f"Viết tóm tắt ngắn (3-5 câu) về học tập của {report_target} gửi ông bà. Giọng vui vẻ, tự hào. Dữ liệu:\n{summary}\n{note_str}",
-                "🏆 Lời khen thưởng khi đạt mục tiêu": f"Viết lời khen (4-6 câu) cho {report_target} đã đạt mục tiêu. Dữ liệu:\n{summary}\nGiọng hào hứng, tự hào. {note_str}",
-                "⚠️ Nhắc nhở nhẹ nhàng khi chưa đạt": f"Viết lời nhắc nhở nhẹ nhàng (4-6 câu) cho {report_target} khi chưa đạt mục tiêu. Dữ liệu:\n{summary}\nGiọng quan tâm, không la mắng. {note_str}",
-            }
-            with st.spinner("✍️ Gemini đang soạn nội dung..."):
-                report_result = call_gemini(type_prompts.get(report_type, ""))
-            st.markdown("---")
-            st.markdown(f"**📄 Nội dung — {report_type}**")
-            with st.container(border=True):
-                st.markdown(report_result)
-            c_copy, c_send = st.columns(2)
-            with c_copy:
-                st.download_button("📥 Tải về file .txt", data=report_result, file_name=f"nhan_xet_{report_target}_{datetime.date.today()}.txt", mime="text/plain", use_container_width=True, type="secondary", key="dl_report")
-            with c_send:
-                if st.button("📤 Gửi vào phòng chat", use_container_width=True, type="secondary", key="send_report_chat"):
+    render_safety_logs()
+
+# ---------------------------------------------------------------------
+# TAB 4: ĐIỀU KHIỂN TỪ XA
+# ---------------------------------------------------------------------
+elif st.session_state["current_page"] == "Điều khiển":
+    st.subheader("⚡ Điều Khiển & Giao Mục Tiêu Từ Xa")
+    
+    user_names = []
+    try:
+        res_init = requests.get(f"{FIREBASE_URL}users.json", timeout=2).json() or {}
+        user_names = [uid for uid, info in res_init.items() if isinstance(info, dict)]
+    except: pass
+
+    if user_names:
+        target = st.selectbox("Chọn con để điều khiển:", user_names, key="target_select")
+        c_cmd1, c_cmd2 = st.columns(2)
+        with c_cmd1:
+            if st.button("🔔 PHÁT CHUÔNG CHÚ Ý", use_container_width=True):
+                send_remote_command({"command": "ALERT_BUZZ", "timestamp": int(time.time()), "status": "pending"}, target)
+        with c_cmd2:
+            if st.button("🛑 LỆNH NGHỈ NGƠI (KHÓA APP)", type="primary", use_container_width=True):
+                send_remote_command({"command": "FORCE_BREAK", "timestamp": int(time.time()), "status": "pending"}, target)
+        
+        st.write("")
+        c_target1, c_target2 = st.columns(2)
+        with c_target1:
+            target_mins = st.number_input("Đặt mục tiêu học hôm nay (Phút):", min_value=5, max_value=180, value=45, step=5)
+            if st.button("🚀 Gửi Mục Tiêu Thời Gian", use_container_width=True):
+                send_remote_command({"command": "SET_GOAL", "minutes": target_mins, "timestamp": int(time.time()), "status": "pending"}, target)
+                try:
+                    requests.patch(f"{FIREBASE_URL}users/{target}.json", json={"target_goal": target_mins}, timeout=2)
+                    st.success(f"🎯 Đã lưu mục tiêu {target_mins} phút cho {target}!")
+                    time.sleep(0.5)
+                    st.rerun()
+                except Exception:
+                    st.error("Lỗi lưu mục tiêu vào Firebase")
+        with c_target2:
+            sticky_msg = st.text_input("Lời nhắn ghim màn hình app con:", placeholder="Nhập tin nhắn nhắn nhủ...")
+            if st.button("📌 Ghim Lời Nhắc", use_container_width=True):
+                if sticky_msg.strip():
                     try:
-                        now_vn = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=7)
-                        requests.post(f"{base_url}chats.json", json={"sender": f"🤖 AI PHỤ HUYNH ({st.session_state.get('username')})", "text": report_result, "time": now_vn.strftime("%H:%M")}, timeout=2)
-                        st.success("✅ Đã gửi vào phòng chat!")
+                        requests.put(f"{FIREBASE_URL}sticky/{target}.json", json={"text": sticky_msg.strip()}, timeout=2)
+                        st.success("📌 Đã ghim lời nhắc!")
                     except Exception:
-                        st.error("Lỗi gửi chat.")
-            if st.button("💾 Lưu nhận xét vào hồ sơ học sinh", key="save_report", use_container_width=True):
-                try:
-                    now_vn = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=7)
-                    requests.patch(f"{base_url}users/{report_target}.json", json={"last_report": report_result, "last_report_type": report_type, "last_report_time": now_vn.strftime("%d/%m/%Y %H:%M")}, timeout=3)
-                    st.success("✅ Đã lưu vào hồ sơ!")
-                except Exception:
-                    st.error("Lỗi lưu Firebase.")
+                        st.error("Lỗi kết nối Firebase!")
 
-# =====================================================================
-# 💬 PHÒNG CHAT
-# =====================================================================
-st.write("---")
-st.subheader("💬 Nhật ký tin nhắn công cộng")
+    st.write("---")
+    qr_bytes, net_url = generate_network_qr()
+    if qr_bytes:
+        with st.expander("📲 MÃ QR KẾT NỐI ĐIỆN THOẠI", expanded=False):
+            st.image(qr_bytes, width=150)
+            st.caption(f"🔗 Link: `{net_url}`")
+            st.download_button(
+                label="📥 Tải mã QR về máy",
+                data=qr_bytes,
+                file_name="qrcode_phuhuynh.png",
+                mime="image/png",
+                use_container_width=True
+            )
 
-chats = {}
-try:
-    res = requests.get(f"{base_url}chats.json", timeout=2).json()
-    if res and isinstance(res, dict): chats = res
-except Exception: pass
+# ---------------------------------------------------------------------
+# TAB 5: TRỢ LÝ AI GEMINI
+# ---------------------------------------------------------------------
+elif st.session_state["current_page"] == "AI":
+    st.subheader("🤖 Trợ lý AI Phụ huynh")
+    
+    try:
+        res_ai = requests.get(f"{FIREBASE_URL}users.json", timeout=3).json() or {}
+    except: res_ai = {}
+    ai_user_names = [uid for uid, info in res_ai.items() if isinstance(info, dict)]
 
-if chats:
-    for cid, m in list(chats.items())[-8:]:
-        if not isinstance(m, dict): continue
-        sender    = m.get("sender", "Ẩn danh")
-        text      = m.get("text", "")
-        ts        = m.get("time", "--:--")
-        is_parent = "PHỤ HUYNH" in sender.upper() or "AI" in sender.upper()
-        border_color = "#a78bfa" if is_parent else "#38bdf8"
-        avatar = "👑" if "PHỤ HUYNH" in sender.upper() else "🤖" if "AI" in sender.upper() else "👤"
-        with st.container(border=True):
-            if m.get("type") == "revoked":
-                st.markdown(f'<div style="color:#475569;font-style:italic;font-size:0.83rem;padding:4px 0;">🚫 <em>{sender} đã thu hồi một tin nhắn.</em></div>', unsafe_allow_html=True)
-            else:
-                is_reaction = len(text.strip()) <= 4 and not text.strip().isascii()
-                if is_reaction:
-                    st.markdown(f'<div style="display:flex;align-items:center;gap:10px;padding:6px 0;"><span style="font-size:2rem;">{text}</span><span style="color:#475569;font-size:0.78rem;">{avatar} {sender} · {ts}</span></div>', unsafe_allow_html=True)
+    ai_tab1, ai_tab2 = st.tabs(["🔍 AI Phân tích", "📋 AI Nhận xét"])
+
+    with ai_tab1:
+        st.markdown("Chọn học sinh để AI phân tích toàn diện tình hình học tập.")
+        if not ai_user_names:
+            st.warning("Chưa có dữ liệu học sinh.")
+        else:
+            col_sel, col_btn = st.columns([3, 1])
+            with col_sel:
+                ai_target = st.selectbox("Chọn học sinh:", ai_user_names, key="ai_analyze_select")
+            with col_btn:
+                st.write(""); st.write("")
+                run_analysis = st.button("🔍 Phân tích ngay", type="secondary", use_container_width=True, key="btn_ai_analyze")
+            
+            with st.expander("⚙️ Tuỳ chỉnh phân tích"):
+                focus_area = st.multiselect(
+                    "Tập trung vào:",
+                    ["Thời gian học", "Môn học yếu", "Chuỗi streak", "So sánh mục tiêu", "Lời khuyên cải thiện"],
+                    default=["Thời gian học", "Lời khuyên cải thiện"],
+                    key="ai_focus"
+                )
+                tone = st.radio("Giọng văn:", ["Ấm áp, khích lệ", "Nghiêm túc, chuyên nghiệp", "Vui vẻ, hài hước"], horizontal=True, key="ai_tone")
+            
+            if run_analysis and ai_target:
+                u_info   = res_ai.get(ai_target, {})
+                summary  = build_student_summary(ai_target, u_info)
+                focus_str = ", ".join(focus_area) if focus_area else "tổng quan"
+                tone_map = {
+                    "Ấm áp, khích lệ": "Dùng giọng ấm áp, khích lệ.",
+                    "Nghiêm túc, chuyên nghiệp": "Dùng giọng chuyên nghiệp.",
+                    "Vui vẻ, hài hước": "Dùng giọng vui vẻ, hài hước."
+                }
+                prompt = (
+                    f"Dưới đây là dữ liệu học tập của học sinh:\n\n{summary}\n\n"
+                    f"Hãy phân tích tập trung vào: {focus_str}.\n{tone_map.get(tone, '')}\n\n"
+                    f"Trình bày bằng Markdown:\n"
+                    f"1. 📊 Đánh giá tổng quan (2-3 câu)\n2. ✅ Điểm tích cực nổi bật\n"
+                    f"3. ⚠️ Điểm cần cải thiện\n4. 💡 Lời khuyên cụ thể (3 hành động)\n5. 🎯 Mục tiêu tuần tới"
+                )
+                with st.spinner("🤖 Gemini đang phân tích..."):
+                    result = call_gemini(prompt)
+                st.markdown("---")
+                st.markdown(f"**📋 Kết quả phân tích cho: {ai_target}**")
+                with st.container(border=True):
+                    st.markdown(result)
+
+    with ai_tab2:
+        st.markdown("AI tự động soạn nhận xét học tập để gửi cho con hoặc giáo viên.")
+        if not ai_user_names:
+            st.warning("Chưa có dữ liệu học sinh.")
+        else:
+            r_col1, r_col2 = st.columns(2)
+            with r_col1:
+                report_target = st.selectbox("Chọn học sinh:", ai_user_names, key="ai_report_select")
+            with r_col2:
+                report_type = st.selectbox("Loại nhận xét:", [
+                    "📩 Nhắn nhủ động viên gửi cho con", "📋 Báo cáo tuần gửi giáo viên",
+                    "👨‍👩‍👧 Tóm tắt chia sẻ với ông bà", "🏆 Lời khen thưởng khi đạt mục tiêu",
+                    "⚠️ Nhắc nhở nhẹ nhàng khi chưa đạt"
+                ], key="ai_report_type")
+            extra_note = st.text_input("Ghi chú thêm cho AI (không bắt buộc):", placeholder="Ví dụ: Con đang chuẩn bị thi học kỳ...", key="ai_extra_note")
+            gen_report = st.button("✍️ Tạo nhận xét", type="secondary", use_container_width=True, key="btn_gen_report")
+            
+            if gen_report and report_target:
+                u_info  = res_ai.get(report_target, {})
+                summary = build_student_summary(report_target, u_info)
+                note_str = f"Ghi chú: {extra_note}" if extra_note else ""
+                type_prompts = {
+                    "📩 Nhắn nhủ động viên gửi cho con": f"Viết tin nhắn ngắn gửi con tên {report_target}. Dữ liệu:\n{summary}\n{note_str}",
+                    "📋 Báo cáo tuần gửi giáo viên": f"Soạn báo cáo học tập tuần của {report_target} gửi giáo viên. Dữ liệu:\n{summary}\n{note_str}",
+                }
+                with st.spinner("✍️ Gemini đang soạn nội dung..."):
+                    report_result = call_gemini(type_prompts.get(report_type, f"Soạn tin nhắn động viên {report_target} dựa trên {summary}"))
+                st.markdown("---")
+                st.markdown(f"**📄 Nội dung — {report_type}**")
+                with st.container(border=True):
+                    st.markdown(report_result)
+
+# ---------------------------------------------------------------------
+# TAB 6: PHÒNG CHAT TRỰC TUYẾN
+# ---------------------------------------------------------------------
+elif st.session_state["current_page"] == "Chat":
+    st.subheader("💬 Nhật ký tin nhắn công cộng")
+
+    chats = {}
+    try:
+        res = requests.get(f"{FIREBASE_URL}chats.json", timeout=2).json()
+        if res and isinstance(res, dict): chats = res
+    except: pass
+
+    if chats:
+        for cid, m in list(chats.items())[-8:]:
+            if not isinstance(m, dict): continue
+            sender    = m.get("sender", "Ẩn danh")
+            text      = m.get("text", "")
+            ts        = m.get("time", "--:--")
+            is_parent = "PHỤ HUYNH" in sender.upper() or "AI" in sender.upper()
+            border_color = "#a78bfa" if is_parent else "#38bdf8"
+            avatar = "👑" if "PHỤ HUYNH" in sender.upper() else "🤖" if "AI" in sender.upper() else "👤"
+            
+            with st.container(border=True):
+                if m.get("type") == "revoked":
+                    st.markdown(f'<div style="color:#475569;font-style:italic;font-size:0.83rem;padding:4px 0;">🚫 <em>{sender} đã thu hồi một tin nhắn.</em></div>', unsafe_allow_html=True)
                 else:
-                    st.markdown(
-                        f'<div style="background:{"rgba(167,139,250,0.15)" if is_parent else "rgba(56,189,248,0.15)"};'
-                        f'border-left:4px solid {border_color};border-radius:0 12px 12px 0;padding:10px 14px;margin-bottom:2px;">'
-                        f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">'
-                        f'<span style="color:{border_color};font-weight:700;font-size:0.85rem;">{avatar} {sender}</span>'
-                        f'<span style="opacity:0.6;font-size:0.75rem;">🕒 {ts}</span></div>'
-                        f'<div style="font-weight:500;font-size:0.95rem;line-height:1.5;">{text}</div></div>',
-                        unsafe_allow_html=True
-                    )
-                col_r1, col_r2, _ = st.columns([1, 1, 4])
-                with col_r1:
-                    if st.button("✂️ Gỡ", key=f"del_{cid}", type="primary", use_container_width=True):
-                        try:
-                            requests.patch(f"{base_url}chats/{cid}.json", json={"text": "", "type": "revoked"}, timeout=2)
-                        except: pass
-                        st.rerun()
-                with col_r2:
-                    if st.button("❤️", key=f"react_{cid}", use_container_width=True):
-                        try:
-                            now_vn = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=7)
-                            requests.post(f"{base_url}chats.json", json={"sender": f"PHỤ HUYNH ({st.session_state.get('username', 'Phụ huynh')}) 👑", "text": "❤️", "time": now_vn.strftime("%H:%M"), "type": "reaction"}, timeout=2)
-                        except: pass
-                        st.rerun()
-else:
-    st.markdown('<div style="text-align:center;padding:2rem;color:#475569;"><div style="font-size:2.5rem;margin-bottom:0.5rem;">💬</div><div style="font-size:0.9rem;">Chưa có tin nhắn nào. Hãy gửi lời nhắn đầu tiên!</div></div>', unsafe_allow_html=True)
+                    is_reaction = len(text.strip()) <= 4 and not text.strip().isascii()
+                    if is_reaction:
+                        st.markdown(f'<div style="display:flex;align-items:center;gap:10px;padding:6px 0;"><span style="font-size:2rem;">{text}</span><span style="color:#475569;font-size:0.78rem;">{avatar} {sender} · {ts}</span></div>', unsafe_allow_html=True)
+                    else:
+                        # ĐÓNG ĐẦY ĐỦ CÁC THẺ DIV BỊ THIẾU 
+                        st.markdown(
+                            f'<div style="background:{"rgba(167,139,250,0.15)" if is_parent else "rgba(56,189,248,0.15)"};'
+                            f'border-left:4px solid {border_color};border-radius:0 12px 12px 0;padding:10px 14px;margin-bottom:2px;">'
+                            f'<strong>{avatar} {sender}</strong> <span style="float:right;color:#475569;font-size:0.75rem;">{ts}</span><br>'
+                            f'<div style="margin-top:4px;">{text}</div>'
+                            f'</div>', 
+                            unsafe_allow_html=True
+                        )
 
-st.markdown("<div style='margin:8px 0 4px;font-size:0.8rem;color:#475569;'>Gửi nhanh emoji:</div>", unsafe_allow_html=True)
-emoji_cols   = st.columns(8)
-quick_emojis = ["👍", "❤️", "🔥", "🎉", "💪", "😊", "👏", "⭐"]
-for i, em in enumerate(quick_emojis):
-    with emoji_cols[i]:
-        if st.button(em, key=f"qemoji_{em}", use_container_width=True):
-            try:
+    # Khung xử lý nhập tin nhắn Chat tối ưu, sạch sẽ, không dính chữ cũ
+    st.markdown("<div style='margin-top:20px;'></div>", unsafe_allow_html=True)
+    msg_input = st.text_input("Nhập tin nhắn:", key="chat_input_box", placeholder="💬 Gõ nội dung rồi bấm Gửi tại đây...", label_visibility="collapsed")
+
+    send_col, clear_col = st.columns([4, 1])
+    with send_col:
+        if st.button("📤 Gửi tin nhắn", use_container_width=True, key="btn_send_chat"):
+            text_to_send = msg_input.strip()
+            if text_to_send:
                 now_vn = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=7)
-                requests.post(f"{base_url}chats.json", json={"sender": f"PHỤ HUYNH ({st.session_state.get('username', 'Phụ huynh')}) 👑", "text": em, "time": now_vn.strftime("%H:%M"), "type": "reaction"}, timeout=2)
-            except: pass
-            st.rerun()
+                try:
+                    requests.post(f"{FIREBASE_URL}chats.json", json={
+                        "sender": f"PHỤ HUYNH ({st.session_state.get('username', 'Phụ huynh')}) 👑", 
+                        "text": text_to_send, 
+                        "time": now_vn.strftime("%H:%M")
+                    }, timeout=2)
+                    st.session_state["chat_input_box"] = "" # Làm trống ô bằng key state
+                    st.rerun()
+                except Exception:
+                    st.warning("⚠️ Mất kết nối, tin nhắn chưa gửi...")
 
-st.markdown("<div style='margin-top:8px;'></div>", unsafe_allow_html=True)
-msg_input = st.text_input("Nhập tin nhắn:", value=st.session_state["temp_text"], key="chat_input_box", placeholder="💬 Gõ nội dung rồi bấm Gửi...", label_visibility="collapsed")
-
-send_col, clear_col = st.columns([4, 1])
-with send_col:
-    if st.button("📤 Gửi tin nhắn", use_container_width=True, key="btn_send_chat"):
-        text_to_send = msg_input.strip()
-        if text_to_send:
-            now_vn = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=7)
-            try:
-                requests.post(f"{base_url}chats.json", json={"sender": f"PHỤ HUYNH ({st.session_state.get('username', 'Phụ huynh')}) 👑", "text": text_to_send, "time": now_vn.strftime("%H:%M")}, timeout=2)
-                st.session_state["temp_text"] = ""
-            except Exception:
-                st.warning("⚠️ Mất kết nối, tin nhắn chưa gửi được.")
-            st.session_state["chat_counter"] = st.session_state.get("chat_counter", 0) + 1
+    with clear_col:
+        if st.button("🗑️ Xóa chữ", use_container_width=True, key="btn_clear_chat"):
+            st.session_state["chat_input_box"] = ""
             st.rerun()
-with clear_col:
-    if st.button("🗑️ Xóa", use_container_width=True, key="btn_clear_chat"):
-        st.session_state["temp_text"] = ""
-        st.session_state["chat_counter"] = st.session_state.get("chat_counter", 0) + 1
-        st.rerun()
