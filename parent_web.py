@@ -9,15 +9,6 @@ import datetime
 import hashlib
 
 FIREBASE_URL = "https://pomodoroapp-701a2-default-rtdb.firebaseio.com/"
-try:
-    res_ai = requests.get(f"{base_url}users.json", timeout=3).json() or {}
-except:
-    res_ai = {}
-
-ai_user_names = [
-    uid for uid, info in res_ai.items()
-    if isinstance(info, dict)
-]
 
 st.set_page_config(
     page_title="Trung Tâm Điều Khiển Phụ Huynh", 
