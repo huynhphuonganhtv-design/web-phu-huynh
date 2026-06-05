@@ -42,7 +42,6 @@ with st.sidebar:
     )
 
 
-# Thay thế toàn bộ đoạn if/else theme cũ bằng đoạn này
 
 if st.session_state.get("theme_mode") == "🌙 Giao diện Tối":
     st.markdown("""
@@ -457,9 +456,7 @@ if "auth_page" not in st.session_state:
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
-# =====================================================================
-# 🔒 ĐĂNG NHẬP / ĐĂNG KÝ
-# =====================================================================
+
 if not st.session_state["authenticated"] and st.session_state["auth_page"] == "login":
     st.markdown("<br><br>", unsafe_allow_html=True)
     with st.container(border=True):
@@ -1545,8 +1542,7 @@ msg_input = st.text_input(
     placeholder="💬 Gõ nội dung rồi bấm Gửi...",
     label_visibility="collapsed"
 )
-
-send_col, clear_col = st.columns([4, 1])
+send_col, clear_col = st.columns([7, 3], vertical_alignment="center")
 with send_col:
     if st.button("📤 Gửi tin nhắn", use_container_width=True, key="btn_send_chat"):
         text_to_send = msg_input.strip()
