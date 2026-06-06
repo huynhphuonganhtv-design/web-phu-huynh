@@ -1087,7 +1087,8 @@ st.write("---")
 qr_bytes, net_url = generate_network_qr()
 if qr_bytes:
     # Thêm icon trực tiếp bằng emoji, tránh dùng các ký tự lạ gây lỗi giao diện
-    with st.expander("📲 MÃ QR KẾT NỐI ĐIỆN THOẠI", expanded=False):
+    # ✅ Dùng emoji ASCII-safe
+    with st.expander("🔗 MÃ QR KẾT NỐI ĐIỆN THOẠI", expanded=False):
         # Căn giữa ảnh bằng cách dùng st.columns nếu muốn, hoặc để mặc định
         st.image(qr_bytes, width=150)
         st.caption(f"🔗 Link: `{net_url}`")
