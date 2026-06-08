@@ -225,13 +225,20 @@ if st.session_state.get("theme_mode") == "🌙 Giao diện Tối":
             font-size: 0.88rem !important;
             padding: 0.75rem 1rem !important;
         }
-        [data-testid="stExpander"] summary * {
-            font-family: inherit !important;
-        }
         [data-testid="stExpander"] summary p {
             display: inline-block !important;
             margin-left: 10px !important;
             color: #e2e8f0 !important;
+        }
+        /* ── Giữ font Material cho icon mũi tên, tránh hiện chữ keyboard_arrow_down ── */
+        [data-testid="stExpander"] summary [data-testid="stIconMaterial"],
+        [data-testid="stExpander"] summary span[data-testid="stIconMaterial"] {
+            font-family: 'Material Symbols Rounded', 'Material Symbols Outlined' !important;
+            font-weight: normal !important;
+            font-style: normal !important;
+            -webkit-font-feature-settings: 'liga' !important;
+            font-feature-settings: 'liga' !important;
+            -webkit-font-smoothing: antialiased !important;
         }
 
         /* ── Alerts ── */
@@ -407,13 +414,20 @@ else:  # Giao diện Sáng
             font-size: 0.88rem !important;
             padding: 0.75rem 1rem !important;
         }
-        [data-testid="stExpander"] summary * {
-            font-family: inherit !important;
-        }
         [data-testid="stExpander"] summary p {
             display: inline-block !important;
             margin-left: 10px !important;
             color: #0f172a !important;
+        }
+        /* ── Giữ font Material cho icon mũi tên, tránh hiện chữ keyboard_arrow_down ── */
+        [data-testid="stExpander"] summary [data-testid="stIconMaterial"],
+        [data-testid="stExpander"] summary span[data-testid="stIconMaterial"] {
+            font-family: 'Material Symbols Rounded', 'Material Symbols Outlined' !important;
+            font-weight: normal !important;
+            font-style: normal !important;
+            -webkit-font-feature-settings: 'liga' !important;
+            font-feature-settings: 'liga' !important;
+            -webkit-font-smoothing: antialiased !important;
         }
 
         /* ── Chat box ── */
@@ -1101,10 +1115,8 @@ if qr_bytes:
             mime="image/png",
             use_container_width=True  # Sử dụng cái này thay cho width="stretch" để nút khít giao diện
         )
-import streamlit as st
 import google.generativeai as genai
 import datetime
-import requests
 import os
 import json  # Thêm nếu code phía dưới của bạn có dùng json
 from dotenv import load_dotenv
