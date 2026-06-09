@@ -1152,7 +1152,7 @@ def call_openrouter(prompt: str, system_instruction: str = "") -> str:
         }
 
         data = {
-            "model": "google/gemini-2.5-flash:free",
+            "model": "meta-llama/llama-3-8b-instruct:free",
             "messages": [
                 {"role": "system", "content": sys_msg},
                 {"role": "user", "content": prompt}
