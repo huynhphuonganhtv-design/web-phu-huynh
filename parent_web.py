@@ -225,20 +225,13 @@ if st.session_state.get("theme_mode") == "🌙 Giao diện Tối":
             font-size: 0.88rem !important;
             padding: 0.75rem 1rem !important;
         }
+        [data-testid="stExpander"] summary * {
+            font-family: inherit !important;
+        }
         [data-testid="stExpander"] summary p {
             display: inline-block !important;
             margin-left: 10px !important;
             color: #e2e8f0 !important;
-        }
-        /* ── Giữ font Material cho icon mũi tên, tránh hiện chữ keyboard_arrow_down ── */
-        [data-testid="stExpander"] summary [data-testid="stIconMaterial"],
-        [data-testid="stExpander"] summary span[data-testid="stIconMaterial"] {
-            font-family: 'Material Symbols Rounded', 'Material Symbols Outlined' !important;
-            font-weight: normal !important;
-            font-style: normal !important;
-            -webkit-font-feature-settings: 'liga' !important;
-            font-feature-settings: 'liga' !important;
-            -webkit-font-smoothing: antialiased !important;
         }
 
         /* ── Alerts ── */
@@ -414,20 +407,13 @@ else:  # Giao diện Sáng
             font-size: 0.88rem !important;
             padding: 0.75rem 1rem !important;
         }
+        [data-testid="stExpander"] summary * {
+            font-family: inherit !important;
+        }
         [data-testid="stExpander"] summary p {
             display: inline-block !important;
             margin-left: 10px !important;
             color: #0f172a !important;
-        }
-        /* ── Giữ font Material cho icon mũi tên, tránh hiện chữ keyboard_arrow_down ── */
-        [data-testid="stExpander"] summary [data-testid="stIconMaterial"],
-        [data-testid="stExpander"] summary span[data-testid="stIconMaterial"] {
-            font-family: 'Material Symbols Rounded', 'Material Symbols Outlined' !important;
-            font-weight: normal !important;
-            font-style: normal !important;
-            -webkit-font-feature-settings: 'liga' !important;
-            font-feature-settings: 'liga' !important;
-            -webkit-font-smoothing: antialiased !important;
         }
 
         /* ── Chat box ── */
@@ -1115,46 +1101,69 @@ if qr_bytes:
             mime="image/png",
             use_container_width=True  # Sử dụng cái này thay cho width="stretch" để nút khít giao diện
         )
-import google.generativeai as genai
-import datetime
+
 import os
-import json  # Thêm nếu code phía dưới của bạn có dùng json
+import json
+import datetime
 from dotenv import load_dotenv
 
-base_url = "https://pomodoroapp-701a2-default-rtdb.firebaseio.com/" 
+base_url = "https://pomodoroapp-701a2-default-rtdb.firebaseio.com/"
 load_dotenv()
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or st.secrets.get("GEMINI_API_KEY")
 
-if GEMINI_API_KEY:
-    try:
-        genai.configure(api_key=GEMINI_API_KEY)
-    except Exception as e:
-        st.error(f"Lỗi cấu hình Gemini: {e}")
+OPENROUTER_API_KEY = (
+    os.getenv("OPENROUTER_API_KEY")
+    or st.secrets.get("OPENROUTER_API_KEY")
+)
+
+if OPENROUTER_API_KEY:
+    st.success("✅ Đã kết nối OpenRouter.")
 else:
-    st.warning("⚠️ Chưa có GEMINI_API_KEY — tính năng AI sẽ bị tắt.")
+    st.warning("⚠️ Chưa có OPENROUTER_API_KEY — tính năng AI sẽ bị tắt.")
 
-def call_gemini(prompt: str, system_instruction: str = "") -> str:
-    if not GEMINI_API_KEY:
-        return "❌ Chưa cấu hình GEMINI_API_KEY (Kiểm tra file .env hoặc mục Secrets trên Streamlit)"
+
+def call_openrouter(prompt: str, system_instruction: str = "") -> str:
+    if not OPENROUTER_API_KEY:
+        return "❌ Chưa cấu hình OPENROUTER_API_KEY (Kiểm tra file .env hoặc mục Secrets trên Streamlit)"
 
     try:
         sys_msg = system_instruction or (
             "Bạn là trợ lý AI hỗ trợ phụ huynh Việt Nam theo dõi việc học của con. "
             "Trả lời bằng tiếng Việt, ngắn gọn, thực tế, ấm áp như một người tư vấn giáo dục."
         )
-        gemini_model = genai.GenerativeModel(
-            model_name="models/gemini-1.5-flash-latest",
-            system_instruction=sys_msg
+
+        headers = {
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "http://localhost:8501",
+            "X-Title": "Parent AI Assistant"
+        }
+
+        data = {
+            "model": "google/gemini-2.0-flash-exp:free",
+            "messages": [
+                {"role": "system", "content": sys_msg},
+                {"role": "user", "content": prompt}
+            ],
+            "max_tokens": 1000
+        }
+
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers=headers,
+            json=data,
+            timeout=30
         )
-        response = gemini_model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(max_output_tokens=1000)
-        )
-        if response.text:
-            return response.text
-        return "❌ Lỗi: AI không trả về nội dung text."
+
+        if response.status_code == 200:
+            result_json = response.json()
+            if "choices" in result_json and len(result_json["choices"]) > 0:
+                return result_json["choices"][0]["message"]["content"]
+            return "❌ Lỗi: OpenRouter không trả về nội dung trong choices."
+        else:
+            return f"❌ Lỗi từ OpenRouter (Mã {response.status_code}): {response.text}"
+
     except Exception as e:
-        return f"❌ Lỗi kết nối Gemini: {e}"
+        return f"❌ Lỗi kết nối OpenRouter: {e}"
 
 
 def build_student_summary(name: str, u_info: dict) -> str:
@@ -1203,6 +1212,7 @@ def build_student_summary(name: str, u_info: dict) -> str:
         f"- Tổng số phiên học: {len(history)}"
     )
 
+
 # ── Lấy dữ liệu tất cả học sinh từ Firebase ──
 try:
     res_ai = requests.get(f"{base_url}users.json", timeout=3).json() or {}
@@ -1213,13 +1223,10 @@ ai_user_names = [uid for uid, info in res_ai.items() if isinstance(info, dict)]
 st.write("---")
 st.subheader("🤖 Trợ lý AI Phụ huynh")
 
-ai_tab1, ai_tab2 = st.tabs([
-    "🔍 AI Phân tích",
-    "📋 AI Nhận xét"
-])
+ai_tab1, ai_tab2 = st.tabs(["🔍 AI Phân tích", "📋 AI Nhận xét"])
 
 # =====================================================================
-# TAB 1 — AI PHÂN TÍCH HỌC TẬP (CẬP NHẬT GEMINI)
+# TAB 1 — AI PHÂN TÍCH HỌC TẬP
 # =====================================================================
 with ai_tab1:
     st.markdown("Chọn học sinh để AI phân tích toàn diện tình hình học tập và đưa ra lời khuyên.")
@@ -1229,11 +1236,7 @@ with ai_tab1:
     else:
         col_sel, col_btn = st.columns([3, 1])
         with col_sel:
-            ai_target = st.selectbox(
-                "Chọn học sinh:",
-                ai_user_names,
-                key="ai_analyze_select"
-            )
+            ai_target = st.selectbox("Chọn học sinh:", ai_user_names, key="ai_analyze_select")
         with col_btn:
             st.write("")
             st.write("")
@@ -1278,15 +1281,14 @@ with ai_tab1:
                 f"5. 🎯 Mục tiêu đề xuất cho tuần tới"
             )
 
-            with st.spinner("🤖 Gemini đang phân tích dữ liệu học tập..."):
-                result = call_gemini(prompt)
+            with st.spinner("🤖 OpenRouter đang phân tích dữ liệu học tập..."):
+                result = call_openrouter(prompt)
 
             st.markdown("---")
             st.markdown(f"**📋 Kết quả phân tích cho: {ai_target}**")
             with st.container(border=True):
                 st.markdown(result)
 
-            # Nút lưu vào Firebase
             if st.button("💾 Lưu phân tích này vào Firebase", key="save_analysis"):
                 try:
                     now_vn = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=7)
@@ -1300,7 +1302,7 @@ with ai_tab1:
                     st.error("Lỗi lưu Firebase.")
 
 # =====================================================================
-# TAB 2 — AI TẠO NHẬN XÉT / BÁO CÁO (CẬP NHẬT GEMINI)
+# TAB 2 — AI TẠO NHẬN XÉT / BÁO CÁO
 # =====================================================================
 with ai_tab2:
     st.markdown("AI tự động soạn nhận xét học tập để phụ huynh gửi cho con hoặc chia sẻ với giáo viên.")
@@ -1310,11 +1312,7 @@ with ai_tab2:
     else:
         r_col1, r_col2 = st.columns(2)
         with r_col1:
-            report_target = st.selectbox(
-                "Chọn học sinh:",
-                ai_user_names,
-                key="ai_report_select"
-            )
+            report_target = st.selectbox("Chọn học sinh:", ai_user_names, key="ai_report_select")
         with r_col2:
             report_type = st.selectbox(
                 "Loại nhận xét:",
@@ -1377,8 +1375,8 @@ with ai_tab2:
 
             prompt = type_prompts.get(report_type, "")
 
-            with st.spinner("✍️ Gemini đang soạn nội dung..."):
-                report_result = call_gemini(prompt)
+            with st.spinner("✍️ OpenRouter đang soạn nội dung..."):
+                report_result = call_openrouter(prompt)
 
             st.markdown("---")
             st.markdown(f"**📄 Nội dung được tạo — {report_type}**")
@@ -1404,7 +1402,7 @@ with ai_tab2:
                         requests.post(
                             f"{base_url}chats.json",
                             json={
-                                "sender": f"🤖 AI PHUY HUYNH ({st.session_state.get('username')})",
+                                "sender": f"🤖 AI PHỤ HUYNH ({st.session_state.get('username')})",
                                 "text": report_result,
                                 "time": now_vn.strftime("%H:%M")
                             },
@@ -1430,6 +1428,7 @@ with ai_tab2:
                     st.success("✅ Đã lưu vào hồ sơ!")
                 except:
                     st.error("Lỗi lưu Firebase.")
+                
 # =====================================================================
 # 💬 PHÒNG CHAT
 # =====================================================================
